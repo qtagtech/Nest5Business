@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Comunes -->
+    
+<attr name="homeBackground" format="reference" />
+<attr name="headerTitle" format="reference" />
+<attr name="logoButton" format="reference" />
+
+
+<!-- Main: Login Options -->
+
+<attr name="fb_login_button" format="reference" />
+<attr name="tw_login_button" format="reference" />
+
+<!-- Home: Select Actions Circle -->
+
+<attr name="spinnerContainer" format="reference" />
+
+
+
+<!-- Deals -->
+	<attr name="bigTitle" format="reference" />
+	<attr name="textArea" format="reference" />
+	<attr name="pageBackground" format="reference" />
+	<attr name="image_title" format="reference" />
+	<attr name="category_title" format="reference" />
+	<attr name="dealList" format="reference" />
+	<attr name="dealImage" format="reference" />
+	<attr name="listSeparator" format="reference" />
+	<attr name="listItem" format="reference" />
+	
+	
+<!-- Company Deals Details -->
+<attr name="companyInfo" format="reference" />
+<attr name="companyImage" format="reference" />
+<attr name="companyTitle" format="reference" />
+<attr name="companyItem" format="reference" />
+<attr name="companyCoupon" format="reference" />
+<attr name="companyPromos" format="reference" />
+<attr name="companyPromoTitle" format="reference" />
+<attr name="companyNest5Text" format="reference" />
+
+
+<!-- Dimensions -->
+
+<attr name="pageMargin" format="reference|dimension" />
+</resources>
