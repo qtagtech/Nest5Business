@@ -100,6 +100,7 @@ public class DeviceRegistrar {
             }
             editor.commit();
             updateUIIntent.putExtra(ACCOUNT_NAME_EXTRA, accountName);
+            updateUIIntent.putExtra("USER_ID", deviceRegId);
             updateUIIntent.putExtra(STATUS_EXTRA, isRegister ? REGISTERED_STATUS
                     : UNREGISTERED_STATUS);
             contextApp.sendBroadcast(updateUIIntent);

@@ -7,6 +7,15 @@
    <item name="android:background">@drawable/home_background_gradient</item>
 </style>
 
+<style name="scan_button">
+    <item name="android:background">@drawable/bt_scan</item>
+    <item name="android:layout_width">300dip</item>
+    <item name="android:layout_height">50dip</item>
+    <item name="android:text">@string/scan</item>
+    <item name="android:textSize">25sp</item>
+    <item name="android:layout_gravity">center_horizontal</item>
+</style>
+
 
 <style name="header_title">
 		
@@ -45,6 +54,30 @@
 		</style>		
 	
  
+
+<!-- Login -->
+<style name="login_user">
+    <item name="android:layout_height">35dip</item>
+    <item name="android:textSize">20dp</item>
+    <item name="android:background">@drawable/company_coupon_background</item>
+    <item name="android:textColor">#000000</item>
+    <item name="android:layout_marginBottom">10dip</item>
+    <item name="android:padding">5dip</item>
+</style>
+<style name="login_password">
+    <item name="android:layout_height">35dip</item>
+    <item name="android:textSize">20dp</item>
+    <item name="android:background">@drawable/company_coupon_background</item>
+    <item name="android:textColor">#000000</item>
+    <item name="android:layout_marginBottom">10dip</item>
+    <item name="android:padding">5dip</item>
+</style>
+
+<style name="login_button">
+
+</style>
+
+
 
 <!-- Home -->
 <style name="spinner_container">

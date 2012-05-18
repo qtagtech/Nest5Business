@@ -19,6 +19,11 @@
 		       android:layout_height="fill_parent"
 		       
        />
+            <Button 
+               android:id="@+id/scanButton"
+                android:onClick="scanCode"
+                style="?scanButton"
+                />
             
         </LinearLayout>
 

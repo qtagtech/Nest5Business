@@ -3,6 +3,7 @@
 
     <!-- Menu item text [CHAR LIMIT=NONE] -->
     <string name="accounts">Cuentas</string>
+    <string name="logout">Salir</string>
 
     <!-- Dialog button [CHAR LIMIT=NONE] -->
     <string name="add_account">Agregar Cuenta...</string>
@@ -15,6 +16,9 @@
 
     <!-- Button text [CHAR LIMIT=NONE] -->
     <string name="connect">Conectar</string>
+    
+    <!-- Button text [CHAR LIMIT=NONE] -->
+    <string name="scan">Gana Beneficios</string>
 
     <!-- Message text for "Connect" screen [CHAR LIMIT=NONE] -->
     <string name="connect_text">Esta aplicación está solicitando permiso para conectar su dispositivo móvil a la Nube.</string>
@@ -66,6 +70,11 @@
 
     <!-- Notification message [CHAR LIMIT=NONE] -->
     <string name="unregistration_succeeded">Unegistered %1$s for from receiving notifications.</string>
+    
+    <!-- Login -->
+    <string name="user">Usuario o Email</string>
+    <string name="password">Contraseña</string>
+    <string name="login">Iniciar Sesión</string>
     
     <!-- Home -->
     <string name="logo_big_description">Nest5, una Historia de Amor entre Marcas y Consumidores</string>

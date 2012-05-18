@@ -5,16 +5,20 @@
 <attr name="homeBackground" format="reference" />
 <attr name="headerTitle" format="reference" />
 <attr name="logoButton" format="reference" />
-
+<attr name="scanButton" format="reference" />
 
 <!-- Main: Login Options -->
 
 <attr name="fb_login_button" format="reference" />
 <attr name="tw_login_button" format="reference" />
+<attr name="loginUser" format="reference" />
+<attr name="loginPassword" format="reference" />
+<attr name="loginButton" format="reference" />
 
 <!-- Home: Select Actions Circle -->
 
 <attr name="spinnerContainer" format="reference" />
+
 
 
 

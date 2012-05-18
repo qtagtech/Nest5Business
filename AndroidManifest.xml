@@ -2,7 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.nest5.androidClient"
     android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionName="1.0"
+    android:installLocation="preferExternal" >
 
     <uses-sdk android:minSdkVersion="8" />
     
@@ -29,18 +30,30 @@
         android:icon="@drawable/icon"
         android:theme="@style/Nest5.Default"
         android:label="@string/app_name" >
-        <activity
+         <activity
             android:name=".Initialactivity"
             android:label="@string/app_name" >
-            
-            <intent-filter>
+			 <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity> 
+        
+        <!-- <activity
+            android:name=".LoginActivity"
+            android:label="@string/app_name" > 
+            
+           
+        </activity> -->
+        
         <activity
             android:name="DealsActivity"
+            android:label="@string/app_name" >
+        </activity>
+        
+        <activity
+            android:name="FacebookActivity"
             android:label="@string/app_name" >
         </activity>
         
@@ -48,6 +61,8 @@
         <activity android:name=".AccountsActivity" android:label="@string/app_name"
             android:screenOrientation="portrait">
         </activity>
+        
+        <service android:name=".ExecuteRequest" android:label="ExecuteRequest"/>
         
         <!-- In order to use the C2DM library, an application must declare a class 
              with the name C2DMReceiver, extending com.google.android.c2dm.C2DMBaseReceiver.

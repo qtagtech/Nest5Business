@@ -75,6 +75,26 @@ public class Util {
      * Value for {@link #CONNECTION_STATUS} key.
      */
     public static final String DISCONNECTED = "disconnected";
+    
+    /**
+     * Key for logged status in shared preferences.
+     */
+    public static final String LOGGED_STATUS = "loggedStatus";
+    
+    /**
+     * Value for {@link #LOGGED_STATUS} key.
+     */
+    public static final String LOGGEDIN = "loggedin";
+    
+    /**
+     * Value for {@link #LOGGED_STATUS} key.
+     */
+    public static final String LOGGEDOUT = "loggedout";
+    
+    /**
+     * Value for {@link #LOGGED_STATUS} key.
+     */
+    public static final String LOGGINGIN = "loggingin";
 
     /**
      * Key for device registration id in shared preferences.
@@ -90,6 +110,13 @@ public class Util {
      * An intent name for receiving registration/unregistration status.
      */
     public static final String UPDATE_UI_INTENT = getPackageName() + ".UPDATE_UI";
+    
+    
+    public static final int USER_REGISTER_OK = 2;
+    
+    public static final int USER_REGISTER_ERROR = 0;
+    
+    public static final int USER_REGISTER_UPDATE = 1;
 
     // End shared constants
 
@@ -218,4 +245,11 @@ public class Util {
     private static String getPackageName() {
         return Util.class.getPackage().getName();
     }
+    
+    public static void userLogout(Context mContext)
+    {
+    	SharedPreferences prefs = Util.getSharedPreferences(mContext);
+        prefs.edit().putString(Util.LOGGED_STATUS, Util.LOGGEDOUT).commit();
+    } 
+    
 }

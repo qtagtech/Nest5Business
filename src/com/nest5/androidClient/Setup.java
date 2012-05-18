@@ -39,4 +39,6 @@ public class Setup {
      * must exist for the app to function correctly.
      */
     public static final String SENDER_ID = "juanda6@gmail.com";
+    
+    public static final String apiKey = "zAxEE9U1691Nq0h5JiJ0X20tcayF5RTpmzIOctVGNQNBByHslznDR0VP7rWOuyW";
 }

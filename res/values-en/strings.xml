@@ -3,6 +3,7 @@
 
     <!-- Menu item text [CHAR LIMIT=NONE] -->
     <string name="accounts">Accounts</string>
+    <string name="logout">Logout</string>
 
     <!-- Dialog button [CHAR LIMIT=NONE] -->
     <string name="add_account">Add account...</string>
@@ -15,6 +16,9 @@
 
     <!-- Button text [CHAR LIMIT=NONE] -->
     <string name="connect">Connect</string>
+    
+    <!-- Button text [CHAR LIMIT=NONE] -->
+    <string name="scan">Read Promotion</string>
 
     <!-- Message text for "Connect" screen [CHAR LIMIT=NONE] -->
     <string name="connect_text">This application requests permission to connect your mobile device to the cloud.</string>
@@ -68,6 +72,12 @@
     <string name="unregistration_succeeded">Unegistered %1$s for from receiving notifications.</string>
     
     
+    <!-- Login -->
+    <string name="user">User or Email</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
+    
+    
     <!-- Home -->
     <string name="logo_big_description">Nest5, A love Story Among Brands and Cosumers</string>
     <string name="close_deals">Close Deals</string>
@@ -84,5 +94,7 @@
     
     <!-- Company -->
     <string name="withNest5">With Nest5, get:</string>
+    
+    
 
 </resources>

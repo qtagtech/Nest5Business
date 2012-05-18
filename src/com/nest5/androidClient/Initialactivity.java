@@ -29,8 +29,11 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONObject;
 
 import com.google.gson.Gson;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 
 import android.app.Activity;
@@ -41,11 +44,15 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -54,8 +61,12 @@ import android.view.View.OnTouchListener;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.widget.AdapterView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -77,6 +88,13 @@ public class Initialactivity extends Activity {
     
     private int lay = R.layout.home;
     
+    Typeface BebasFont;
+    Typeface VarelaFont;
+    RestService restService;
+    
+    EditText user;
+    EditText pass;
+    
     
     
 	 
@@ -88,6 +106,7 @@ public class Initialactivity extends Activity {
     private final BroadcastReceiver mUpdateUIReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+        	String accountId = intent.getStringExtra("USER_ID");
             String accountName = intent.getStringExtra(DeviceRegistrar.ACCOUNT_NAME_EXTRA);
             int status = intent.getIntExtra(DeviceRegistrar.STATUS_EXTRA,
                     DeviceRegistrar.ERROR_STATUS);
@@ -96,18 +115,36 @@ public class Initialactivity extends Activity {
             if (status == DeviceRegistrar.REGISTERED_STATUS) {
                 message = getResources().getString(R.string.registration_succeeded);
                 connectionStatus = Util.CONNECTED;
+                //Enviar email al servidor: params.email, params.android
+                
+                
+                restService = new RestService(sendEmailHandler, mContext, "http://nest5stage.herokuapp.com/api/user/newAndroidUser");
+                restService.addParam("email", accountName);
+                restService.addParam("android", accountId);
+                restService.setCredentials("apiadmin", Setup.apiKey);
+                try {
+                	
+        			restService.execute(RestService.POST); //Executes the request with the HTTP POST verb
+        		} catch (Exception e) {
+        			e.printStackTrace();
+        		}
             } else if (status == DeviceRegistrar.UNREGISTERED_STATUS) {
                 message = getResources().getString(R.string.unregistration_succeeded);
             } else {
+            	
+            	
                 message = getResources().getString(R.string.registration_error);
             }
 
             // Set connection status
             SharedPreferences prefs = Util.getSharedPreferences(mContext);
             prefs.edit().putString(Util.CONNECTION_STATUS, connectionStatus).commit();
+            
+            //set logging status
+            prefs.edit().putString(Util.LOGGED_STATUS, Util.LOGGINGIN);
 
             // Display a notification
-            Util.generateNotification(mContext, String.format(message, accountName));
+//            Util.generateNotification(mContext, String.format(message, accountName));
         }
     };
 
@@ -128,16 +165,49 @@ public class Initialactivity extends Activity {
     @Override
     public void onResume() {
         super.onResume();
-
+        BebasFont= Typeface.createFromAsset(getAssets(), "fonts/BebasNeue.otf");
+	    VarelaFont= Typeface.createFromAsset(getAssets(), "fonts/Varela-Regular.otf");
         SharedPreferences prefs = Util.getSharedPreferences(mContext);
         String connectionStatus = prefs.getString(Util.CONNECTION_STATUS, Util.DISCONNECTED);
         if (Util.DISCONNECTED.equals(connectionStatus)) {
+        	Log.i(TAG,"Desconectado");
             startActivity(new Intent(this, AccountsActivity.class));
         }
-        int  layoutValue = getIntent().getIntExtra("com.nest5.androidClient.layout",0);
-        lay = layoutValue != 0 ? layoutValue : R.layout.home;
+        else
+        {
+        	if(Util.CONNECTING.equals(connectionStatus)){
+            	Log.i(TAG,"Conectando ando");
+            	//Toast.makeText(mContext, "Loggeando", Toast.LENGTH_LONG).show();
+            	//poner logging in
+            	lay = R.layout.logging;
+            	setScreenContent();
+            }
+            else
+            {
+            	Log.i(TAG,"Conectado");
+            	int  layoutValue = getIntent().getIntExtra("com.nest5.androidClient.layout",0);
+                
+                String loggedStatus = prefs.getString(Util.LOGGED_STATUS, Util.LOGGEDOUT);
+                //Toast.makeText(mContext, loggedStatus, Toast.LENGTH_LONG).show();
+                if(Util.LOGGEDIN.equals(loggedStatus))
+                {
+                	lay = layoutValue != 0 ? layoutValue : R.layout.home;
+                	
+                }
+                else{
+                	//Hacer Login forzado porque esta conectado con google pero por alguna razon no esta loggeado en nest5, 
+                	//mientras tanto uuestra la pantalla de actividad para desconectar hy volver a conectar
+                	startActivity(new Intent(this, AccountsActivity.class));
+                    
+                	
+                }
+                
+                setScreenContent();
+            }
+        }
         
-        setScreenContent();
+        
+	    
  
     }
 
@@ -156,17 +226,58 @@ public class Initialactivity extends Activity {
         inflater.inflate(R.menu.main_menu, menu);
         // Invoke the Register activity
         menu.getItem(0).setIntent(new Intent(this, AccountsActivity.class));
+        
         return true;
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+       // AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+    	//Toast.makeText(mContext, String.valueOf(item.getItemId()), Toast.LENGTH_SHORT).show();
+        switch (item.getItemId()) {
+            
+            case R.id.menu_logout:
+            	//Toast.makeText(mContext, "HOLA", Toast.LENGTH_SHORT).show();
+                Util.userLogout(mContext);
+                lay = R.layout.login;
+                setScreenContent();
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
     }
 
     // Manage UI Screens
 
+    
+    private void setLoginScreenContent(){
+    	
+    	setContentView(R.layout.login);
+    	 user = (EditText) findViewById(R.id.username);
+	     pass = (EditText) findViewById(R.id.password);
+	     LinearLayout form = (LinearLayout) findViewById(R.id.textfield_layout);
+	    ImageView loading = (ImageView) findViewById(R.id.loading_image);
+	    user.setTypeface(BebasFont);
+	    pass.setTypeface(BebasFont);
+	    SharedPreferences prefs = Util.getSharedPreferences(mContext);
+        String connectionstatus = prefs.getString(Util.CONNECTION_STATUS, "Unknown");
+        String loginStatus = prefs.getString(Util.LOGGED_STATUS, "unknown");
+        if(Util.LOGGINGIN.equals(loginStatus) || Util.CONNECTING.equals(connectionstatus)){
+        	//poner spinner
+        	form.setVisibility(View.INVISIBLE);
+        	loading.setVisibility(View.VISIBLE);
+        }
+	    
+    }
     
     private void setHomeScreenContent(){
     	setContentView(R.layout.home);
     	
     	final SpinCircleView circle = (SpinCircleView) findViewById(R.id.main_spin);
     	
+    	Button scan_btn = (Button) findViewById(R.id.scanButton);
+    	
+    	scan_btn.setTypeface(BebasFont);
     	
         
         circle.setOnTouchListener(new OnTouchListener() {
@@ -438,12 +549,27 @@ public class Initialactivity extends Activity {
         });
     }*/
 
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+    	  IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+    	  if (scanResult != null) {
+    	    // handle scan result
+    		  Toast.makeText(mContext, scanResult.getContents(), Toast.LENGTH_LONG).show();
+    	  }
+    	  // else continue with any other code you need in the method
+    	  
+    	}
+    
+    
+    
     /**
      * Sets the screen content based on the screen id.
      */
     private void setScreenContent() {
         
         switch (lay) {
+	        case R.layout.login:
+	            setLoginScreenContent();
+	            break;
             case R.layout.home:
                 setHomeScreenContent();
                 break;
@@ -464,6 +590,147 @@ public class Initialactivity extends Activity {
     	  finish();
       }
        
+    }
+    
+    public void fbLogin(View v){
+    	Intent inten = new Intent(mContext,FacebookActivity.class);
+    	//inten.putExtra("com.nest5.androidClient.layout", R.layout.deals);
+    	startActivity(inten);
+    	
+    }
+    public void doLogin(View v){
+    	
+    	String u = user.getText().toString();
+    	String p = pass.getText().toString();
+    	restService = new RestService(mHandlerGet, this, "http://nest5stage.herokuapp.com/user/api/restCall"); //Create new rest service for get
+    	
+        restService.setCredentials(u, p);
+        
+        try {
+        	
+			restService.execute(RestService.GET); //Executes the request with the HTTP GET verb
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    	
+    }
+    
+    private final Handler sendEmailHandler = new Handler(){
+    	@Override
+    	public void handleMessage(Message msg){
+    		JSONObject respuesta = null;
+    		String loggedStatus = Util.LOGGEDOUT;
+    		String connectionStatus = Util.DISCONNECTED;
+    		try{
+    			respuesta = new JSONObject((String) msg.obj);
+    		}
+    		catch(Exception e){
+    			e.printStackTrace();
+    		}
+    		
+    		if (respuesta != null){
+    			int status = 0;
+    			try{
+    				status = respuesta.getInt("status");
+    				
+    			}
+    			catch (Exception e) {
+					e.printStackTrace();
+				}
+    			
+    			
+    			
+    			//Toast.makeText(mContext, String.valueOf(status), Toast.LENGTH_LONG).show();
+    			if(status == 1 || status == 2)
+    			{
+    				loggedStatus = Util.LOGGEDIN;
+    				SharedPreferences prefs = Util.getSharedPreferences(mContext);
+    	            prefs.edit().putString(Util.LOGGED_STATUS, loggedStatus).commit();
+    				lay = R.layout.home;
+    				setScreenContent();
+    				
+    			}
+    			else
+    			{
+    				loggedStatus = Util.LOGGEDOUT;
+    				connectionStatus = Util.DISCONNECTED;
+    				SharedPreferences prefs = Util.getSharedPreferences(mContext);
+    	            prefs.edit().putString(Util.LOGGED_STATUS, loggedStatus).commit();
+    	            //quitar la conexion
+    	            prefs.edit().putString(Util.CONNECTION_STATUS, connectionStatus);
+    	            lay = R.layout.home;
+    				setScreenContent();
+    			}
+    			
+    		}
+    		
+    		
+    		
+    		
+    	}
+    };
+    
+    private final Handler mHandlerGet = new Handler(){
+    	@Override
+    	public void handleMessage(Message msg){
+    		User user = null; 
+    		try{
+    				Gson gson = new Gson();
+    				user = gson.fromJson((String)msg.obj, User.class);
+    		}
+    		catch(Exception e){
+    			e.printStackTrace();
+    		}
+    		
+    				String status = "unathorized";
+    				if(user != null){
+    					//Toast.makeText(mContext,user.username , Toast.LENGTH_LONG).show();
+    					status = "authorized";
+    				}
+    				else{
+    					//Toast.makeText(mContext,"Login Incorrecto" , Toast.LENGTH_LONG).show();
+    				}
+    				
+    				
+    	    		String message = null;
+    	            String loggedStatus = Util.LOGGEDOUT;
+    	            if (status == "authorized") {
+    	                message = getResources().getString(R.string.registration_succeeded);
+    	                loggedStatus = Util.LOGGEDIN;
+    	                Log.i(TAG, "Registrado");
+    	                
+    	            } else if (status == "unuthorizedok") {
+    	                message = getResources().getString(R.string.unregistration_succeeded);
+    	                Log.i(TAG, "Salido");
+    	            } else {
+    	                message = getResources().getString(R.string.registration_error);
+    	                Log.i(TAG, "Error");
+    	                String usuario = user != null ? user.username: "usuario";
+        	            Toast.makeText(mContext,String.format(message, usuario), Toast.LENGTH_LONG).show();
+    	            }
+    	           
+
+    	            // Set connection status
+    	            SharedPreferences prefs = Util.getSharedPreferences(mContext);
+    	            prefs.edit().putString(Util.LOGGED_STATUS, loggedStatus).commit();
+    	            
+    	            if(status == "authorized"){
+    	            	lay = R.layout.home;
+    	    	    	setScreenContent();
+    	            }
+    	            
+    	            // Display a notification
+    	           
+    		
+    		
+    			
+    			
+    		}		
+    };
+    
+    public void scanCode(View v){
+    	IntentIntegrator integrator = new IntentIntegrator(this);
+    	integrator.initiateScan();
     }
     
 
