@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import com.google.android.c2dm.C2DMessaging;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -100,6 +102,11 @@ public class Util {
      * Key for device registration id in shared preferences.
      */
     public static final String DEVICE_REGISTRATION_ID = "deviceRegistrationID";
+    
+    /**
+     * Key for user registration id in shared preferences from nest5 server.
+     */
+    public static final String USER_REGISTRATION_ID = "userRegistrationID";
 
     /*
      * URL suffix for the RequestFactory servlet.
@@ -250,6 +257,7 @@ public class Util {
     {
     	SharedPreferences prefs = Util.getSharedPreferences(mContext);
         prefs.edit().putString(Util.LOGGED_STATUS, Util.LOGGEDOUT).commit();
+        C2DMessaging.unregister(mContext);
     } 
     
 }

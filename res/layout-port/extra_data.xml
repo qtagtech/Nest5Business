@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/home_layout"
+        style="?homeBackground"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+
+        <com.nest5.androidClient.HeaderBar
+            android:id="@+id/header"
+           
+            style="?headerTitle" />
+        <LinearLayout 
+            android:id="@+id/textfield_layout"
+            style="?spinnerContainer"
+            >
+            <!-- <Button
+                android:text="Guarda Tiu"
+                android:onClick="fbLogin"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                
+                /> -->
+            <EditText 
+                android:id="@+id/fullname"
+                android:layout_width="fill_parent"
+                android:hint="@string/user"
+                style="?loginUser"
+                
+                />
+           <!-- <EditText
+                android:id="@+id/" 
+                android:layout_width="fill_parent"
+                android:password="true"
+                android:hint="@string/password"
+                style="?loginPassword"
+                /> -->
+            <Button
+                android:text="@string/login"
+                android:onClick="updateExtra"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                style="?loginButton"
+                />
+            
+        </LinearLayout>
+        <ImageView 
+            android:id="@+id/loading_image"
+            android:src="@drawable/loading"
+            android:layout_width="100dip"
+            android:layout_height="100dip"
+            android:layout_centerInParent="true"
+            android:contentDescription="Loading..."
+            android:visibility="invisible"/>
+
+
+    </RelativeLayout>

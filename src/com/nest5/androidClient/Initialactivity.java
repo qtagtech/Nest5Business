@@ -95,6 +95,9 @@ public class Initialactivity extends Activity {
     EditText user;
     EditText pass;
     
+    ProgressDialog dialogLogin;
+    ProgressDialog dialogUpdateExtra;
+    
     
     
 	 
@@ -112,16 +115,20 @@ public class Initialactivity extends Activity {
                     DeviceRegistrar.ERROR_STATUS);
             String message = null;
             String connectionStatus = Util.DISCONNECTED;
+            SharedPreferences prefs = Util.getSharedPreferences(mContext);
             if (status == DeviceRegistrar.REGISTERED_STATUS) {
                 message = getResources().getString(R.string.registration_succeeded);
                 connectionStatus = Util.CONNECTED;
+                prefs.edit().putString(Util.CONNECTION_STATUS, connectionStatus).commit();
                 //Enviar email al servidor: params.email, params.android
                 
                 
                 restService = new RestService(sendEmailHandler, mContext, "http://nest5stage.herokuapp.com/api/user/newAndroidUser");
                 restService.addParam("email", accountName);
                 restService.addParam("android", accountId);
+                //Toast.makeText(mContext, accountId, Toast.LENGTH_LONG).show();
                 restService.setCredentials("apiadmin", Setup.apiKey);
+                prefs.edit().putString(Util.LOGGED_STATUS, Util.LOGGINGIN);
                 try {
                 	
         			restService.execute(RestService.POST); //Executes the request with the HTTP POST verb
@@ -129,19 +136,18 @@ public class Initialactivity extends Activity {
         			e.printStackTrace();
         		}
             } else if (status == DeviceRegistrar.UNREGISTERED_STATUS) {
+            	prefs.edit().putString(Util.CONNECTION_STATUS, connectionStatus).commit();
                 message = getResources().getString(R.string.unregistration_succeeded);
+                //Iniciar actividad de Account
+                startActivity(new Intent(mContext, AccountsActivity.class));
             } else {
             	
-            	
+            	prefs.edit().putString(Util.CONNECTION_STATUS, connectionStatus).commit();
                 message = getResources().getString(R.string.registration_error);
+                startActivity(new Intent(mContext, AccountsActivity.class));
             }
 
-            // Set connection status
-            SharedPreferences prefs = Util.getSharedPreferences(mContext);
-            prefs.edit().putString(Util.CONNECTION_STATUS, connectionStatus).commit();
-            
-            //set logging status
-            prefs.edit().putString(Util.LOGGED_STATUS, Util.LOGGINGIN);
+                    
 
             // Display a notification
 //            Util.generateNotification(mContext, String.format(message, accountName));
@@ -239,8 +245,7 @@ public class Initialactivity extends Activity {
             case R.id.menu_logout:
             	//Toast.makeText(mContext, "HOLA", Toast.LENGTH_SHORT).show();
                 Util.userLogout(mContext);
-                lay = R.layout.login;
-                setScreenContent();
+                
                 return true;
             default:
                 return super.onContextItemSelected(item);
@@ -250,23 +255,23 @@ public class Initialactivity extends Activity {
     // Manage UI Screens
 
     
-    private void setLoginScreenContent(){
+    private void setExtraDataScreenContent(){
     	
-    	setContentView(R.layout.login);
-    	 user = (EditText) findViewById(R.id.username);
-	     pass = (EditText) findViewById(R.id.password);
+    	setContentView(R.layout.extra_data);
+    	 user = (EditText) findViewById(R.id.fullname);
+	     //pass = (EditText) findViewById(R.id.password);
 	     LinearLayout form = (LinearLayout) findViewById(R.id.textfield_layout);
 	    ImageView loading = (ImageView) findViewById(R.id.loading_image);
 	    user.setTypeface(BebasFont);
-	    pass.setTypeface(BebasFont);
-	    SharedPreferences prefs = Util.getSharedPreferences(mContext);
+	    //pass.setTypeface(BebasFont);
+	    /*SharedPreferences prefs = Util.getSharedPreferences(mContext);
         String connectionstatus = prefs.getString(Util.CONNECTION_STATUS, "Unknown");
         String loginStatus = prefs.getString(Util.LOGGED_STATUS, "unknown");
         if(Util.LOGGINGIN.equals(loginStatus) || Util.CONNECTING.equals(connectionstatus)){
         	//poner spinner
         	form.setVisibility(View.INVISIBLE);
         	loading.setVisibility(View.VISIBLE);
-        }
+        }*/
 	    
     }
     
@@ -505,6 +510,15 @@ public class Initialactivity extends Activity {
 	    
 	    
     }
+    
+    private void setLoggingScreenContent()
+    {
+    	setContentView(R.layout.deals);
+    	dialogLogin = new ProgressDialog(mContext);
+	    dialogLogin.setMessage("Inciando Sesión");
+	    dialogLogin.show();
+    	
+    }
    /* private void setHelloWorldScreenContent() {
         setContentView(R.layout.hello_world);
 
@@ -567,14 +581,17 @@ public class Initialactivity extends Activity {
     private void setScreenContent() {
         
         switch (lay) {
-	        case R.layout.login:
-	            setLoginScreenContent();
+	        case R.layout.extra_data:
+	            setExtraDataScreenContent();
 	            break;
             case R.layout.home:
                 setHomeScreenContent();
                 break;
             case R.layout.deals:
                 setDealsScreenContent();
+                break;
+            case R.layout.logging:
+                setLoggingScreenContent();
                 break;
         }
     }
@@ -598,17 +615,24 @@ public class Initialactivity extends Activity {
     	startActivity(inten);
     	
     }
-    public void doLogin(View v){
+    public void updateExtra(View v){
     	
     	String u = user.getText().toString();
-    	String p = pass.getText().toString();
-    	restService = new RestService(mHandlerGet, this, "http://nest5stage.herokuapp.com/user/api/restCall"); //Create new rest service for get
+    	//String p = pass.getText().toString();
+    	restService = new RestService(mHandlerGet, this, "http://nest5stage.herokuapp.com/api/user/updateAndroidUser"); //Create new rest service for get
     	
-        restService.setCredentials(u, p);
-        
+    	restService.setCredentials("apiadmin", Setup.apiKey);
+    	//enviar id de usuario para actualizar datos de nombre
+    	SharedPreferences prefs = Util.getSharedPreferences(mContext);
+        int uid = prefs.getInt(Util.USER_REGISTRATION_ID, 0);
+        restService.addParam("name", u);
+        restService.addParam("userid", String.valueOf(uid));
+        dialogUpdateExtra = new ProgressDialog(mContext);
+	    dialogUpdateExtra.setMessage("Actualizando Información");
+	    dialogUpdateExtra.show();
         try {
         	
-			restService.execute(RestService.GET); //Executes the request with the HTTP GET verb
+			restService.execute(RestService.POST); //Executes the request with the HTTP POST verb
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -621,6 +645,7 @@ public class Initialactivity extends Activity {
     		JSONObject respuesta = null;
     		String loggedStatus = Util.LOGGEDOUT;
     		String connectionStatus = Util.DISCONNECTED;
+    		Log.i(TAG, (String) msg.obj);
     		try{
     			respuesta = new JSONObject((String) msg.obj);
     		}
@@ -630,8 +655,11 @@ public class Initialactivity extends Activity {
     		
     		if (respuesta != null){
     			int status = 0;
+    			int uid = 0;
     			try{
     				status = respuesta.getInt("status");
+    				uid = respuesta.getInt("uid");
+    					
     				
     			}
     			catch (Exception e) {
@@ -639,27 +667,38 @@ public class Initialactivity extends Activity {
 				}
     			
     			
-    			
+    			dialogLogin.hide();
     			//Toast.makeText(mContext, String.valueOf(status), Toast.LENGTH_LONG).show();
     			if(status == 1 || status == 2)
     			{
+    				Log.i(TAG,String.valueOf(uid));
     				loggedStatus = Util.LOGGEDIN;
     				SharedPreferences prefs = Util.getSharedPreferences(mContext);
     	            prefs.edit().putString(Util.LOGGED_STATUS, loggedStatus).commit();
-    				lay = R.layout.home;
-    				setScreenContent();
+    	            prefs.edit().putInt(Util.USER_REGISTRATION_ID, uid).commit();
+    	            if(status == 1)
+    	            {
+    	            	lay = R.layout.home;
+        				setScreenContent();
+    	            }
+    	            else {
+    	            	//poner para pedir nombre, telefono y otros datos
+    	            	lay = R.layout.extra_data;
+        				setScreenContent();
+    	            }
+    				
     				
     			}
     			else
     			{
+    				
     				loggedStatus = Util.LOGGEDOUT;
     				connectionStatus = Util.DISCONNECTED;
     				SharedPreferences prefs = Util.getSharedPreferences(mContext);
     	            prefs.edit().putString(Util.LOGGED_STATUS, loggedStatus).commit();
     	            //quitar la conexion
     	            prefs.edit().putString(Util.CONNECTION_STATUS, connectionStatus);
-    	            lay = R.layout.home;
-    				setScreenContent();
+    	            startActivity(new Intent(mContext, AccountsActivity.class));
     			}
     			
     		}
@@ -670,7 +709,7 @@ public class Initialactivity extends Activity {
     	}
     };
     
-    private final Handler mHandlerGet = new Handler(){
+   /* private final Handler mHandlerGet = new Handler(){
     	@Override
     	public void handleMessage(Message msg){
     		User user = null; 
@@ -726,6 +765,51 @@ public class Initialactivity extends Activity {
     			
     			
     		}		
+    };*/
+    
+    private final Handler mHandlerGet = new Handler(){
+    	@Override
+    	public void handleMessage(Message msg){
+    		JSONObject respuesta = null;
+    		
+    		try{
+    			respuesta = new JSONObject((String) msg.obj);
+    		}
+    		catch(Exception e){
+    			e.printStackTrace();
+    		}
+    		
+    		if (respuesta != null){
+    			int status = 0;
+    			try{
+    				status = respuesta.getInt("status");
+    				
+    				
+    				
+    			}
+    			catch (Exception e) {
+					e.printStackTrace();
+				}
+    			//quitar loading
+    			dialogUpdateExtra.hide();
+    			//dialogLogin.hide();
+    			//Toast.makeText(mContext, String.valueOf(status), Toast.LENGTH_LONG).show();
+    			if(status == 1)
+    			{
+    				  	lay = R.layout.home;
+        				setScreenContent();
+    	        }
+    			else
+    			{
+    				Toast.makeText(mContext, "Lo Sentimos, hay errores con el servidor pero en breve lo arreglaremos.", Toast.LENGTH_LONG).show();
+    			}
+    			
+    		}
+    		
+    		
+    		
+    		
+    	}
     };
     
     public void scanCode(View v){
