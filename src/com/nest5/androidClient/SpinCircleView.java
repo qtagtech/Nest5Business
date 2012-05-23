@@ -2,7 +2,6 @@ package com.nest5.androidClient;
 
 
 
-import com.google.android.maps.MyLocationOverlay;
 
 import android.content.Context;
 import android.content.res.Resources;
