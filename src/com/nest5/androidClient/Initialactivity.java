@@ -678,6 +678,7 @@ public class Initialactivity extends Activity {
     	            prefs.edit().putInt(Util.USER_REGISTRATION_ID, uid).commit();
     	            if(status == 1)
     	            {
+    	            	//coger con una clase propia todo el objeto del usuario que se traiga de la base de datos, completico completico
     	            	lay = R.layout.home;
         				setScreenContent();
     	            }
