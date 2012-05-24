@@ -101,7 +101,7 @@ public class Initialactivity extends Activity {
     ProgressDialog dialogUpdateExtra;
     
     //JSONObject userInstance;
-    User userInstance;
+    User userInstance = null;
     
     
     
@@ -286,9 +286,32 @@ public class Initialactivity extends Activity {
     	final SpinCircleView circle = (SpinCircleView) findViewById(R.id.main_spin);
     	
     	userName = (TextView) findViewById(R.id.header_username);
-    	//traer el objeto del usuario porque cuando ya esta loggeado no esta el objeto usuario aca
-    	userName.setText(userInstance.name);
     	userName.setTypeface(BebasFont);
+    	//traer el objeto del usuario porque cuando ya esta loggeado no esta el objeto usuario aca
+    	if(userInstance == null)
+    	{
+    		restService = new RestService(userObjectHandlerGet, this, "http://nest5stage.herokuapp.com/api/user/requestAndroidUser"); //Create new rest service for get
+        	
+        	restService.setCredentials("apiadmin", Setup.apiKey);
+        	//enviar id de usuario para pedir objeto
+        	SharedPreferences prefs = Util.getSharedPreferences(mContext);
+            int uid = prefs.getInt(Util.USER_REGISTRATION_ID, 0);
+            restService.addParam("userid", String.valueOf(uid));
+            
+            try {
+            	
+    			restService.execute(RestService.POST); //Executes the request with the HTTP POST verb
+    		} catch (Exception e) {
+    			e.printStackTrace();
+    		}
+    	}
+    	else
+    	{
+    		userName.setText(userInstance.name);
+    	}
+    	
+    	//userName.setText(userInstance.name);
+    	
     	
     	Button scan_btn = (Button) findViewById(R.id.scanButton);
     	
@@ -693,6 +716,10 @@ public class Initialactivity extends Activity {
     	            		usuario = respuesta.getJSONObject("userInstance");
     	            		Gson gson = new Gson();
     	            		userInstance = gson.fromJson(usuario.toString(), User.class);
+    	            		if(userInstance != null)
+    	        	    	{
+    	        	    		userName.setText(userInstance.name);
+    	        	    	}
     						//userInstance = respuesta.getJSONObject("userInstance");
     						//Log.i(TAG,userInstance.toString());
     	            		Log.i(TAG,userInstance.username);
@@ -835,6 +862,32 @@ public class Initialactivity extends Activity {
     		
     		
     	}
+    };
+    
+    private final Handler userObjectHandlerGet = new Handler()
+    {
+    	
+    	@Override
+    	public void handleMessage(Message msg){
+    	
+	    	try{
+	    		//usuario = respuesta.getJSONObject("userInstance");
+	    		Gson gson = new Gson();
+	    		userInstance = gson.fromJson((String) msg.obj, User.class);
+				//userInstance = respuesta.getJSONObject("userInstance");
+				//Log.i(TAG,userInstance.toString());
+	    		//Log.i(TAG,userInstance.username);
+	    	}
+	    	catch(Exception e){
+			
+	    	}
+	    	
+	    	if(userInstance != null)
+	    	{
+	    		userName.setText(userInstance.name);
+	    	}
+    	}
+    	
     };
     
     public void scanCode(View v){
