@@ -6,6 +6,7 @@
 <attr name="headerTitle" format="reference" />
 <attr name="logoButton" format="reference" />
 <attr name="scanButton" format="reference" />
+<attr name="headerUsername" format="reference"></attr>
 
 <!-- Main: Login Options -->
 

@@ -9,6 +9,10 @@
 			                android:id="@+id/header_button"
 			                style="?logoButton"
 			                 />
+			            <TextView 
+			                android:id="@+id/header_username"
+			                style="?headerUsername"
+			                />
 
 			            
 

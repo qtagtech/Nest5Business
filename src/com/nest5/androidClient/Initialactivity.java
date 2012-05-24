@@ -95,10 +95,13 @@ public class Initialactivity extends Activity {
     EditText user;
     EditText pass;
     
+    TextView userName;
+    
     ProgressDialog dialogLogin;
     ProgressDialog dialogUpdateExtra;
     
-    JSONObject userInstance;
+    //JSONObject userInstance;
+    User userInstance;
     
     
     
@@ -281,6 +284,11 @@ public class Initialactivity extends Activity {
     	setContentView(R.layout.home);
     	
     	final SpinCircleView circle = (SpinCircleView) findViewById(R.id.main_spin);
+    	
+    	userName = (TextView) findViewById(R.id.header_username);
+    	//traer el objeto del usuario porque cuando ya esta loggeado no esta el objeto usuario aca
+    	userName.setText(userInstance.name);
+    	userName.setTypeface(BebasFont);
     	
     	Button scan_btn = (Button) findViewById(R.id.scanButton);
     	
@@ -645,6 +653,7 @@ public class Initialactivity extends Activity {
     	@Override
     	public void handleMessage(Message msg){
     		JSONObject respuesta = null;
+    		JSONObject usuario = null;
     		String loggedStatus = Util.LOGGEDOUT;
     		String connectionStatus = Util.DISCONNECTED;
     		Log.i(TAG, (String) msg.obj);
@@ -681,8 +690,12 @@ public class Initialactivity extends Activity {
     	            if(status == 1)
     	            {
     	            	try{
-    						userInstance = respuesta.getJSONObject("userInstance");
-    						Log.i(TAG,userInstance.toString());
+    	            		usuario = respuesta.getJSONObject("userInstance");
+    	            		Gson gson = new Gson();
+    	            		userInstance = gson.fromJson(usuario.toString(), User.class);
+    						//userInstance = respuesta.getJSONObject("userInstance");
+    						//Log.i(TAG,userInstance.toString());
+    	            		Log.i(TAG,userInstance.username);
     	            	}
     	            	catch(Exception e){
     					

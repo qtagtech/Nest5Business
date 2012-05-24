@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import android.widget.LinearLayout;
 
@@ -11,6 +12,7 @@ import android.widget.LinearLayout;
 public class HeaderBar extends LinearLayout {
 
 	ImageButton imagebtn;
+	TextView usernameText;
 	
 
 	public HeaderBar(Context context) {
@@ -39,6 +41,7 @@ public class HeaderBar extends LinearLayout {
 		
 		//Get References to child controls
 		imagebtn = (ImageButton) findViewById(R.id.header_button);
+		usernameText = (TextView) findViewById(R.id.header_username);
 	}
 
 }

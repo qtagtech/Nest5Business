@@ -11,6 +11,7 @@
 <item name="headerTitle">@style/header_title</item>
 <item name="logoButton">@style/logo_button</item>
 <item name="scanButton">@style/scan_button</item>
+<item name="headerUsername">@style/header_username</item>
 <!-- Main -->
 <item name="fb_login_button">@style/fb_login</item>
 <item name="tw_login_button">@style/tw_login</item>
