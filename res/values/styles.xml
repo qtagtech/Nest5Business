@@ -83,6 +83,12 @@
 
 </style>
 
+<style name="extra_info">
+    <item name="android:layout_width">fill_parent</item>
+    <item name="android:layout_height">25sp</item>
+    <item name="android:textSize">20sp</item>
+</style>
+
 
 
 <!-- Home -->

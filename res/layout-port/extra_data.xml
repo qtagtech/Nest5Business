@@ -14,12 +14,16 @@
             style="?spinnerContainer"
             >
             <!-- <Button
-                android:text="Guarda Tiu"
+                android:text="Guarda Tu"
                 android:onClick="fbLogin"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 
                 /> -->
+            <TextView 
+                android:id="@+id/extra_info"
+                android:text="@string/extrainfo"
+                style="?extraInfo"/>
             <EditText 
                 android:id="@+id/fullname"
                 android:layout_width="fill_parent"

@@ -73,9 +73,10 @@
     
     
     <!-- Login -->
-    <string name="user">User or Email</string>
+    <string name="user">Complete Name</string>
     <string name="password">Password</string>
-    <string name="login">Login</string>
+    <string name="login">Save</string>
+   	<string name="extrainfo">Only one more step to get going with Nest5!</string>
     
     
     <!-- Home -->

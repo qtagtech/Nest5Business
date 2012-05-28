@@ -264,6 +264,8 @@ public class Initialactivity extends Activity {
     	
     	setContentView(R.layout.extra_data);
     	 user = (EditText) findViewById(R.id.fullname);
+    	 TextView title = (TextView) findViewById(R.id.extra_info);
+    	 title.setTypeface(BebasFont);
 	     //pass = (EditText) findViewById(R.id.password);
 	     LinearLayout form = (LinearLayout) findViewById(R.id.textfield_layout);
 	    ImageView loading = (ImageView) findViewById(R.id.loading_image);
@@ -661,7 +663,7 @@ public class Initialactivity extends Activity {
         restService.addParam("name", u);
         restService.addParam("userid", String.valueOf(uid));
         dialogUpdateExtra = new ProgressDialog(mContext);
-	    dialogUpdateExtra.setMessage("Actualizando Información");
+	    dialogUpdateExtra.setMessage("Actualizando tu Información");
 	    dialogUpdateExtra.show();
         try {
         	
@@ -835,9 +837,7 @@ public class Initialactivity extends Activity {
     			int status = 0;
     			try{
     				status = respuesta.getInt("status");
-    				
-    				
-    				
+    			
     			}
     			catch (Exception e) {
 					e.printStackTrace();

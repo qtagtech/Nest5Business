@@ -10,6 +10,7 @@
 
 <!-- Main: Login Options -->
 
+<attr name="extraInfo" format="reference"/>
 <attr name="fb_login_button" format="reference" />
 <attr name="tw_login_button" format="reference" />
 <attr name="loginUser" format="reference" />

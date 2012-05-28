@@ -72,9 +72,10 @@
     <string name="unregistration_succeeded">Unegistered %1$s for from receiving notifications.</string>
     
     <!-- Login -->
-    <string name="user">Usuario o Email</string>
+    <string name="user">Tu Email</string>
     <string name="password">Contraseña</string>
-    <string name="login">Iniciar Sesión</string>
+    <string name="login">Guardar Datos</string>
+    <string name="extrainfo">¡Solo un paso más para comenzar con Nest5!</string>
     
     <!-- Home -->
     <string name="logo_big_description">Nest5, una Historia de Amor entre Marcas y Consumidores</string>
