@@ -3,7 +3,5 @@
     <item android:title="@string/accounts"
           android:icon="@drawable/ic_mailboxes_accounts" 
           android:id="@+id/menu_accounts"/>
-    <item android:title="@string/logout"
-          android:icon="@android:drawable/ic_delete" 
-          android:id="@+id/menu_logout"/>
+    
 </menu>

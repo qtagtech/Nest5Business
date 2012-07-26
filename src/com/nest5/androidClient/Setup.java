@@ -32,6 +32,8 @@ public class Setup {
      */
     public static final String PROD_URL = "http://www.nest5.com";
     
+    public static final String STAGE_URL = "http://nest5stage.herokuapp.com";
+    
     public static final String DEV_URL = "http://nest5testserver.herokuapp.com";
 
     /**
@@ -41,4 +43,15 @@ public class Setup {
     public static final String SENDER_ID = "juanda6@gmail.com";
     
     public static final String apiKey = "zAxEE9U1691Nq0h5JiJ0X20tcayF5RTpmzIOctVGNQNBByHslznDR0VP7rWOuyW";
+    
+    //Íconos
+    public static final int ICON_WIN_STAR = 99;
+    public static final int ICON_FACE_WIN = 0;
+    public static final int ICON_FACE_ONE = 1;
+    public static final int ICON_FACE_TWO = 2;
+    public static final int ICON_FACE_THREE = 3;
+    public static final int ICON_FACE_CHEER = 4;
+    
+    
+    
 }

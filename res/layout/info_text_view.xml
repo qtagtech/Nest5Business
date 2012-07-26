@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+			            android:id="@+id/app_infotext_layout"
+			            android:orientation="horizontal"
+			            android:layout_width="fill_parent"
+			            android:layout_height="wrap_content"
+			            >
+			            <ImageButton
+			                android:id="@+id/infotext_icon"
+			                style="?iconButton"
+			                 />
+			            <TextView 
+			                android:id="@+id/infotext_message"
+			                style="?infoText"
+			                />
+
+			            
+
+           
+			            
+			        </LinearLayout>

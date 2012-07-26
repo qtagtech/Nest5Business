@@ -19,15 +19,17 @@
     
     <!-- Button text [CHAR LIMIT=NONE] -->
     <string name="scan">Read Promotion</string>
+    <string name="redeem">Redeem this Coupon!</string>
+    <string name="goToCoupons">Go To My Coupons</string>
 
     <!-- Message text for "Connect" screen [CHAR LIMIT=NONE] -->
-    <string name="connect_text">This application requests permission to connect your mobile device to the cloud.</string>
+    <string name="connect_text">Select an account for logging in to Nest5 or one you wish to use for registering.</string>
 
     <!-- Header text for "Connect" screen [CHAR LIMIT=NONE] -->
-    <string name="connect_to_the_cloud">Connect To The Cloud</string>
+    <string name="connect_to_the_cloud">Connect</string>
 
     <!-- Header text for "Connected" screen [CHAR LIMIT=NONE] -->
-    <string name="connected_to_the_cloud">Connected To The Cloud</string>
+    <string name="connected_to_the_cloud">Connected</string>
 
     <!-- Message text [CHAR LIMIT=NONE] -->
     <string name="contacting_server">Contacting server...</string>
@@ -36,7 +38,7 @@
     <string name="disconnect">Disconnect</string>
 
     <!-- Informational text for "Connected" screen with placeholder for account name [CHAR LIMIT=NONE] -->
-    <string name="disconnect_text">This device is currently connected to the cloud as %1$s.</string>
+    <string name="disconnect_text">This device is currently connected as %1$s.</string>
 
     <!-- Footer text for "Connect" screen [CHAR LIMIT=NONE] -->
     <string name="do_you_want_to_connect">Do you want to connect?</string>
@@ -77,6 +79,7 @@
     <string name="password">Password</string>
     <string name="login">Save</string>
    	<string name="extrainfo">Only one more step to get going with Nest5!</string>
+   	<string name="putname">Full Name</string>
     
     
     <!-- Home -->

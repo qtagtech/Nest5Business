@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/relativeLayout1"
+        style="?homeBackground"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+		 <com.nest5.androidClient.HeaderBar
+            android:id="@+id/header"
+           
+            style="?headerTitle" />
+       
+		
+			<ListView
+		       android:id="@+id/close_deals"
+		       android:layout_width="fill_parent"
+		       android:layout_height="fill_parent"
+		       android:cacheColorHint="#00000000"
+		       android:layout_below="@id/header"
+		       style="?dealList"
+	       />
+			<ViewStub
+	            android:id="@android:id/empty"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_gravity="center"
+	            android:layout="@layout/empty" />
+		
+    </RelativeLayout>

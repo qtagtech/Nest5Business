@@ -43,6 +43,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -51,6 +53,7 @@ import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -83,6 +86,8 @@ public class AccountsActivity extends Activity {
      * The current context.
      */
     private Context mContext = this;
+    
+    ImageView internetConnectionStatus;
 
     /**
      * Begins the activity.
@@ -94,13 +99,16 @@ public class AccountsActivity extends Activity {
 	    getWindow().addFlags(WindowManager.LayoutParams.FLAG_DITHER);
         SharedPreferences prefs = Util.getSharedPreferences(mContext);
         String deviceRegistrationID = prefs.getString(Util.DEVICE_REGISTRATION_ID, null);
-        if (deviceRegistrationID == null) {
+        
+    	
+		if (deviceRegistrationID == null) {
             // Show the 'connect' screen if we are not connected
             setScreenContent(R.layout.connect);
         } else {
             // Show the 'disconnect' screen if we are connected
             setScreenContent(R.layout.disconnect);
         }
+        
     }
 
     /**
@@ -109,7 +117,9 @@ public class AccountsActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (mPendingAuth) {
+       
+    	
+		if (mPendingAuth) {
             mPendingAuth = false;
             String regId = C2DMessaging.getRegistrationId(mContext);
             if (regId != null && !"".equals(regId)) {
@@ -118,6 +128,7 @@ public class AccountsActivity extends Activity {
                 C2DMessaging.register(mContext, Setup.SENDER_ID);
             }
         }
+        
     }
 
     // Manage UI Screens
@@ -165,6 +176,34 @@ public class AccountsActivity extends Activity {
                 }
             });
         }
+        
+        internetConnectionStatus = (ImageView) findViewById(R.id.header_connection_status);
+        SharedPreferences prefs = Util.getSharedPreferences(mContext);        
+    	if(!isNetworkAvailable())
+    	{
+    		internetConnectionStatus.setImageResource(R.drawable.error);
+    		
+    		prefs.edit().putInt(Util.INTERNET_CONNECTION, Util.INTERNET_DISCONNECTED).commit();
+    		AlertDialog.Builder builder = new AlertDialog.Builder(this);  
+            builder.setMessage("No tienes una conexión a internet activa. Habilítala haciendo click en aceptar y seleccionando luego una red.")  
+                   .setCancelable(false)  
+                   .setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {  
+                       public void onClick(DialogInterface dialog, int id) {  
+                           Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);  
+                       startActivityForResult(intent, 1);  
+                       }  
+                   })  
+                   .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {  
+                       public void onClick(DialogInterface dialog, int id) {  
+                           finish();  
+                       }  
+                   }).show();
+    		
+    	}
+    	else
+    	{
+    		prefs.edit().putInt(Util.INTERNET_CONNECTION, Util.INTERNET_CONNECTED).commit();
+    	}
     }
 
     /**
@@ -321,4 +360,11 @@ public class AccountsActivity extends Activity {
 
         return result;
     }
+    
+    private boolean isNetworkAvailable() {
+	    ConnectivityManager connectivityManager 
+	          = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+	    NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+	    return activeNetworkInfo != null;
+	}
 }

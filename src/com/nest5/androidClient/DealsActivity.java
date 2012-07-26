@@ -98,6 +98,7 @@ public class DealsActivity extends Activity {
 
         SharedPreferences prefs = Util.getSharedPreferences(mContext);
         String connectionStatus = prefs.getString(Util.CONNECTION_STATUS, Util.DISCONNECTED);
+        
         if (Util.DISCONNECTED.equals(connectionStatus)) {
             startActivity(new Intent(this, AccountsActivity.class));
         }
@@ -108,6 +109,9 @@ public class DealsActivity extends Activity {
         setContentView(R.layout.company_info);
         
         LinearLayout dealList = (LinearLayout) findViewById(R.id.company_info_deals);
+        TextView text = (TextView) findViewById(R.id.header_username);
+        text.setTypeface(BebasFont);
+        text.setText("Promociones Disponibles");
         
         for (Promo it : deal.promos) {
             

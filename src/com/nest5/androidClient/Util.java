@@ -124,13 +124,22 @@ public class Util {
     public static final int USER_REGISTER_ERROR = 0;
     
     public static final int USER_REGISTER_UPDATE = 1;
+    
+    //Internet Connection
+    
+    public static final String INTERNET_CONNECTION = "internetStatus";
+    
+    public static final int INTERNET_CONNECTED = 1;
+    
+    public static final int INTERNET_DISCONNECTED = 0;
+    
 
     // End shared constants
 
     /**
      * Key for shared preferences.
      */
-    private static final String SHARED_PREFS = "quehacemoshoy".toUpperCase(Locale.ENGLISH) + "_PREFS";
+    private static final String SHARED_PREFS = "nest5".toUpperCase(Locale.ENGLISH) + "_PREFS";
 
     /**
      * Cache containing the base URL for a given context.

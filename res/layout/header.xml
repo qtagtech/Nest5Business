@@ -13,6 +13,9 @@
 			                android:id="@+id/header_username"
 			                style="?headerUsername"
 			                />
+			            <ImageView 
+			                android:id="@+id/header_connection_status"
+			                style="?headerStatus"/>
 
 			            
 

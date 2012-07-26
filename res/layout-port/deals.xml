@@ -5,11 +5,10 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" >
 
-        <TextView
+        <com.nest5.androidClient.HeaderBar
             android:id="@+id/header"
-            android:layout_width="fill_parent"
-            android:layout_height="20dip"
-             />
+           
+            style="?headerTitle" />
 		
 			<ListView
 		       android:id="@+id/close_deals"

@@ -12,6 +12,7 @@
 <item name="logoButton">@style/logo_button</item>
 <item name="scanButton">@style/scan_button</item>
 <item name="headerUsername">@style/header_username</item>
+<item name="headerStatus">@style/header_status</item>
 <item name="extraInfo">@style/extra_info</item>
 <!-- Main -->
 <item name="fb_login_button">@style/fb_login</item>
@@ -46,5 +47,9 @@
 <item name="companyPromos">@style/company_promos</item>
 <item name="companyPromoTitle">@style/company_promo_title</item>
 <item name="companyNest5Text">@style/company_nest5_text</item>
+
+<!-- InfoTextView -->
+<item name="iconButton">@style/icon_button</item>
+<item name="infoText">@style/info_text</item>
 </style>
 </resources>

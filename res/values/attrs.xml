@@ -7,6 +7,7 @@
 <attr name="logoButton" format="reference" />
 <attr name="scanButton" format="reference" />
 <attr name="headerUsername" format="reference"></attr>
+<attr name="headerStatus" format="reference"></attr>
 
 <!-- Main: Login Options -->
 
@@ -45,6 +46,11 @@
 <attr name="companyPromos" format="reference" />
 <attr name="companyPromoTitle" format="reference" />
 <attr name="companyNest5Text" format="reference" />
+	
+	
+<!-- InfoTextView -->
+<attr name="iconButton" format="reference" />
+<attr name="infoText" format="reference" />
 
 
 <!-- Dimensions -->

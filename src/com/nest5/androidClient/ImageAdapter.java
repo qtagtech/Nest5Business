@@ -82,7 +82,7 @@ public class ImageAdapter extends ArrayAdapter<Deal> {
         //String imageAndText = getItem(position);
         
         Deal currentDeal = result[position];
-		imageUrl = Setup.DEV_URL+currentDeal.imagen;
+		imageUrl = Setup.STAGE_URL+currentDeal.imagen;
 		String name = currentDeal.company.name;
 		int cantPromos = currentDeal.promos.size();
 		
@@ -175,7 +175,17 @@ public class ImageAdapter extends ArrayAdapter<Deal> {
         titleView.setText(name);
         //Log.i("NOMBRE",name);
         TextView descView = viewCache.getDescView();
-        String description = cantPromos > 1 ? "Existen "+cantPromos+" promociones o beneficios." : currentDeal.promos.get(0).perk;
+        Log.i("InitialActivity",String.valueOf(cantPromos));
+        String description;
+        if(cantPromos == 0)
+        {
+        	description = "No existen Beneficios ni Promociones";
+        }
+        else
+        {
+        	description = cantPromos > 1 ? "Existen "+cantPromos+" promociones o beneficios." : currentDeal.promos.get(0).perk;
+        }
+        
         descView.setText(description);
         
         

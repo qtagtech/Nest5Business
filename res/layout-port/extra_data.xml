@@ -9,9 +9,20 @@
             android:id="@+id/header"
            
             style="?headerTitle" />
+        <ImageView 
+            android:id="@+id/welcomeImage"
+                android:src="@drawable/letrero_nest5"
+                android:scaleType="fitCenter"
+                android:layout_width="fill_parent"
+                android:layout_height="200dip"
+                android:contentDescription="Bienvenido a Nest5"
+                android:layout_below="@id/header"
+                android:layout_centerHorizontal="true"
+            />
         <LinearLayout 
             android:id="@+id/textfield_layout"
             style="?spinnerContainer"
+            android:layout_below="@id/welcomeImage"
             >
             <!-- <Button
                 android:text="Guarda Tu"
@@ -27,7 +38,7 @@
             <EditText 
                 android:id="@+id/fullname"
                 android:layout_width="fill_parent"
-                android:hint="@string/user"
+                android:hint="@string/putname"
                 style="?loginUser"
                 
                 />
@@ -47,14 +58,7 @@
                 />
             
         </LinearLayout>
-        <ImageView 
-            android:id="@+id/loading_image"
-            android:src="@drawable/loading"
-            android:layout_width="100dip"
-            android:layout_height="100dip"
-            android:layout_centerInParent="true"
-            android:contentDescription="Loading..."
-            android:visibility="invisible"/>
+       
 
 
     </RelativeLayout>

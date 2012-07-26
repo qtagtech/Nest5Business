@@ -39,9 +39,17 @@
 </style>
 
 <style name="header_username">
-    <item name="android:layout_width">fill_parent</item>
+    <item name="android:layout_width">240dip</item>
     <item name="android:layout_height">wrap_content</item>
     <item name="android:textSize">25sp</item>
+</style>
+
+<style name="header_status">
+    <item name="android:layout_width">30dip</item>
+    <item name="android:layout_height">30dip</item>
+    <item name="android:src">@drawable/tick</item>
+    <item name="android:scaleType">fitCenter</item>
+    
 </style>
 
 <!-- Main -->
@@ -49,13 +57,13 @@
 	<style name="fb_login">
         <item name="android:gravity">center_horizontal</item>
 		<item name="android:layout_marginTop">60dip</item>
-		<item name="android:background">@drawable/fb_button</item>
+		
 		<item name="android:layout_centerHorizontal">true</item>
 		</style>
 <style name="tw_login">
     	<item name="android:gravity">center_horizontal</item>
 		<item name="android:layout_marginTop">20dip</item>
-		<item name="android:background">@drawable/tw_button</item>
+		
 		<item name="android:layout_centerHorizontal">true</item>
 		</style>		
 	
@@ -208,6 +216,24 @@
     
 
 </style>
+
+<!-- Íconos y Text View informativos -->
+<style name="icon_button">
+		<item name="android:src">@drawable/big_logo</item>
+		<item name="android:background">@null</item>
+		<item name="android:contentDescription">@string/app_name</item>
+		<item name="android:scaleType">fitCenter</item>
+		<item name="android:layout_height">fill_parent</item>
+		<item name="android:layout_width">50dip</item>
+		
+</style>
+<style name="info_text">
+    <item name="android:layout_width">fill_parent</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:textSize">15sp</item>
+    <item name="android:textColor">#FFFFFF</item>
+</style>
+
 
 <!-- Dimensions -->
 

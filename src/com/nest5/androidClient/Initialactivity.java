@@ -30,31 +30,45 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import com.google.gson.Gson;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 
+import android.R.bool;
+import android.R.color;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Typeface;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
@@ -96,6 +110,7 @@ public class Initialactivity extends Activity {
     EditText pass;
     
     TextView userName;
+    ImageView internetConnectionStatus;
     
     ProgressDialog dialogLogin;
     ProgressDialog dialogUpdateExtra;
@@ -104,7 +119,37 @@ public class Initialactivity extends Activity {
     User userInstance = null;
     
     
+    //Respuesta cuando obtiene sellos al leer código QR
+    Answer payload;
     
+    //Saber si llama poner stampCard desde lista de promociones de usuario
+    Boolean fromMyDeals = false;
+    
+    //Cuando da clic en promoción de usuario
+    MyDeal currentDeal;
+    
+  //Cuando da clic en cupón de usuario
+    AnswerCoupon currentCoupon;
+    
+    //Validar si botón redime cupón o sello
+    
+    Boolean redeemCoupon = false;
+    
+    Boolean redimiendo = false;
+    
+    private static final int TWO_MINUTES = 1000 * 60 * 2;
+    
+    private LocationManager locationManager;
+	private String provider;
+	
+	private double lat;
+	private double lng;
+	
+	private Location location;
+	
+	
+	
+	
 	 
 
     /**
@@ -128,7 +173,7 @@ public class Initialactivity extends Activity {
                 //Enviar email al servidor: params.email, params.android
                 
                 
-                restService = new RestService(sendEmailHandler, mContext, "http://nest5stage.herokuapp.com/api/user/newAndroidUser");
+                restService = new RestService(sendEmailHandler, mContext, "http://www.nest5.com/api/user/newAndroidUser");
                 restService.addParam("email", accountName);
                 restService.addParam("android", accountId);
                 //Toast.makeText(mContext, accountId, Toast.LENGTH_LONG).show();
@@ -171,6 +216,26 @@ public class Initialactivity extends Activity {
 
         // Register a receiver to provide register/unregister notifications
         registerReceiver(mUpdateUIReceiver, new IntentFilter(Util.UPDATE_UI_INTENT));
+        
+     // Get the location manager
+     		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+     		// Define the criteria how to select the locatioin provider -> use
+     		// default
+     		Criteria criteria = new Criteria();
+     		provider = locationManager.getBestProvider(criteria, false);
+     		Location _location = locationManager.getLastKnownLocation(provider);
+     		
+     		//Log.i("InitialActivity","aca1");
+     		// Initialize the location fields
+     		if (_location != null) {
+     			//Log.i("InitialActivity","aca2");
+     			location = _location;
+     			//Toast.makeText(mContext, String.valueOf(location.getAccuracy()), Toast.LENGTH_LONG).show();
+     			System.out.println("Provider " + provider + " has been selected.");
+     			lat =  (location.getLatitude());
+     			lng =  (location.getLongitude());
+     			
+     		} 
     }
 
     @Override
@@ -221,6 +286,12 @@ public class Initialactivity extends Activity {
 	    
  
     }
+    
+    @Override
+	protected void onPause() {
+		super.onPause();
+		locationManager.removeUpdates(locationListener );
+	}
 
     /**
      * Shuts down the activity.
@@ -247,11 +318,7 @@ public class Initialactivity extends Activity {
     	//Toast.makeText(mContext, String.valueOf(item.getItemId()), Toast.LENGTH_SHORT).show();
         switch (item.getItemId()) {
             
-            case R.id.menu_logout:
-            	//Toast.makeText(mContext, "HOLA", Toast.LENGTH_SHORT).show();
-                Util.userLogout(mContext);
-                
-                return true;
+            
             default:
                 return super.onContextItemSelected(item);
         }
@@ -263,6 +330,7 @@ public class Initialactivity extends Activity {
     private void setExtraDataScreenContent(){
     	
     	setContentView(R.layout.extra_data);
+    	dialogLogin.hide();
     	 user = (EditText) findViewById(R.id.fullname);
     	 TextView title = (TextView) findViewById(R.id.extra_info);
     	 title.setTypeface(BebasFont);
@@ -288,15 +356,29 @@ public class Initialactivity extends Activity {
     	final SpinCircleView circle = (SpinCircleView) findViewById(R.id.main_spin);
     	
     	userName = (TextView) findViewById(R.id.header_username);
+    	internetConnectionStatus = (ImageView) findViewById(R.id.header_connection_status);
     	userName.setTypeface(BebasFont);
+    	SharedPreferences prefs = Util.getSharedPreferences(mContext);
+    	if(!isNetworkAvailable())
+    	{
+    		internetConnectionStatus.setImageResource(R.drawable.error);
+    		
+    		prefs.edit().putInt(Util.INTERNET_CONNECTION, Util.INTERNET_DISCONNECTED).commit();
+    		
+    	}
+    	else
+    	{
+    		prefs.edit().putInt(Util.INTERNET_CONNECTION, Util.INTERNET_CONNECTED).commit();
+    	}
+    	
     	//traer el objeto del usuario porque cuando ya esta loggeado no esta el objeto usuario aca
     	if(userInstance == null)
     	{
-    		restService = new RestService(userObjectHandlerGet, this, "http://nest5stage.herokuapp.com/api/user/requestAndroidUser"); //Create new rest service for get
+    		restService = new RestService(userObjectHandlerGet, this, "http://www.nest5.com/api/user/requestAndroidUser"); //Create new rest service for get
         	
         	restService.setCredentials("apiadmin", Setup.apiKey);
         	//enviar id de usuario para pedir objeto
-        	SharedPreferences prefs = Util.getSharedPreferences(mContext);
+        	
             int uid = prefs.getInt(Util.USER_REGISTRATION_ID, 0);
             restService.addParam("userid", String.valueOf(uid));
             
@@ -311,6 +393,7 @@ public class Initialactivity extends Activity {
     	{
     		userName.setText(userInstance.name);
     	}
+    	if(prefs.getInt(Util.INTERNET_CONNECTION, 0) == 1){
     	
     	//userName.setText(userInstance.name);
     	
@@ -396,7 +479,7 @@ public class Initialactivity extends Activity {
 				
 				switch(pressed)
 				{
-				case 1: Toast.makeText(mContext, "0", Toast.LENGTH_SHORT).show();
+				case 1: //Toast.makeText(mContext, "0", Toast.LENGTH_SHORT).show();
 				break;
 				case 2: 
 					lay = R.layout.deals;
@@ -407,14 +490,20 @@ public class Initialactivity extends Activity {
 					circle.rotate.setAnimationListener(animReady);
 					break;
 				case 4:
-					lay = R.layout.deals;
+					lay = R.layout.my_deals;
 					circle.rotate.setAnimationListener(animReady);
 					break;
 				case 5:
-					Toast.makeText(mContext, "4", Toast.LENGTH_SHORT).show();
+					lay = R.layout.my_coupons;
+					circle.rotate.setAnimationListener(animReady);
 					break;
+					
 				case 6:
-					Toast.makeText(mContext, "5", Toast.LENGTH_SHORT).show();
+					//Toast.makeText(mContext, "Muy Pronto", Toast.LENGTH_SHORT).show();
+					Intent intent = new Intent(Intent.ACTION_SEND);
+					intent.setType("text/plain");
+					intent.putExtra(Intent.EXTRA_TEXT, "Nest, Aplicación para cupones de descuentos en Las Mejores Marcas y Tiendas en mi teléfono móvil. http://www.nest5.com");
+					startActivity(Intent.createChooser(intent, "Compartir Usando: "));
 					break;
 				default: 
 				break;
@@ -422,6 +511,25 @@ public class Initialactivity extends Activity {
 				return false;
 			}
 		});
+    }
+    	else
+    	{
+    		//Toast.makeText(mContext, "No tienes conexión a internet.", Toast.LENGTH_LONG).show();
+    		AlertDialog.Builder builder = new AlertDialog.Builder(this);  
+            builder.setMessage("No tienes una conexión a internet activa. Habilítala haciendo click en aceptar y seleccionando luego una red.")  
+                   .setCancelable(false)  
+                   .setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {  
+                       public void onClick(DialogInterface dialog, int id) {  
+                           Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);  
+                       startActivityForResult(intent, 1);  
+                       }  
+                   })  
+                   .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {  
+                       public void onClick(DialogInterface dialog, int id) {  
+                           finish();  
+                       }  
+                   }).show();
+    	}
     	
     }
     
@@ -433,7 +541,9 @@ public class Initialactivity extends Activity {
     	setContentView(R.layout.deals);
     	final ListView dealsList =  (ListView) findViewById(R.id.close_deals);
     	final ProgressDialog dialog;
-    	
+    	userName = (TextView) findViewById(R.id.header_username);
+    	userName.setTypeface(BebasFont);
+    	userName.setText("Listado de Empresas");
     	
 	    dialog = new ProgressDialog(mContext);
 	    new  AsyncTask<String, Void, String>(){
@@ -540,7 +650,64 @@ public class Initialactivity extends Activity {
 			
 				
     	    
-        }.execute(Setup.DEV_URL+"/usuario/jsonTest");
+        }.execute(Setup.PROD_URL+"/promo/showDeals");
+	    
+	    
+	    
+    }
+    
+ private void setMyDealsScreenContent(){
+    	
+    	//setContentView(R.layout.deals);
+    	//Intent inte = new Intent(mContext, DealsActivity.class);
+    	//startActivity(inte);
+    	setContentView(R.layout.my_deals);
+    	userName = (TextView) findViewById(R.id.header_username);
+    	userName.setTypeface(BebasFont);
+    	//traer el objeto del usuario porque cuando ya esta loggeado no esta el objeto usuario aca
+    	if(userInstance == null)
+    	{
+    		restService = new RestService(userObjectHandlerGet, this, "http://www.nest5.com/api/user/requestAndroidUser"); //Create new rest service for get
+        	
+        	restService.setCredentials("apiadmin", Setup.apiKey);
+        	//enviar id de usuario para pedir objeto
+        	SharedPreferences prefs = Util.getSharedPreferences(mContext);
+            int uid = prefs.getInt(Util.USER_REGISTRATION_ID, 0);
+            restService.addParam("userid", String.valueOf(uid));
+            
+            try {
+            	
+    			restService.execute(RestService.POST); //Executes the request with the HTTP POST verb
+    		} catch (Exception e) {
+    			e.printStackTrace();
+    		}
+    	}
+    	else
+    	{
+    		userName.setText(userInstance.name);
+    	}
+    	
+    	
+        
+    	
+    	
+	    dialogUpdateExtra = new ProgressDialog(mContext);
+	    restService = new RestService(myDealsHandlerGet, this, "http://www.nest5.com/api/promo/showMyDeals"); //Create new rest service for get
+    	
+    	restService.setCredentials("apiadmin", Setup.apiKey);
+    	//enviar id de usuario para pedir objeto
+    	SharedPreferences prefs = Util.getSharedPreferences(mContext);
+        int uid = prefs.getInt(Util.USER_REGISTRATION_ID, 0);
+        restService.addParam("id", String.valueOf(uid));
+        dialogUpdateExtra.setMessage("Estamos cargando tus tarjetas de sellos...");
+        dialogUpdateExtra.show();
+        try {
+        	
+			restService.execute(RestService.POST); //Executes the request with the HTTP POST verb
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	    
 	    
 	    
 	    
@@ -554,55 +721,386 @@ public class Initialactivity extends Activity {
 	    dialogLogin.show();
     	
     }
-   /* private void setHelloWorldScreenContent() {
-        setContentView(R.layout.hello_world);
-
-        final TextView helloWorld = (TextView) findViewById(R.id.hello_world);
-        final Button sayHelloButton = (Button) findViewById(R.id.say_hello);
-        sayHelloButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                sayHelloButton.setEnabled(false);
-                helloWorld.setText(R.string.contacting_server);
-
-                // Use an AsyncTask to avoid blocking the UI thread
-                new AsyncTask<Void, Void, String>() {
-                    private String message;
-
-                    @Override
-                    protected String doInBackground(Void... arg0) {
-                        MyRequestFactory requestFactory = Util.getRequestFactory(mContext,
-                                MyRequestFactory.class);
-                        final HelloWorldRequest request = requestFactory.helloWorldRequest();
-                        Log.i(TAG, "Sending request to server");
-                        request.getMessage().fire(new Receiver<String>() {
-                            @Override
-                            public void onFailure(ServerFailure error) {
-                                message = "Failure: " + error.getMessage();
-                            }
-
-                            @Override
-                            public void onSuccess(String result) {
-                                message = result;
-                            }
-                        });
-                        return message;
-                    }
-
-                    @Override
-                    protected void onPostExecute(String result) {
-                        helloWorld.setText(result);
-                        sayHelloButton.setEnabled(true);
-                    }
-                }.execute();
-            }
-        });
-    }*/
+    
+    private void setStampScreenContent()
+    {
+    	setContentView(R.layout.stamp_card);
+    	userName = (TextView) findViewById(R.id.header_username);
+    	userName.setTypeface(BebasFont);
+    	//traer el objeto del usuario porque cuando ya esta loggeado no esta el objeto usuario aca
+    	if(userInstance == null)
+    	{
+    		restService = new RestService(userObjectHandlerGet, this, "http://www.nest5.com/api/user/requestAndroidUser"); //Create new rest service for get
+        	
+        	restService.setCredentials("apiadmin", Setup.apiKey);
+        	//enviar id de usuario para pedir objeto
+        	SharedPreferences prefs = Util.getSharedPreferences(mContext);
+            int uid = prefs.getInt(Util.USER_REGISTRATION_ID, 0);
+            restService.addParam("userid", String.valueOf(uid));
+            
+            try {
+            	
+    			restService.execute(RestService.POST); //Executes the request with the HTTP POST verb
+    		} catch (Exception e) {
+    			e.printStackTrace();
+    		}
+    	}
+    	else
+    	{
+    		userName.setText(userInstance.name);
+    	}
+    	CardView card;
+    	
+    	LinearLayout layout = (LinearLayout) findViewById(R.id.card_holder);
+    	TextView title = (TextView) findViewById(R.id.card_info_title);
+    	TextView description_one = (TextView) findViewById(R.id.card_info_requirement);
+    	TextView description_two = (TextView) findViewById(R.id.card_info_perk);
+    	TextView withNest5 = (TextView) findViewById(R.id.card_row_nest5);
+    	InformationTextView ach1;
+    	title.setTypeface(BebasFont);
+    	description_one.setTypeface(VarelaFont);
+    	description_two.setTypeface(VarelaFont);
+    	withNest5.setTypeface(VarelaFont);
+    	title.setText(payload.company.name);
+    	String titleText = payload.promo.action.equals("Compra") ? getString(R.string.buyPerk, payload.promo.reqQTY,payload.promo.requirement) : getString(R.string.visitPerk, payload.promo.reqQTY,payload.promo.requirement);
+    	String perkText = String.valueOf(payload.promo.perkQTY) +" "+ payload.promo.perk;
+    	description_one.setText(titleText);
+    	description_two.setText(perkText);
+    	
+    	
+    	//ScrollingTextView ach1 = new ScrollingTextView(this,null);
+    	//ach1.setTextAppearance(mContext, R.style.company_promos);
+    	
+    	
+    	String couponsText;
+    	if(payload.coupons.size() == 0)
+    	{
+    		
+    		//card = new CardView(this,null,10,payload.stamps.size(),false); // No es cupón sino tarjeta de sellos
+    		card = new CardView(this,null,payload.promo.reqQTY,payload.stamps.size(),false);
+    		int restantes = payload.promo.reqQTY - payload.stamps.size();
+    		
+    		if(restantes == 1)
+    		{
+    			
+    			couponsText = "¡Wow, 1 sello más y tendrás tu preciado cupón!";
+    			ach1 = new InformationTextView(mContext, null, Setup.ICON_FACE_ONE, couponsText);
+    		}
+    		else
+    		{
+    			if(restantes == 2)
+        		{
+        			couponsText = "¡Casi Lo Logras! dos sellos más y tendrás tu cupón.";
+        			ach1 = new InformationTextView(mContext, null, Setup.ICON_FACE_TWO, couponsText);
+        		}
+    			else
+    			{
+    				if(restantes == 3)
+            		{
+            			couponsText = "¡Vamos!, ese cupón solo está a 3 sellos de distancia.";
+            			ach1 = new InformationTextView(mContext, null, Setup.ICON_FACE_THREE, couponsText);
+            		}
+    				else
+    				{
+    					couponsText = "¡Ánimo! Estás a "+restantes+" sellos de conseguir el cupón.";
+    					ach1 = new InformationTextView(mContext, null, Setup.ICON_FACE_CHEER, couponsText);
+    				}
+    			}
+    			
+    			
+    		}
+    		    		
+    	}
+    	else
+    	{    			
+    		//card = new CardView(this,null,1,1,true);
+    		card = new CardView(this,null,1,1,true);
+    		couponsText = "¡Has Ganado un Cupón! Este sello te ha completado los "+payload.promo.reqQTY+" que eran necesarios para obtenerlo. \n¡Ve atus cupones, y redímelo!";
+    		ach1 = new InformationTextView(mContext, null, Setup.ICON_FACE_WIN, couponsText);
+    		Button goToCoupons = (Button) findViewById(R.id.couponsButton);
+    		goToCoupons.setVisibility(View.VISIBLE);
+    		goToCoupons.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					lay = R.layout.my_coupons;
+					setScreenContent();
+					
+				}
+			}); 
+    	}
+    	layout.addView(card);
+    	
+    	ach1.message.setTypeface(VarelaFont);
+    	//ach1.setTextColor(Color.parseColor("#FFFFFF"));
+    	LinearLayout achLayout = (LinearLayout) findViewById(R.id.achievements_container);
+    	achLayout.addView(ach1);
+    	
+    	
+    }
+    
+    private void setCouponScreenContent()
+    {
+    	setContentView(R.layout.my_coupons);
+    	
+    	userName = (TextView) findViewById(R.id.header_username);
+    	userName.setTypeface(BebasFont);
+    	//traer el objeto del usuario porque cuando ya esta loggeado no esta el objeto usuario aca
+    	if(userInstance == null)
+    	{
+    		restService = new RestService(userObjectHandlerGet, this, "http://www.nest5.com/api/user/requestAndroidUser"); //Create new rest service for get
+        	
+        	restService.setCredentials("apiadmin", Setup.apiKey);
+        	//enviar id de usuario para pedir objeto
+        	SharedPreferences prefs = Util.getSharedPreferences(mContext);
+            int uid = prefs.getInt(Util.USER_REGISTRATION_ID, 0);
+            restService.addParam("userid", String.valueOf(uid));
+            
+            try {
+            	
+    			restService.execute(RestService.POST); //Executes the request with the HTTP POST verb
+    		} catch (Exception e) {
+    			e.printStackTrace();
+    		}
+    	}
+    	else
+    	{
+    		userName.setText(userInstance.name);
+    	}
+    	//setContentView(R.layout.deals);
+    	//Intent inte = new Intent(mContext, DealsActivity.class);
+    	//startActivity(inte);
+    	
+    	
+    	
+    	
+        
+    	
+    	
+	    dialogUpdateExtra = new ProgressDialog(mContext);
+	    restService = new RestService(myCouponsHandlerGet, this, "http://www.nest5.com/api/user/requestUserCoupons"); //Create new rest service for get
+    	
+    	restService.setCredentials("apiadmin", Setup.apiKey);
+    	//enviar id de usuario para pedir objeto
+    	SharedPreferences prefs = Util.getSharedPreferences(mContext);
+        int uid = prefs.getInt(Util.USER_REGISTRATION_ID, 0);
+        restService.addParam("id", String.valueOf(uid));
+        dialogUpdateExtra.setMessage("Estamos cargando tus Cupones...");
+        dialogUpdateExtra.show();
+        try {
+        	
+			restService.execute(RestService.POST); //Executes the request with the HTTP POST verb
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    }
+    
+    private void setMyDealScreenContent()
+    {
+    	
+    	setContentView(R.layout.stamp_card);
+    	userName = (TextView) findViewById(R.id.header_username);
+    	userName.setTypeface(BebasFont);
+    	//traer el objeto del usuario porque cuando ya esta loggeado no esta el objeto usuario aca
+    	if(userInstance == null)
+    	{
+    		restService = new RestService(userObjectHandlerGet, this, "http://www.nest5.com/api/user/requestAndroidUser"); //Create new rest service for get
+        	
+        	restService.setCredentials("apiadmin", Setup.apiKey);
+        	//enviar id de usuario para pedir objeto
+        	SharedPreferences prefs = Util.getSharedPreferences(mContext);
+            int uid = prefs.getInt(Util.USER_REGISTRATION_ID, 0);
+            restService.addParam("userid", String.valueOf(uid));
+            
+            try {
+            	
+    			restService.execute(RestService.POST); //Executes the request with the HTTP POST verb
+    		} catch (Exception e) {
+    			e.printStackTrace();
+    		}
+    	}
+    	else
+    	{
+    		userName.setText(userInstance.name);
+    	}
+    	
+    	CardView card;
+    	
+    	LinearLayout layout = (LinearLayout) findViewById(R.id.card_holder);
+    	TextView title = (TextView) findViewById(R.id.card_info_title);
+    	TextView description_one = (TextView) findViewById(R.id.card_info_requirement);
+    	TextView description_two = (TextView) findViewById(R.id.card_info_perk);
+    	TextView withNest5 = (TextView) findViewById(R.id.card_row_nest5);
+    	InformationTextView ach1;
+    	title.setTypeface(BebasFont);
+    	description_one.setTypeface(VarelaFont);
+    	description_two.setTypeface(VarelaFont);
+    	withNest5.setTypeface(VarelaFont);
+    	title.setText(currentDeal.company.name);
+    	String titleText = currentDeal.promo.action.equals("Compra") ? getString(R.string.buyPerk, currentDeal.promo.reqQTY,currentDeal.promo.requirement) : getString(R.string.visitPerk, currentDeal.promo.reqQTY,currentDeal.promo.requirement);
+    	String perkText = String.valueOf(currentDeal.promo.perkQTY) +" "+ currentDeal.promo.perk;
+    	description_one.setText(titleText);
+    	description_two.setText(perkText);
+    	
+    	
+    	//ScrollingTextView ach1 = new ScrollingTextView(this,null);
+    	//ach1.setTextAppearance(mContext, R.style.company_promos);
+    	
+    	
+    	String couponsText;
+    	
+    		
+    		//card = new CardView(this,null,10,payload.stamps.size(),false); // No es cupón sino tarjeta de sellos
+    		card = new CardView(this,null,currentDeal.promo.reqQTY,currentDeal.stamps.size(),false);
+    		int restantes = currentDeal.promo.reqQTY - currentDeal.stamps.size();
+    		
+    		if(restantes == 1)
+    		{
+    			
+    			couponsText = "¡Wow, 1 sello más y tendrás tu preciado cupón!";
+    			ach1 = new InformationTextView(mContext, null, Setup.ICON_FACE_ONE, couponsText);
+    		}
+    		else
+    		{
+    			if(restantes == 2)
+        		{
+        			couponsText = "¡Casi Lo Logras! dos sellos más y tendrás tu cupón.";
+        			ach1 = new InformationTextView(mContext, null, Setup.ICON_FACE_TWO, couponsText);
+        		}
+    			else
+    			{
+    				if(restantes == 3)
+            		{
+            			couponsText = "¡Vamos!, ese cupón solo está a 3 sellos de distancia.";
+            			ach1 = new InformationTextView(mContext, null, Setup.ICON_FACE_THREE, couponsText);
+            		}
+    				else
+    				{
+    					couponsText = "¡Ánimo! Estás a "+restantes+" sellos de conseguir el cupón.";
+    					ach1 = new InformationTextView(mContext, null, Setup.ICON_FACE_CHEER, couponsText);
+    				}
+    			}
+    			
+    			
+    		}
+    		    		
+    	
+    	
+    
+    	layout.addView(card);
+    	
+    	ach1.message.setTypeface(VarelaFont);
+    	//ach1.setTextColor(Color.parseColor("#FFFFFF"));
+    	LinearLayout achLayout = (LinearLayout) findViewById(R.id.achievements_container);
+    	achLayout.addView(ach1);
+    	
+    	
+    }
+    
+    public void setCouponInfoScreenContent()
+    {
+    	setContentView(R.layout.coupon);
+    	userName = (TextView) findViewById(R.id.header_username);
+    	userName.setTypeface(BebasFont);
+    	//traer el objeto del usuario porque cuando ya esta loggeado no esta el objeto usuario aca
+    	if(userInstance == null)
+    	{
+    		restService = new RestService(userObjectHandlerGet, this, "http://www.nest5.com/api/user/requestAndroidUser"); //Create new rest service for get
+        	
+        	restService.setCredentials("apiadmin", Setup.apiKey);
+        	//enviar id de usuario para pedir objeto
+        	SharedPreferences prefs = Util.getSharedPreferences(mContext);
+            int uid = prefs.getInt(Util.USER_REGISTRATION_ID, 0);
+            restService.addParam("userid", String.valueOf(uid));
+            
+            try {
+            	
+    			restService.execute(RestService.POST); //Executes the request with the HTTP POST verb
+    		} catch (Exception e) {
+    			e.printStackTrace();
+    		}
+    	}
+    	else
+    	{
+    		userName.setText(userInstance.name);
+    	}
+    	TextView companyT = (TextView) findViewById(R.id.card_info_title);
+    	ScrollingTextView requirement = (ScrollingTextView) findViewById(R.id.card_info_requirement);
+    	ScrollingTextView perk = (ScrollingTextView) findViewById(R.id.card_info_perk);
+    	TextView withNest5 = (TextView) findViewById(R.id.card_row_nest5);
+    	Button btn = (Button) findViewById(R.id.redeemButton);
+    	ImageView img = (ImageView)findViewById(R.id.couponStar);
+    	companyT.setTypeface(BebasFont);
+    	requirement.setTypeface(VarelaFont);
+    	perk.setTypeface(VarelaFont);
+    	withNest5.setTypeface(VarelaFont);
+    	String titleText = currentCoupon.promo.action.equals("Compra") ? getString(R.string.buyPerk, currentCoupon.promo.reqQTY,currentCoupon.promo.requirement) : getString(R.string.visitPerk, currentCoupon.promo.reqQTY,currentCoupon.promo.requirement);
+    	companyT.setText(currentCoupon.company.name);
+    	requirement.setText(titleText);
+    	perk.setText(currentCoupon.promo.perk);
+    	if(redimiendo)
+    	{
+    		btn.setVisibility(View.INVISIBLE);
+    		img.setImageResource(R.drawable.sello_estrella);
+    		
+    		redimiendo = false;
+    	}
+    	
+    }
+  
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
     	  IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+    	  Log.i(TAG, String.valueOf(redeemCoupon));
     	  if (scanResult != null) {
-    	    // handle scan result
-    		  Toast.makeText(mContext, scanResult.getContents(), Toast.LENGTH_LONG).show();
+    		  //Toast.makeText(mContext, String.valueOf(location.getAccuracy()), Toast.LENGTH_LONG).show();
+    		  	SharedPreferences prefs = Util.getSharedPreferences(mContext);
+  	        	int uid = prefs.getInt(Util.USER_REGISTRATION_ID, 0);
+    		  if(!redeemCoupon)
+    		  {
+    			// handle scan result
+        		  //enviar id de usuario, código escaneado, clave de api y usuario de api a http://nest5stage.herokuapp.com/api/promo/beLucky?userId=XX&code=XXXX
+        		  restService = new RestService(mHandlerLucky, this, "http://www.nest5.com/api/promo/beLucky"); //Create new rest service for get
+        	    	
+        	    	restService.setCredentials("apiadmin", Setup.apiKey);
+        	    	//enviar id de usuario para actualizar datos de nombre
+        	    	
+        	        restService.addParam("id", String.valueOf(uid));
+        	        restService.addParam("code", scanResult.getContents());
+        	        restService.addParam("latitude", String.valueOf(lat));
+        	        restService.addParam("longitude", String.valueOf(lng));
+        	        dialogUpdateExtra = new ProgressDialog(mContext);
+        		    dialogUpdateExtra.setMessage("Guardando...");
+        		    dialogUpdateExtra.show();
+        	        try {
+        	        	
+        				restService.execute(RestService.POST); //Executes the request with the HTTP POST verb
+        			} catch (Exception e) {
+        				e.printStackTrace();
+        			}
+        		  //Toast.makeText(mContext, scanResult.getContents(), Toast.LENGTH_LONG).show();  
+    		  }
+    		  else
+    		  {
+    			  //Redimir Cupón
+    			  restService = new RestService(mHandlerRedeem, this, "http://www.nest5.com/api/promo/redeemCoupon"); //Create new rest service for get
+      	    	
+      	    	restService.setCredentials("apiadmin", Setup.apiKey);
+      	    	//enviar id de usuario para actualizar datos de nombre
+      	    	
+      	        restService.addParam("id", String.valueOf(uid));
+      	        restService.addParam("code", scanResult.getContents());
+      	        dialogUpdateExtra = new ProgressDialog(mContext);
+      		    dialogUpdateExtra.setMessage("Un momento, estamos solicitando la autorización...");
+      		    dialogUpdateExtra.show();
+      	        try {
+      	        	
+      				restService.execute(RestService.POST); //Executes the request with the HTTP POST verb
+      			} catch (Exception e) {
+      				e.printStackTrace();
+      			}
+    		  }
+    	    
     	  }
     	  // else continue with any other code you need in the method
     	  
@@ -628,19 +1126,86 @@ public class Initialactivity extends Activity {
             case R.layout.logging:
                 setLoggingScreenContent();
                 break;
+            case R.layout.stamp_card:
+            	if(!fromMyDeals)
+            	{
+            		setStampScreenContent();
+            	}
+            	else
+            	{
+            		setMyDealScreenContent();
+            	}
+            	
+                break;
+            case R.layout.my_deals:
+                setMyDealsScreenContent();
+                break;
+            case R.layout.coupon:
+                setCouponInfoScreenContent();
+                break;
+            case R.layout.my_coupons:
+                setCouponScreenContent();
+                break;
         }
     }
     
     @Override
     public void onBackPressed() {
-    	Log.i(TAG, String.valueOf(R.layout.deals)+"   "+String.valueOf(lay));
-      if(lay == R.layout.deals){
+    	//Log.i(TAG, String.valueOf(R.layout.deals)+"   "+String.valueOf(lay));
+      if(lay == R.layout.deals ){
     	  lay = R.layout.home;
-    	  setScreenContent();
+    	  
       }
       else{
-    	  finish();
+    	  if(lay== R.layout.my_deals)
+    	  {
+    		  lay = R.layout.home;
+    		  
+    	  }
+    	  else
+    	  {
+    		  if(lay == R.layout.stamp_card)
+        	  {
+        		  if(!fromMyDeals)
+        		  {
+        			  lay = R.layout.home;
+        		  }
+        		  else
+        		  {
+        			  lay = R.layout.my_deals;
+        			  fromMyDeals = false;
+        		  }
+        		  
+        		  
+        	  }
+        	  else
+        	  {
+        		  if(lay == R.layout.my_coupons)
+        		  {
+        			  lay = R.layout.home;
+        		  }
+        		  else{
+        			  if(lay == R.layout.coupon)
+        			  {
+        				lay = R.layout.my_coupons;  
+        			  }
+        			  else
+        			  {
+        				  finish();
+        			  }
+        			  
+        		  }
+        		  
+        		  
+        			  
+        		  
+        		  
+        	  } 
+    	  }
+    	  
+    	  
       }
+      setScreenContent();
        
     }
     
@@ -654,7 +1219,7 @@ public class Initialactivity extends Activity {
     	
     	String u = user.getText().toString();
     	//String p = pass.getText().toString();
-    	restService = new RestService(mHandlerGet, this, "http://nest5stage.herokuapp.com/api/user/updateAndroidUser"); //Create new rest service for get
+    	restService = new RestService(mHandlerGet, this, "http://www.nest5.com/api/user/updateAndroidUser"); //Create new rest service for get
     	
     	restService.setCredentials("apiadmin", Setup.apiKey);
     	//enviar id de usuario para actualizar datos de nombre
@@ -737,6 +1302,7 @@ public class Initialactivity extends Activity {
     	            }
     	            else {
     	            	//poner para pedir nombre, telefono y otros datos
+    	            	
     	            	lay = R.layout.extra_data;
         				setScreenContent();
     	            }
@@ -763,63 +1329,7 @@ public class Initialactivity extends Activity {
     	}
     };
     
-   /* private final Handler mHandlerGet = new Handler(){
-    	@Override
-    	public void handleMessage(Message msg){
-    		User user = null; 
-    		try{
-    				Gson gson = new Gson();
-    				user = gson.fromJson((String)msg.obj, User.class);
-    		}
-    		catch(Exception e){
-    			e.printStackTrace();
-    		}
-    		
-    				String status = "unathorized";
-    				if(user != null){
-    					//Toast.makeText(mContext,user.username , Toast.LENGTH_LONG).show();
-    					status = "authorized";
-    				}
-    				else{
-    					//Toast.makeText(mContext,"Login Incorrecto" , Toast.LENGTH_LONG).show();
-    				}
-    				
-    				
-    	    		String message = null;
-    	            String loggedStatus = Util.LOGGEDOUT;
-    	            if (status == "authorized") {
-    	                message = getResources().getString(R.string.registration_succeeded);
-    	                loggedStatus = Util.LOGGEDIN;
-    	                Log.i(TAG, "Registrado");
-    	                
-    	            } else if (status == "unuthorizedok") {
-    	                message = getResources().getString(R.string.unregistration_succeeded);
-    	                Log.i(TAG, "Salido");
-    	            } else {
-    	                message = getResources().getString(R.string.registration_error);
-    	                Log.i(TAG, "Error");
-    	                String usuario = user != null ? user.username: "usuario";
-        	            Toast.makeText(mContext,String.format(message, usuario), Toast.LENGTH_LONG).show();
-    	            }
-    	           
-
-    	            // Set connection status
-    	            SharedPreferences prefs = Util.getSharedPreferences(mContext);
-    	            prefs.edit().putString(Util.LOGGED_STATUS, loggedStatus).commit();
-    	            
-    	            if(status == "authorized"){
-    	            	lay = R.layout.home;
-    	    	    	setScreenContent();
-    	            }
-    	            
-    	            // Display a notification
-    	           
-    		
-    		
-    			
-    			
-    		}		
-    };*/
+   
     
     private final Handler mHandlerGet = new Handler(){
     	@Override
@@ -890,10 +1400,374 @@ public class Initialactivity extends Activity {
     	
     };
     
+    private final Handler mHandlerLucky = new Handler()
+    {
+    	
+    	@Override
+    	public void handleMessage(Message msg){
+    		JSONObject respuesta = null;
+    		Log.i(TAG,"Pasando por acá");
+    		Log.i(TAG,(String) msg.obj);
+	    	try{
+	    		//usuario = respuesta.getJSONObject("userInstance");
+	    		//Gson gson = new Gson();
+	    		//userInstance = gson.fromJson((String) msg.obj, User.class);
+				//userInstance = respuesta.getJSONObject("userInstance");
+				//Log.i(TAG,userInstance.toString());
+	    		//Log.i(TAG,userInstance.username);
+	    		respuesta = new JSONObject((String) msg.obj);
+	    		Log.i(TAG,"Pasando por acá");
+	    		Log.i(TAG,(String) msg.obj);
+	    	}
+	    	catch(Exception e){
+			
+	    	}
+	    	Log.i(TAG,"Aca");
+	    	if (respuesta != null){
+	    		//Log.i(TAG,"Aca2");
+    			int status = 0;
+    			//int coupons = 0;
+    			String payloadObject;
+    			
+    			try{
+    				status = respuesta.getInt("status");
+    				//coupons = respuesta.getInt("coupons");
+    				
+    				
+    			
+    			}
+    			catch (Exception e) {
+					e.printStackTrace();
+				}
+    			//quitar loading
+    			dialogUpdateExtra.hide();
+    			//dialogLogin.hide();
+    			//Toast.makeText(mContext, String.valueOf(status), Toast.LENGTH_LONG).show();
+    			if(status == 1)
+    			{
+    				//Toast.makeText(mContext,"¡Excelente! Has Acumulado otro sello con esta empresa",Toast.LENGTH_LONG).show();
+    				//Tomar cupones y Sellos para mostrar pantalla de logro.
+    				
+    				
+    				//crear un view CardView con el constructor que recibe sellos totales y sellos buenos (redimidos)
+    				
+    				try
+    				{
+    					payloadObject = respuesta.getString("payload");
+    					
+    					
+    					Gson gson = new Gson();
+    		    		payload = gson.fromJson(payloadObject, Answer.class);
+    		    		
+    		    		
+    		    		//Log.i(TAG,"cupones: "+String.valueOf(payload.coupons)+" Sellos:"+String.valueOf(payload.stamps));
+    		    		lay = R.layout.stamp_card;
+    		    		fromMyDeals = false;
+    		    		setScreenContent();
+    		    		
+    				}
+    				catch(Exception e)
+    				{
+    					e.printStackTrace();
+    					
+    				}
+    				
+    			}
+    			else
+    			{
+    				Toast.makeText(mContext, "Lo Sentimos, hay errores con el servidor pero en breve lo arreglaremos.", Toast.LENGTH_LONG).show();
+    			}
+    			
+    		}
+	    	else
+	    	{
+	    		dialogUpdateExtra.hide();
+	    		Toast.makeText(mContext, "Sin Respuesta.", Toast.LENGTH_LONG).show();
+	    	}
+    	}
+    	
+    };
+    
+    private final Handler mHandlerRedeem = new Handler()
+    {
+    	
+    	@Override
+    	public void handleMessage(Message msg){
+    		JSONObject respuesta = null;
+    	Log.i("InitialActivity",(String) msg.obj);
+	    	try{
+	    		//usuario = respuesta.getJSONObject("userInstance");
+	    		//Gson gson = new Gson();
+	    		//userInstance = gson.fromJson((String) msg.obj, User.class);
+				//userInstance = respuesta.getJSONObject("userInstance");
+				//Log.i(TAG,userInstance.toString());
+	    		//Log.i(TAG,userInstance.username);
+	    		respuesta = new JSONObject((String) msg.obj);
+	    		//Log.i(TAG,(String) msg.obj);
+	    	}
+	    	catch(Exception e){
+			
+	    	}
+	    	//Log.i(TAG,"Aca");
+	    	if (respuesta != null){
+	    		//Log.i(TAG,"Aca2");
+    			int status = 0;
+    			//int coupons = 0;
+    			String payloadObject;
+    			
+    			try{
+    				status = respuesta.getInt("status");
+    				//coupons = respuesta.getInt("coupons");
+    				
+    				
+    			
+    			}
+    			catch (Exception e) {
+					e.printStackTrace();
+				}
+    			//quitar loading
+    			dialogUpdateExtra.hide();
+    			//dialogLogin.hide();
+    			//Toast.makeText(mContext, String.valueOf(status), Toast.LENGTH_LONG).show();
+    			if(status == 1)
+    			{
+    				
+    				
+    				try
+    				{
+    					//Poner pantalla de cupón redimido
+    		    		//lay = R.layout.home;
+    					redimiendo = true;
+    					lay = R.layout.coupon;
+    		    		setScreenContent();
+    		    		
+    					
+    					
+    		    		
+    				}
+    				catch(Exception e)
+    				{
+    					e.printStackTrace();
+    					
+    				}
+    				
+    			}
+    			else
+    			{
+    				Toast.makeText(mContext, "Lo Sentimos, hay errores con el servidor pero en breve lo arreglaremos.", Toast.LENGTH_LONG).show();
+    			}
+    			
+    		}
+	    	else
+	    	{
+	    		dialogUpdateExtra.hide();
+	    		Toast.makeText(mContext, "Sin Respuesta.", Toast.LENGTH_LONG).show();
+	    	}
+    	}
+    	
+    };
+    
+    private final Handler myDealsHandlerGet = new Handler()
+    {
+    	
+    	@Override
+    	public void handleMessage(Message msg){
+    		//Log.i(TAG,(String)msg.obj);
+    		final ListView dealsList =  (ListView) findViewById(R.id.close_deals);
+    		
+    		
+	    	try{
+	    		Gson gson = new Gson();
+   				final MyDeal lista[] = gson.fromJson((String)msg.obj, MyDeal[].class);
+   				if(lista.length == 0)
+   				{
+   					dialogUpdateExtra.hide();
+   					lay = R.layout.home;
+   					Toast.makeText(mContext, "No tienes tarjetas de sellos activas", Toast.LENGTH_LONG).show();
+   					setScreenContent();
+   				}
+   				else
+   				{
+   					ImageAdapterMyDeal adapter1 = new ImageAdapterMyDeal(mContext, lista,dealsList);
+   					dealsList.setAdapter(adapter1);
+   	   				dialogUpdateExtra.hide();
+   	   				dealsList.setOnItemClickListener(new OnItemClickListener() {
+   	     			    public void onItemClick(AdapterView<?> parent, View view,
+   	     			            int position, long id) {
+   	     			           // Toast.makeText(getApplicationContext(), lista[position].company.name,Toast.LENGTH_SHORT).show();
+   	     			    	currentDeal = lista[position];
+   	     			    	lay = R.layout.stamp_card;
+   	     			    	fromMyDeals = true;
+   	     			    	setScreenContent();
+   	     			        }
+   	     			      });
+   				}
+   				
+   				
+	    	}
+	    	catch(Exception e){
+	    		e.printStackTrace();
+     		   dialogUpdateExtra.hide();
+     		   lay = R.layout.home;
+     		   setScreenContent();
+     		   Toast.makeText(mContext, "La información recibida parece no ser válida", Toast.LENGTH_SHORT).show();
+     		   
+	    		
+	    	}
+	    	
+	    	
+	    	
+    	}
+    	
+    };
+    
+    private final Handler myCouponsHandlerGet = new Handler()
+    {
+    	
+    	@Override
+    	public void handleMessage(Message msg){
+    		//Log.i(TAG,(String)msg.obj);
+    		final ListView dealsList =  (ListView) findViewById(R.id.close_deals);
+    		
+    		
+	    	try{
+	    		Gson gson = new Gson();
+   				final AnswerCoupon lista[] = gson.fromJson((String)msg.obj, AnswerCoupon[].class);
+   				if(lista.length == 0)
+   				{
+   					dialogUpdateExtra.hide();
+   					lay = R.layout.home;
+   					Toast.makeText(mContext, "No tienes cupones activos", Toast.LENGTH_LONG).show();
+   					setScreenContent();
+   				}
+   				else
+   				{
+   					ImageAdapterMyCoupon adapter1 = new ImageAdapterMyCoupon(mContext, lista,dealsList);
+   					dealsList.setAdapter(adapter1);
+   	   				dialogUpdateExtra.hide();
+   	   				dealsList.setOnItemClickListener(new OnItemClickListener() {
+   	     			    public void onItemClick(AdapterView<?> parent, View view,
+   	     			            int position, long id) {
+   	     			           // Toast.makeText(getApplicationContext(), lista[position].company.name,Toast.LENGTH_SHORT).show();
+   	     			    	currentCoupon = lista[position];
+   	     			    	lay = R.layout.coupon;
+   	     			    	//fromMyDeals = true;
+   	     			    	setScreenContent();
+   	     			        }
+   	     			      });
+   				}
+   				
+   				
+	    	}
+	    	catch(Exception e){
+	    		e.printStackTrace();
+     		   dialogUpdateExtra.hide();
+     		   lay = R.layout.home;
+     		   setScreenContent();
+     		   Toast.makeText(mContext, "La información recibida parece no ser válida", Toast.LENGTH_SHORT).show();
+     		   
+	    		
+	    	}
+	    	
+	    	
+	    	
+    	}
+    	
+    };
+    
     public void scanCode(View v){
+    	locationManager.requestLocationUpdates(provider, 0, 0, locationListener);
+    	redeemCoupon = false;
     	IntentIntegrator integrator = new IntentIntegrator(this);
     	integrator.initiateScan();
+    	
     }
+    
+    public void redeemCoupon(View v){
+    	redeemCoupon = true;
+    	IntentIntegrator integrator = new IntentIntegrator(this);
+    	integrator.initiateScan();
+    	
+    }
+    
+    
+
+    /** Determines whether one Location reading is better than the current Location fix
+      * @param location  The new Location that you want to evaluate
+      * @param currentBestLocation  The current Location fix, to which you want to compare the new one
+      */
+    protected boolean isBetterLocation(Location location, Location currentBestLocation) {
+        if (currentBestLocation == null) {
+            // A new location is always better than no location
+            return true;
+        }
+
+        // Check whether the new location fix is newer or older
+        long timeDelta = location.getTime() - currentBestLocation.getTime();
+        boolean isSignificantlyNewer = timeDelta > TWO_MINUTES;
+        boolean isSignificantlyOlder = timeDelta < -TWO_MINUTES;
+        boolean isNewer = timeDelta > 0;
+
+        // If it's been more than two minutes since the current location, use the new location
+        // because the user has likely moved
+        if (isSignificantlyNewer) {
+            return true;
+        // If the new location is more than two minutes older, it must be worse
+        } else if (isSignificantlyOlder) {
+            return false;
+        }
+
+        // Check whether the new location fix is more or less accurate
+        int accuracyDelta = (int) (location.getAccuracy() - currentBestLocation.getAccuracy());
+        boolean isLessAccurate = accuracyDelta > 0;
+        boolean isMoreAccurate = accuracyDelta < 0;
+        boolean isSignificantlyLessAccurate = accuracyDelta > 200;
+
+        // Check if the old and new location are from the same provider
+        boolean isFromSameProvider = isSameProvider(location.getProvider(),
+                currentBestLocation.getProvider());
+
+        // Determine location quality using a combination of timeliness and accuracy
+        if (isMoreAccurate) {
+            return true;
+        } else if (isNewer && !isLessAccurate) {
+            return true;
+        } else if (isNewer && !isSignificantlyLessAccurate && isFromSameProvider) {
+            return true;
+        }
+        return false;
+    }
+
+    /** Checks whether two providers are the same */
+    private boolean isSameProvider(String provider1, String provider2) {
+        if (provider1 == null) {
+          return provider2 == null;
+        }
+        return provider1.equals(provider2);
+    }
+    
+    LocationListener locationListener = new LocationListener() {
+        public void onLocationChanged(Location _location) {
+          // Called when a new location is found by the network location provider.
+        	 location = _location;
+        	 lat =  (location.getLatitude());
+    		 lng =  (location.getLongitude());
+    		 
+        }
+
+        public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+        public void onProviderEnabled(String provider) {}
+
+        public void onProviderDisabled(String provider) {}
+      };
+      
+      private boolean isNetworkAvailable() {
+    	    ConnectivityManager connectivityManager 
+    	          = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+    	    NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+    	    return activeNetworkInfo != null;
+    	}
     
 
 }

@@ -3,12 +3,12 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="#000000">
+    android:background="#ffffff">
 
-    <TextView
+    <com.nest5.androidClient.HeaderBar
             android:id="@+id/header"
-            style="?headerTitle"
-             />
+           
+            style="?headerTitle" />
 
     <TextView
         android:id="@+id/connect_text"
@@ -16,8 +16,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/header"
         android:padding="10dip"
-        android:background="#000000"
-        android:textColor="#ffffff"
+        android:background="#ffffff"
+        android:textColor="#000000"
         android:text="@string/connect_text"
         android:textSize="16dip"/>
 
@@ -27,7 +27,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/connect_text"
         android:text="@string/select_account"
-        android:textColor="#ffffff"
+        android:textColor="#000000"
         android:layout_margin="5dip"/>
 
     <View
@@ -43,7 +43,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/divider"
         android:layout_margin="10dip"
-        android:divider="#FFFFFF"
+        android:divider="#000000"
+        android:textColor="#000000"
         android:textSize="16dip"
         android:background="@android:color/transparent"
         android:cacheColorHint="@android:color/transparent">
@@ -55,8 +56,8 @@
         android:layout_above="@+id/connect_footer"
         android:padding="25dip"
         android:gravity="center_vertical"
-        android:background="#000000"
-        android:textColor="#ffffff"
+        android:background="#ffffff"
+        android:textColor="#000000"
         android:text="@string/do_you_want_to_connect"
         android:textSize="16dip"/>
 
