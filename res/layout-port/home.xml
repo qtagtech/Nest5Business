@@ -9,9 +9,11 @@
             android:id="@+id/header"
            
             style="?headerTitle" />
+        
         <LinearLayout 
             android:id="@+id/spinner_layout"
             style="?spinnerContainer"
+            
             >
             <com.nest5.androidClient.SpinCircleView
 		       android:id="@+id/main_spin"

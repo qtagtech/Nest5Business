@@ -17,24 +17,39 @@ package com.nest5.androidClient;
 
 
 
+import com.nest5.androidClient.MyHorizontalScrollView;
+
+import com.nest5.androidClient.ViewUtils;
+
+
+
+import com.nest5.androidClient.MyHorizontalScrollView.SizeCallback;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
 
 import com.google.gson.Gson;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.nest5.androidClient.MyLocation.LocationResult;
 
 
 import android.R.bool;
@@ -51,7 +66,9 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Typeface;
+import android.location.Address;
 import android.location.Criteria;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -63,6 +80,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -79,6 +97,7 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -139,13 +158,26 @@ public class Initialactivity extends Activity {
     
     private static final int TWO_MINUTES = 1000 * 60 * 2;
     
-    private LocationManager locationManager;
-	private String provider;
-	
+    //private LocationManager locationManager;
+	//private String provider;
+    private LocationResult locationResult;
+    private MyLocation myLocation;
 	private double lat;
 	private double lng;
 	
-	private Location location;
+	//private Location location;
+	
+	
+	//varibales de menu
+	MyHorizontalScrollView scrollView;
+    View menu;
+    View app;
+    ImageView btnSlide;
+    boolean menuOut = false;
+    Handler handler = new Handler();
+    int btnWidth;
+    
+    Bundle savedInstanceState;
 	
 	
 	
@@ -211,6 +243,7 @@ public class Initialactivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         
         super.onCreate(savedInstanceState);
+        this.savedInstanceState = savedInstanceState;
         getWindow().setFormat(PixelFormat.RGBA_8888);
 	    getWindow().addFlags(WindowManager.LayoutParams.FLAG_DITHER);
 
@@ -218,7 +251,7 @@ public class Initialactivity extends Activity {
         registerReceiver(mUpdateUIReceiver, new IntentFilter(Util.UPDATE_UI_INTENT));
         
      // Get the location manager
-     		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+     		/*locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
      		// Define the criteria how to select the locatioin provider -> use
      		// default
      		Criteria criteria = new Criteria();
@@ -235,7 +268,31 @@ public class Initialactivity extends Activity {
      			lat =  (location.getLatitude());
      			lng =  (location.getLongitude());
      			
-     		} 
+     		}*/ 
+        
+         locationResult = new LocationResult(){
+            @Override
+            public void gotLocation(Location location){
+                //Got the location!
+            	//Toast.makeText(mContext, String.valueOf(location.getLatitude()), Toast.LENGTH_LONG).show();
+            	lat = location.getLatitude();
+            	lng = location.getLongitude();
+            }
+        };
+        myLocation = new MyLocation();
+        myLocation.getLocation(this, locationResult);
+    }
+    
+    @Override
+    public void onSaveInstanceState(Bundle savedInstance)
+    {
+    	super.onSaveInstanceState(savedInstance);
+    	
+    }
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstance)
+    {
+    	this.savedInstanceState = savedInstance;
     }
 
     @Override
@@ -289,8 +346,9 @@ public class Initialactivity extends Activity {
     
     @Override
 	protected void onPause() {
+    	myLocation.cancelTimer();
 		super.onPause();
-		locationManager.removeUpdates(locationListener );
+		//locationManager.removeUpdates(locationListener);
 	}
 
     /**
@@ -298,6 +356,7 @@ public class Initialactivity extends Activity {
      */
     @Override
     public void onDestroy() {
+    	myLocation.cancelTimer();
         unregisterReceiver(mUpdateUIReceiver);
         super.onDestroy();
     }
@@ -353,10 +412,28 @@ public class Initialactivity extends Activity {
     private void setHomeScreenContent(){
     	setContentView(R.layout.home);
     	
-    	final SpinCircleView circle = (SpinCircleView) findViewById(R.id.main_spin);
+    	/*LayoutInflater inflater = LayoutInflater.from(this);
+        scrollView = (MyHorizontalScrollView) inflater.inflate(R.layout.horz_scroll_with_list_menu, null);
+        setContentView(scrollView);
+        menu = inflater.inflate(R.layout.horz_scroll_menu, null);
+        app = inflater.inflate(R.layout.home, null);
+        ViewGroup tabBar = (ViewGroup) app.findViewById(R.id.tabBar);
+        ListView listView;
+        listView = (ListView) menu.findViewById(R.id.list);
+        ViewUtils.initListView(this, listView, "Menu ", 30, android.R.layout.simple_list_item_1);
+        btnSlide = (ImageView) tabBar.findViewById(R.id.BtnSlide);
+        btnSlide.setOnClickListener(new ClickListenerForScrolling(scrollView, menu));
+        final View[] children = new View[] { menu, app };
+        // Scroll to app (view[1]) when layout finished.
+        int scrollToViewIdx = 1;
+        scrollView.initViews(children, scrollToViewIdx, new SizeCallbackForMenu(btnSlide));*/
+        
+        final SpinCircleView circle = (SpinCircleView) findViewById(R.id.main_spin);
     	
-    	userName = (TextView) findViewById(R.id.header_username);
-    	internetConnectionStatus = (ImageView) findViewById(R.id.header_connection_status);
+    	//userName = (TextView) tabBar.findViewById(R.id.header_username);
+    	//internetConnectionStatus = (ImageView) tabBar.findViewById(R.id.header_connection_status);
+        userName = (TextView) findViewById(R.id.header_username);
+        internetConnectionStatus = (ImageView) findViewById(R.id.header_connection_status);
     	userName.setTypeface(BebasFont);
     	SharedPreferences prefs = Util.getSharedPreferences(mContext);
     	if(!isNetworkAvailable())
@@ -539,119 +616,70 @@ public class Initialactivity extends Activity {
     	//Intent inte = new Intent(mContext, DealsActivity.class);
     	//startActivity(inte);
     	setContentView(R.layout.deals);
-    	final ListView dealsList =  (ListView) findViewById(R.id.close_deals);
-    	final ProgressDialog dialog;
+    	
+    	
     	userName = (TextView) findViewById(R.id.header_username);
     	userName.setTypeface(BebasFont);
     	userName.setText("Listado de Empresas");
+    	userName.setTextSize(16);
     	
-	    dialog = new ProgressDialog(mContext);
-	    new  AsyncTask<String, Void, String>(){
-	    	boolean conError = false;
-	    @Override
-    	protected void onPreExecute(){
-    		dialog.setMessage("Estamos buscando las mejores ofertas...");
-    		dialog.show();
-    	}
-        @Override
-    	protected String doInBackground(String... addrs) {
-        	
-        	StringBuilder builder = null;
-        	for (String addr : addrs) {
-        		builder = new StringBuilder();
-    		HttpClient client = new DefaultHttpClient();
-    		HttpGet httpGet = new HttpGet(addr);
-    		try {
-    			HttpResponse response = client.execute(httpGet);
-    			StatusLine statusLine = response.getStatusLine();
-    			int statusCode = statusLine.getStatusCode();
-    			if (statusCode == 200) {
-    				HttpEntity entity = response.getEntity();
-    				InputStream content = entity.getContent();
-    				BufferedReader reader = new BufferedReader(
-    						new InputStreamReader(content));
-    				String line;
-    				while ((line = reader.readLine()) != null) {
-    					builder.append(line);
-    				}
-    			} else {
-    				Log.e(Initialactivity.class.toString(), "Failed to download file");
-    				conError = true;
-    			}
-    		} catch (ClientProtocolException e) {
-    			e.printStackTrace();
-    			conError = true;
-    			
-    		} catch (IOException e) {
-    			e.printStackTrace();
-    			conError = true;
-    			
-    		}
-    		
-        }
-        	return builder.toString();
-        }
-        
-        
-        @Override
-        protected void onPostExecute(String result) {
-        	
-        	
-        	//List<ImageAndText> imageList = createList(result);
-    		
-    	    
-    	   
-    	   
-    	   
-    	   if(conError){
-    		   dialog.hide();
-    		   lay = R.layout.home;
-    		   setScreenContent();
-    		   Toast.makeText(mContext, "Lo Sentimos.\nHubo errores al contactar el servidor.", Toast.LENGTH_SHORT).show();
-    	   }
-    	   else{
-    		   try{
-        		   Gson gson = new Gson();
-       				final Deal lista[] = gson.fromJson(result, Deal[].class);
-       				ImageAdapter adapter1 = new ImageAdapter(mContext, lista,dealsList);
-    				dealsList.setAdapter(adapter1);
-       				dialog.hide();
-       			 dealsList.setOnItemClickListener(new OnItemClickListener() {
-     			    public void onItemClick(AdapterView<?> parent, View view,
-     			            int position, long id) {
-     			           // Toast.makeText(getApplicationContext(), lista[position].company.name,Toast.LENGTH_SHORT).show();
-     			    	Intent inten = new Intent(mContext,DealsActivity.class);
-     			    	Bundle b = new Bundle();
-     			        b.putParcelable("com.nest5.androidclient.Deal", lista[position]);
-     			        
-     			       
-     			    	inten.putExtras(b);
-     			    	
-     			    	
-     			    	startActivity(inten);
-     			        }
-     			      });
-        	   }catch(Exception e){
-        		   e.printStackTrace();
-        		   dialog.hide();
-        		   lay = R.layout.home;
-        		   setScreenContent();
-        		   Toast.makeText(mContext, "La información recibida parece no ser válida", Toast.LENGTH_SHORT).show();
-        		   
-        	   }
-    		   
-    		  
-    		   
-    	   }
-    	   
-    	   
-    	    
-        }  		
-			
-				
-    	    
-        }.execute(Setup.PROD_URL+"/promo/showDeals");
-	    
+    	dialogUpdateExtra = new ProgressDialog(mContext);
+	    dialogUpdateExtra.setMessage("Estamos buscando las mejores ofertas cercanas...");
+	    dialogUpdateExtra.show();
+	    LocationResult locationResult2 = new LocationResult(){
+            @Override
+            public void gotLocation(Location location){
+                //Got the location!
+            	//Toast.makeText(mContext, String.valueOf(location.getLatitude()), Toast.LENGTH_LONG).show();
+            	lat = location.getLatitude();
+            	lng = location.getLongitude();
+            	String address= "No se ha podido hallar tu dirección actual.";
+            	Geocoder gc = new Geocoder(mContext,Locale.getDefault());
+            	List<Address> addresses = null;
+            	try{
+            		Log.i(TAG,"Entra try");
+            		addresses = gc.getFromLocation(lat, lng, 1);
+            		StringBuilder sb = new StringBuilder();
+            		Log.i(TAG,"Antes de if");
+            		if(addresses.size() > 0)
+            		{
+            			Log.i(TAG,"Mas de 0 direcciones");
+            			Address actual = addresses.get(0);
+            			for(int i = 0; i < actual.getMaxAddressLineIndex(); i++)
+            			{
+            				sb.append(actual.getAddressLine(i)).append("\n");
+            				
+            			}
+            			
+            			
+            			
+            		}
+            		address = sb.toString();
+            	}catch(IOException e){}
+            	userName.setText(address);
+            	restService = new RestService(getDealslHandler, mContext, Setup.PROD_URL+"/promo/showDeals");
+                //restService.addParam("email", accountName);
+                restService.addParam("latitude", String.valueOf(lat));
+                restService.addParam("longitude",String.valueOf(lng));
+                //Toast.makeText(mContext, accountId, Toast.LENGTH_LONG).show();
+                restService.setCredentials("apiadmin", Setup.apiKey);
+                //Log.i(TAG,"Aca1");
+                try {
+                	//Log.i(TAG,"Aca2");
+        			restService.execute(RestService.GET); //Executes the request with the HTTP POST verb
+        		} catch (Exception e) {
+        			//Log.i(TAG,"Aca3");
+        			e.printStackTrace();
+        		}
+            	
+            }
+        };
+	   boolean enabled = myLocation.getLocation(mContext, locationResult2);
+	   if(!enabled)
+	   {
+		   Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+       		startActivity(intent);
+	   }
 	    
 	    
     }
@@ -1621,6 +1649,48 @@ public class Initialactivity extends Activity {
     	
     };
     
+    private final Handler getDealslHandler = new Handler()
+    {
+    	@Override
+    	public void handleMessage(Message msg){
+    		Log.i(TAG,"Aca4");
+    		Log.i(TAG,(String)msg.obj);
+    		final ListView dealsList =  (ListView) findViewById(R.id.close_deals);
+    		try{
+    			Log.i(TAG,"Aca5");
+     		   Gson gson = new Gson();
+    				final Deal lista[] = gson.fromJson((String) msg.obj, Deal[].class);
+    				ImageAdapterDistance adapter1 = new ImageAdapterDistance(mContext, lista,dealsList);
+ 				dealsList.setAdapter(adapter1);
+ 				dialogUpdateExtra.hide();
+    			 dealsList.setOnItemClickListener(new OnItemClickListener() {
+  			    public void onItemClick(AdapterView<?> parent, View view,
+  			            int position, long id) {
+  			           // Toast.makeText(getApplicationContext(), lista[position].company.name,Toast.LENGTH_SHORT).show();
+  			    	Intent inten = new Intent(mContext,DealsActivity.class);
+  			    	Bundle b = new Bundle();
+  			        b.putParcelable("com.nest5.androidclient.Deal", lista[position]);
+  			        
+  			       
+  			    	inten.putExtras(b);
+  			    	
+  			    	
+  			    	startActivity(inten);
+  			        }
+  			      });
+     	   }catch(Exception e){
+     		  Log.i(TAG,"Aca6");
+     		   e.printStackTrace();
+     		  dialogUpdateExtra.hide();
+     		   lay = R.layout.home;
+     		   setScreenContent();
+     		   Toast.makeText(mContext, "La información recibida parece no ser válida", Toast.LENGTH_SHORT).show();
+     		   
+     	   }
+    		
+    	}
+    };
+    
     private final Handler myCouponsHandlerGet = new Handler()
     {
     	
@@ -1676,7 +1746,8 @@ public class Initialactivity extends Activity {
     };
     
     public void scanCode(View v){
-    	locationManager.requestLocationUpdates(provider, 0, 0, locationListener);
+    	//locationManager.requestLocationUpdates(provider, 0, 0, locationListener);
+    	myLocation.getLocation(this, locationResult);
     	redeemCoupon = false;
     	IntentIntegrator integrator = new IntentIntegrator(this);
     	integrator.initiateScan();
@@ -1746,7 +1817,7 @@ public class Initialactivity extends Activity {
         return provider1.equals(provider2);
     }
     
-    LocationListener locationListener = new LocationListener() {
+    /*LocationListener locationListener = new LocationListener() {
         public void onLocationChanged(Location _location) {
           // Called when a new location is found by the network location provider.
         	 location = _location;
@@ -1760,7 +1831,7 @@ public class Initialactivity extends Activity {
         public void onProviderEnabled(String provider) {}
 
         public void onProviderDisabled(String provider) {}
-      };
+      };*/
       
       private boolean isNetworkAvailable() {
     	    ConnectivityManager connectivityManager 
@@ -1768,6 +1839,81 @@ public class Initialactivity extends Activity {
     	    NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
     	    return activeNetworkInfo != null;
     	}
+      
+      /*
+       *Fucniones del menu scrollhorizontal
+       *
+       * */
+      
+      static class ClickListenerForScrolling implements OnClickListener {
+          HorizontalScrollView scrollView;
+          View menu;
+          /**
+           * Menu must NOT be out/shown to start with.
+           */
+          boolean menuOut = false;
+
+          public ClickListenerForScrolling(HorizontalScrollView scrollView, View menu) {
+              super();
+              this.scrollView = scrollView;
+              this.menu = menu;
+          }
+
+          @Override
+          public void onClick(View v) {
+              Context context = menu.getContext();
+              String msg = "Slide " + new Date();
+              Toast.makeText(context, msg, 1000).show();
+              System.out.println(msg);
+
+              int menuWidth = menu.getMeasuredWidth();
+
+              // Ensure menu is visible
+              menu.setVisibility(View.VISIBLE);
+
+              if (!menuOut) {
+                  // Scroll to 0 to reveal menu
+                  int left = 0;
+                  scrollView.smoothScrollTo(left, 0);
+              } else {
+                  // Scroll to menuWidth so menu isn't on screen.
+                  int left = menuWidth;
+                  scrollView.smoothScrollTo(left, 0);
+              }
+              menuOut = !menuOut;
+          }
+      }
+      
+      /**
+       * Helper that remembers the width of the 'slide' button, so that the 'slide' button remains in view, even when the menu is
+       * showing.
+       */
+      static class SizeCallbackForMenu implements SizeCallback {
+          int btnWidth;
+          View btnSlide;
+
+          public SizeCallbackForMenu(View btnSlide) {
+              super();
+              this.btnSlide = btnSlide;
+          }
+
+          @Override
+          public void onGlobalLayout() {
+              btnWidth = btnSlide.getMeasuredWidth();
+              System.out.println("btnWidth=" + btnWidth);
+          }
+
+          @Override
+          public void getViewSize(int idx, int w, int h, int[] dims) {
+              dims[0] = w;
+              dims[1] = h;
+              final int menuIdx = 0;
+              if (idx == menuIdx) {
+                  dims[0] = w - btnWidth;
+              }
+          }
+      }
+       
     
 
 }

@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.nest5.androidClient"
-    android:versionCode="2"
-    android:versionName="1.0.1"
+    android:versionCode="3"
+    android:versionName="1.0.2"
     android:installLocation="preferExternal"
      >
 
     <uses-sdk android:minSdkVersion="8" />
+    
     
     
     
@@ -36,6 +37,7 @@
         android:theme="@style/Nest5.Default"
         android:label="@string/app_name"
         >
+        <uses-library android:name="com.google.android.maps" />
          <activity
             android:name=".Initialactivity"
             android:label="@string/app_name"
@@ -95,6 +97,8 @@
                 <category android:name="com.nest5.androidClient" />
             </intent-filter>
         </receiver>
+        
+        
     </application>
 
 </manifest>

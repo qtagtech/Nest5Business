@@ -19,6 +19,15 @@ public class Deal implements Parcelable {
 	@SerializedName("promos")
 	public ArrayList<Promo> promos;
 	
+	@SerializedName("distance")
+	public float distance;
+	
+	@SerializedName("latitude")
+	public float latitude;
+	
+	@SerializedName("longitude")
+	public float longitude;
+	
 	
 	
 	/* everything below here is for implementing Parcelable */
@@ -40,6 +49,10 @@ public class Deal implements Parcelable {
                    for (Promo it : promos) {
                        out.writeParcelable(it, flags);
                    }
+                   
+        out.writeFloat(distance);
+        out.writeFloat(latitude);
+        out.writeFloat(longitude);
     }
 
     // this is used to regenerate your object. All Parcelables must have a CREATOR that implements these two methods
@@ -68,6 +81,10 @@ public class Deal implements Parcelable {
         	             Promo promo = in.readParcelable(Promo.class.getClassLoader());
         	             promos.add(promo);
         	         }
+        
+        distance = in.readFloat();
+        latitude = in.readFloat();
+        longitude = in.readFloat();
         
         
     }

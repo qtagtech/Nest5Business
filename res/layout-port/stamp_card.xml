@@ -80,7 +80,7 @@
             
              <ScrollView
 			    android:id="@+id/card_scrollContent"
-			    android:layout_height="100dip"
+			    android:layout_height="200dip"
 			    android:layout_width="fill_parent" 
 			    >
 			    <LinearLayout 

@@ -16,6 +16,9 @@ public class Company implements Parcelable {
 	@SerializedName("name")
 	public String name;
 	
+	@SerializedName("address")
+	public String address;
+	
 	/* everything below here is for implementing Parcelable */
 
     // 99.9% of the time you can just ignore this
@@ -29,6 +32,7 @@ public class Company implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(id);
         out.writeString(name);
+        out.writeString(address);
         
         
     }
@@ -48,6 +52,7 @@ public class Company implements Parcelable {
     private Company(Parcel in) {
         id = in.readInt();
         name = in.readString();
+        address = in.readString();
         
         
     }

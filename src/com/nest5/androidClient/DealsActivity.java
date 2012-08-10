@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
+import java.util.List;
 
 
 
@@ -29,6 +30,7 @@ import android.content.SharedPreferences;
 
 import android.graphics.PixelFormat;
 import android.graphics.Typeface;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -45,10 +47,16 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.maps.GeoPoint;
+import com.google.android.maps.MapActivity;
+import com.google.android.maps.MapController;
+import com.google.android.maps.MapView;
+import com.google.android.maps.MyLocationOverlay;
+import com.google.android.maps.Overlay;
 import com.google.gson.*;
 
 
-public class DealsActivity extends Activity {
+public class DealsActivity extends MapActivity {
 	/**
      * Tag for logging.
      */
@@ -71,6 +79,15 @@ public class DealsActivity extends Activity {
     TextView title;
     ScrollingTextView description;
     ScrollingTextView address;
+    
+    MyLocationOverlay myLocationOverlay;
+    
+    MyOverlay positionOverlay;
+    
+    @Override
+    protected boolean isRouteDisplayed() {
+        return false;
+    }
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -107,6 +124,7 @@ public class DealsActivity extends Activity {
         deal = b.getParcelable("com.nest5.androidclient.Deal");
         
         setContentView(R.layout.company_info);
+        //setContentView(R.layout.map);
         
         LinearLayout dealList = (LinearLayout) findViewById(R.id.company_info_deals);
         TextView text = (TextView) findViewById(R.id.header_username);
@@ -118,14 +136,14 @@ public class DealsActivity extends Activity {
         
         	PromoRow promoR = new PromoRow(mContext);
         	
-        	String titleText = it.action.equals("buy") ? getString(R.string.buyPerk, it.reqQTY,it.requirement) : getString(R.string.visitPerk, it.reqQTY,it.requirement);
-        	String perkText = String.valueOf(it.perkQTY) +" "+ it.perk;
+        	String titleText = it.action.equals("Compra") ? getString(R.string.buyPerk, it.reqQTY,it.requirement) : getString(R.string.visitPerk, it.reqQTY,it.requirement);
+        	String perkText = it.perk;
         	promoR.title.setText(titleText);
         	promoR.perk.setText(perkText);
         	promoR.title.setTypeface(BebasFont);
         	promoR.perk.setTypeface(BebasFont);
         	promoR.nest5.setTypeface(VarelaFont);
-            dealList.addView(promoR);
+            dealList.addView(promoR,0);
         }
         
         title = (TextView) findViewById(R.id.company_info_title);
@@ -134,10 +152,57 @@ public class DealsActivity extends Activity {
         
         title.setText(deal.company.name);
         description.setText(deal.company.name);
-        address.setText(deal.company.name + " Calle 7AA # 30 - 244, Ed. El Vergel Apto 2104");
+        address.setText(deal.company.name +" - "+deal.company.address);
         title.setTypeface(BebasFont);
         description.setTypeface(VarelaFont);
         address.setTypeface(VarelaFont);
+        final MapView mapView = (MapView) findViewById(R.id.mapView);
+        //mapView.setBuiltInZoomControls(true);
+        //myLocationOverlay = new MyLocationOverlay(this, mapView);
+        //mapView.getOverlays().add(myLocationOverlay);
+        final MapController mapController = mapView.getController();
+        float latitude = deal.latitude;
+        float longitude = deal.longitude;
+        GeoPoint position = new GeoPoint((int)(latitude*1E6), (int)(longitude*1E6));
+        /*myLocationOverlay.runOnFirstFix(new Runnable() {
+          public void run() {
+        	 //mapView.getController().animateTo(position);
+            mapController.animateTo(myLocationOverlay.getMyLocation());
+            mapController.setCenter(myLocationOverlay.getMyLocation());
+           
+            
+             }
+        });
+        
+        myLocationOverlay.enableCompass(); 
+        myLocationOverlay.enableMyLocation();*/
+        
+        
+        positionOverlay = new MyOverlay(DealsActivity.this);
+        List<Overlay> overlays = mapView.getOverlays();
+        overlays.add(positionOverlay);
+        
+        positionOverlay.setLocation(position);
+        mapController.setCenter(position);
+        mapController.setZoom(18);
+        
+        /*
+        float latitude = deal.latitude;
+        float longitude = deal.longitude;
+        GeoPoint position = new GeoPoint((int)latitude, (int)longitude);
+        MapController mapController = mapView.getController();
+  	    mapController.animateTo(position);
+        mapController.setZoom(18);
+        mapController.setCenter(position);
+        positionOverlay = new MyOverlay();
+        List<Overlay> overlays = mapView.getOverlays();
+        overlays.add(positionOverlay);
+        positionOverlay.setLocation(DealsActivity.this,position);*/
+        
+        
+        
+        
+        
         
         
  
@@ -159,6 +224,14 @@ public class DealsActivity extends Activity {
         // Invoke the Register activity
         menu.getItem(0).setIntent(new Intent(this, AccountsActivity.class));
         return true;
+    }
+    
+    @Override
+    public void onPause()
+    {
+    	//myLocationOverlay.disableCompass(); 
+       // myLocationOverlay.disableMyLocation();
+    	super.onPause();
     }
     
     @Override

@@ -65,6 +65,15 @@
 			        android:id="@+id/company_info_deals"
 			        style="?companyPromos"
 			        >
+               
+			        <com.google.android.maps.MapView
+						android:id="@+id/mapView"
+						android:layout_width="fill_parent"
+						android:layout_height="200dip"
+						android:state_enabled="true"
+						android:clickable="false"
+						android:apiKey="0FSxQBexjihlDNr1ne8GTEhYEysJmHzXjIdXwlw"
+					/>
 			        
 			    </LinearLayout>
 			</ScrollView>

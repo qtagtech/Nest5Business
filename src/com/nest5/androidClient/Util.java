@@ -21,6 +21,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -209,6 +210,27 @@ public class Util {
         // of caching the result.
         //return !Setup.PROD_URL.equals(getBaseUrl(context));
     	return false;
+    }
+    
+    public static String displayDistance(float distance){
+    	String value;
+    	
+    	if(distance < 1)
+    	{
+    		distance *= 1000;
+    		
+    		value = new DecimalFormat("#").format(distance);
+    		//value = String.format("%.%1g%n", distance);
+    		value +=" Metros.";
+    	}
+    	else
+    	{
+    		value = new DecimalFormat("#.#").format(distance); 
+    		//value = String.format("%.%1g%n", distance);
+    		value +=" Kilómetros.";
+    	}
+    	return value;
+    		
     }
 
     /**
