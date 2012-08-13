@@ -137,6 +137,8 @@ public class Initialactivity extends Activity {
     //JSONObject userInstance;
     User userInstance = null;
     
+  
+    
     
     //Respuesta cuando obtiene sellos al leer código QR
     Answer payload;
@@ -178,6 +180,10 @@ public class Initialactivity extends Activity {
     int btnWidth;
     
     Bundle savedInstanceState;
+    
+    boolean validHome = true;
+    
+   
 	
 	
 	
@@ -298,6 +304,7 @@ public class Initialactivity extends Activity {
     @Override
     public void onResume() {
         super.onResume();
+      
         BebasFont= Typeface.createFromAsset(getAssets(), "fonts/BebasNeue.otf");
 	    VarelaFont= Typeface.createFromAsset(getAssets(), "fonts/Varela-Regular.otf");
         SharedPreferences prefs = Util.getSharedPreferences(mContext);
@@ -335,6 +342,7 @@ public class Initialactivity extends Activity {
                 	
                 }
                 
+                
                 setScreenContent();
             }
         }
@@ -347,6 +355,7 @@ public class Initialactivity extends Activity {
     @Override
 	protected void onPause() {
     	myLocation.cancelTimer();
+    	validHome = false;
 		super.onPause();
 		//locationManager.removeUpdates(locationListener);
 	}
@@ -410,203 +419,216 @@ public class Initialactivity extends Activity {
     }
     
     private void setHomeScreenContent(){
-    	setContentView(R.layout.home);
-    	
-    	/*LayoutInflater inflater = LayoutInflater.from(this);
-        scrollView = (MyHorizontalScrollView) inflater.inflate(R.layout.horz_scroll_with_list_menu, null);
-        setContentView(scrollView);
-        menu = inflater.inflate(R.layout.horz_scroll_menu, null);
-        app = inflater.inflate(R.layout.home, null);
-        ViewGroup tabBar = (ViewGroup) app.findViewById(R.id.tabBar);
-        ListView listView;
-        listView = (ListView) menu.findViewById(R.id.list);
-        ViewUtils.initListView(this, listView, "Menu ", 30, android.R.layout.simple_list_item_1);
-        btnSlide = (ImageView) tabBar.findViewById(R.id.BtnSlide);
-        btnSlide.setOnClickListener(new ClickListenerForScrolling(scrollView, menu));
-        final View[] children = new View[] { menu, app };
-        // Scroll to app (view[1]) when layout finished.
-        int scrollToViewIdx = 1;
-        scrollView.initViews(children, scrollToViewIdx, new SizeCallbackForMenu(btnSlide));*/
-        
-        final SpinCircleView circle = (SpinCircleView) findViewById(R.id.main_spin);
-    	
-    	//userName = (TextView) tabBar.findViewById(R.id.header_username);
-    	//internetConnectionStatus = (ImageView) tabBar.findViewById(R.id.header_connection_status);
-        userName = (TextView) findViewById(R.id.header_username);
-        internetConnectionStatus = (ImageView) findViewById(R.id.header_connection_status);
-    	userName.setTypeface(BebasFont);
-    	SharedPreferences prefs = Util.getSharedPreferences(mContext);
-    	if(!isNetworkAvailable())
+    	//setContentView(R.layout.home);
+    	if(!validHome)
     	{
-    		internetConnectionStatus.setImageResource(R.drawable.error);
-    		
-    		prefs.edit().putInt(Util.INTERNET_CONNECTION, Util.INTERNET_DISCONNECTED).commit();
-    		
-    	}
-    	else
-    	{
-    		prefs.edit().putInt(Util.INTERNET_CONNECTION, Util.INTERNET_CONNECTED).commit();
-    	}
-    	
-    	//traer el objeto del usuario porque cuando ya esta loggeado no esta el objeto usuario aca
-    	if(userInstance == null)
-    	{
-    		restService = new RestService(userObjectHandlerGet, this, "http://www.nest5.com/api/user/requestAndroidUser"); //Create new rest service for get
-        	
-        	restService.setCredentials("apiadmin", Setup.apiKey);
-        	//enviar id de usuario para pedir objeto
-        	
-            int uid = prefs.getInt(Util.USER_REGISTRATION_ID, 0);
-            restService.addParam("userid", String.valueOf(uid));
+    		finish();
+            Intent intent = new Intent(mContext, Initialactivity.class);
+            validHome = true;
+            startActivity(intent);
             
-            try {
+    	}
+    	else
+    	{
+    		LayoutInflater inflater = LayoutInflater.from(this);
+            scrollView = (MyHorizontalScrollView) inflater.inflate(R.layout.horz_scroll_with_list_menu, null);
+            
+            setContentView(scrollView);
+            menu = inflater.inflate(R.layout.horz_scroll_menu, null);
+            app = inflater.inflate(R.layout.home, null);
+            ViewGroup tabBar = (ViewGroup) app.findViewById(R.id.tabBar);
+            ListView listView;
+            listView = (ListView) menu.findViewById(R.id.list);
+            ViewUtils.initListView(this, listView, "Menu ", 30, android.R.layout.simple_list_item_1);
+            btnSlide = (ImageView) tabBar.findViewById(R.id.BtnSlide);
+            btnSlide.setOnClickListener(new ClickListenerForScrolling(scrollView, menu));
+            final View[] children = new View[] { menu, app };
+            // Scroll to app (view[1]) when layout finished.
+            int scrollToViewIdx = 1;
+            scrollView.initViews(children, scrollToViewIdx, new SizeCallbackForMenu(btnSlide));
+            
+            final SpinCircleView circle = (SpinCircleView) findViewById(R.id.main_spin);
+        	
+        	//userName = (TextView) tabBar.findViewById(R.id.header_username);
+        	//internetConnectionStatus = (ImageView) tabBar.findViewById(R.id.header_connection_status);
+            userName = (TextView) findViewById(R.id.header_username);
+            internetConnectionStatus = (ImageView) findViewById(R.id.header_connection_status);
+        	userName.setTypeface(BebasFont);
+        	SharedPreferences prefs = Util.getSharedPreferences(mContext);
+        	if(!isNetworkAvailable())
+        	{
+        		internetConnectionStatus.setImageResource(R.drawable.error);
+        		
+        		prefs.edit().putInt(Util.INTERNET_CONNECTION, Util.INTERNET_DISCONNECTED).commit();
+        		
+        	}
+        	else
+        	{
+        		prefs.edit().putInt(Util.INTERNET_CONNECTION, Util.INTERNET_CONNECTED).commit();
+        	}
+        	
+        	//traer el objeto del usuario porque cuando ya esta loggeado no esta el objeto usuario aca
+        	if(userInstance == null)
+        	{
+        		restService = new RestService(userObjectHandlerGet, this, "http://www.nest5.com/api/user/requestAndroidUser"); //Create new rest service for get
             	
-    			restService.execute(RestService.POST); //Executes the request with the HTTP POST verb
-    		} catch (Exception e) {
-    			e.printStackTrace();
-    		}
+            	restService.setCredentials("apiadmin", Setup.apiKey);
+            	//enviar id de usuario para pedir objeto
+            	
+                int uid = prefs.getInt(Util.USER_REGISTRATION_ID, 0);
+                restService.addParam("userid", String.valueOf(uid));
+                
+                try {
+                	
+        			restService.execute(RestService.POST); //Executes the request with the HTTP POST verb
+        		} catch (Exception e) {
+        			e.printStackTrace();
+        		}
+        	}
+        	else
+        	{
+        		userName.setText(userInstance.name);
+        	}
+        	if(prefs.getInt(Util.INTERNET_CONNECTION, 0) == 1){
+        	
+        	//userName.setText(userInstance.name);
+        	
+        	
+        	Button scan_btn = (Button) findViewById(R.id.scanButton);
+        	
+        	scan_btn.setTypeface(BebasFont);
+        	
+            
+            circle.setOnTouchListener(new OnTouchListener() {
+    			
+    			@Override
+    			public boolean onTouch(View view, MotionEvent event) {
+    				float posX = -1;
+    				float posY = -1;
+    				boolean touched = false;
+    				//circle.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.rotate_indefinitely) );
+    				// TODO Auto-generated method stub
+    				int action = event.getAction();
+    				if (event.getPointerCount() > 1)
+    				{
+    					int actionPointerId = action & MotionEvent.ACTION_POINTER_ID_MASK;
+    					int actionEvent = action & MotionEvent.ACTION_MASK;
+    					
+    					//int pointerIndex = findPointerIndex(actionPointerId);
+    					//posX = (int) event.getX(pointerIndex);
+    					//posY = (int) event.getY(pointerIndex);
+    				}else{
+    					//this.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.rotate_indefinitely) );
+    					posX = event.getX();
+    					posY = event.getY();
+    					
+    					
+    					switch (action) {
+    			        case MotionEvent.ACTION_DOWN:
+    			            touched = true;
+    			            break;
+    			        case MotionEvent.ACTION_MOVE:
+    			            touched = true;
+    			            break;
+    			        case MotionEvent.ACTION_UP:
+    			            touched = false;
+    			            break;
+    			        case MotionEvent.ACTION_CANCEL:
+    			            touched = false;
+    			            break;
+    			        case MotionEvent.ACTION_OUTSIDE:
+    			            touched = false;
+    			            break;
+    			        default:
+    			        }
+    					
+    					if(!touched)
+    					{
+    						//restoreAll();
+    					}
+    					
+    				}
+    				
+    				int pressed = circle.getClickId(posX,posY);
+    				
+    				AnimationListener animReady = new AnimationListener() {
+    					
+    					@Override
+    					public void onAnimationStart(Animation animation) {
+    						// TODO Auto-generated method stub
+    						
+    					}
+    					
+    					@Override
+    					public void onAnimationRepeat(Animation animation) {
+    						// TODO Auto-generated method stub
+    						
+    					}
+    					
+    					@Override
+    					public void onAnimationEnd(Animation animation) {
+    						setScreenContent();
+    						// TODO Auto-generated method stub
+    						
+    					}
+    				};
+    				
+    				switch(pressed)
+    				{
+    				case 1: //Toast.makeText(mContext, "0", Toast.LENGTH_SHORT).show();
+    				break;
+    				case 2: 
+    					lay = R.layout.deals;
+    					setScreenContent();
+    					break;
+    				case 3:
+    					lay = R.layout.deals;
+    					circle.rotate.setAnimationListener(animReady);
+    					break;
+    				case 4:
+    					lay = R.layout.my_deals;
+    					circle.rotate.setAnimationListener(animReady);
+    					break;
+    				case 5:
+    					lay = R.layout.my_coupons;
+    					circle.rotate.setAnimationListener(animReady);
+    					break;
+    					
+    				case 6:
+    					//Toast.makeText(mContext, "Muy Pronto", Toast.LENGTH_SHORT).show();
+    					Intent intent = new Intent(Intent.ACTION_SEND);
+    					intent.setType("text/plain");
+    					intent.putExtra(Intent.EXTRA_TEXT, "Nest, Aplicación para cupones de descuentos en Las Mejores Marcas y Tiendas en mi teléfono móvil. http://www.nest5.com");
+    					startActivity(Intent.createChooser(intent, "Compartir Usando: "));
+    					break;
+    				default: 
+    				break;
+    				}
+    				return false;
+    			}
+    		});
+        }
+        	else
+        	{
+        		//Toast.makeText(mContext, "No tienes conexión a internet.", Toast.LENGTH_LONG).show();
+        		AlertDialog.Builder builder = new AlertDialog.Builder(this);  
+                builder.setMessage("No tienes una conexión a internet activa. Habilítala haciendo click en aceptar y seleccionando luego una red.")  
+                       .setCancelable(false)  
+                       .setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {  
+                           public void onClick(DialogInterface dialog, int id) {  
+                               Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);  
+                           startActivityForResult(intent, 1);  
+                           }  
+                       })  
+                       .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {  
+                           public void onClick(DialogInterface dialog, int id) {  
+                               finish();  
+                           }  
+                       }).show();
+        	}
     	}
-    	else
-    	{
-    		userName.setText(userInstance.name);
-    	}
-    	if(prefs.getInt(Util.INTERNET_CONNECTION, 0) == 1){
-    	
-    	//userName.setText(userInstance.name);
     	
     	
-    	Button scan_btn = (Button) findViewById(R.id.scanButton);
-    	
-    	scan_btn.setTypeface(BebasFont);
-    	
-        
-        circle.setOnTouchListener(new OnTouchListener() {
-			
-			@Override
-			public boolean onTouch(View view, MotionEvent event) {
-				float posX = -1;
-				float posY = -1;
-				boolean touched = false;
-				//circle.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.rotate_indefinitely) );
-				// TODO Auto-generated method stub
-				int action = event.getAction();
-				if (event.getPointerCount() > 1)
-				{
-					int actionPointerId = action & MotionEvent.ACTION_POINTER_ID_MASK;
-					int actionEvent = action & MotionEvent.ACTION_MASK;
-					
-					//int pointerIndex = findPointerIndex(actionPointerId);
-					//posX = (int) event.getX(pointerIndex);
-					//posY = (int) event.getY(pointerIndex);
-				}else{
-					//this.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.rotate_indefinitely) );
-					posX = event.getX();
-					posY = event.getY();
-					
-					
-					switch (action) {
-			        case MotionEvent.ACTION_DOWN:
-			            touched = true;
-			            break;
-			        case MotionEvent.ACTION_MOVE:
-			            touched = true;
-			            break;
-			        case MotionEvent.ACTION_UP:
-			            touched = false;
-			            break;
-			        case MotionEvent.ACTION_CANCEL:
-			            touched = false;
-			            break;
-			        case MotionEvent.ACTION_OUTSIDE:
-			            touched = false;
-			            break;
-			        default:
-			        }
-					
-					if(!touched)
-					{
-						//restoreAll();
-					}
-					
-				}
-				
-				int pressed = circle.getClickId(posX,posY);
-				
-				AnimationListener animReady = new AnimationListener() {
-					
-					@Override
-					public void onAnimationStart(Animation animation) {
-						// TODO Auto-generated method stub
-						
-					}
-					
-					@Override
-					public void onAnimationRepeat(Animation animation) {
-						// TODO Auto-generated method stub
-						
-					}
-					
-					@Override
-					public void onAnimationEnd(Animation animation) {
-						setScreenContent();
-						// TODO Auto-generated method stub
-						
-					}
-				};
-				
-				switch(pressed)
-				{
-				case 1: //Toast.makeText(mContext, "0", Toast.LENGTH_SHORT).show();
-				break;
-				case 2: 
-					lay = R.layout.deals;
-					setScreenContent();
-					break;
-				case 3:
-					lay = R.layout.deals;
-					circle.rotate.setAnimationListener(animReady);
-					break;
-				case 4:
-					lay = R.layout.my_deals;
-					circle.rotate.setAnimationListener(animReady);
-					break;
-				case 5:
-					lay = R.layout.my_coupons;
-					circle.rotate.setAnimationListener(animReady);
-					break;
-					
-				case 6:
-					//Toast.makeText(mContext, "Muy Pronto", Toast.LENGTH_SHORT).show();
-					Intent intent = new Intent(Intent.ACTION_SEND);
-					intent.setType("text/plain");
-					intent.putExtra(Intent.EXTRA_TEXT, "Nest, Aplicación para cupones de descuentos en Las Mejores Marcas y Tiendas en mi teléfono móvil. http://www.nest5.com");
-					startActivity(Intent.createChooser(intent, "Compartir Usando: "));
-					break;
-				default: 
-				break;
-				}
-				return false;
-			}
-		});
-    }
-    	else
-    	{
-    		//Toast.makeText(mContext, "No tienes conexión a internet.", Toast.LENGTH_LONG).show();
-    		AlertDialog.Builder builder = new AlertDialog.Builder(this);  
-            builder.setMessage("No tienes una conexión a internet activa. Habilítala haciendo click en aceptar y seleccionando luego una red.")  
-                   .setCancelable(false)  
-                   .setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {  
-                       public void onClick(DialogInterface dialog, int id) {  
-                           Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);  
-                       startActivityForResult(intent, 1);  
-                       }  
-                   })  
-                   .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {  
-                       public void onClick(DialogInterface dialog, int id) {  
-                           finish();  
-                       }  
-                   }).show();
-    	}
     	
     }
     
@@ -1179,27 +1201,41 @@ public class Initialactivity extends Activity {
     
     @Override
     public void onBackPressed() {
-    	//Log.i(TAG, String.valueOf(R.layout.deals)+"   "+String.valueOf(lay));
+    	boolean exit = false;
+    	validHome = false;
+    	/*Log.i(TAG,"Layout: "+String.valueOf(lay));
+    	Log.i(TAG,"stamp: "+String.valueOf(R.layout.stamp_card));
+    	Log.i(TAG,"home: "+String.valueOf(R.layout.home));
+    	Log.i(TAG,"mydeals: "+String.valueOf(R.layout.my_deals));
+    	Log.i(TAG,"deals: "+String.valueOf(R.layout.deals));
+    	Log.i(TAG,"coupon: "+String.valueOf(R.layout.coupon));
+    	//Log.i(TAG, String.valueOf(R.layout.deals)+"   "+String.valueOf(lay));*/
       if(lay == R.layout.deals ){
     	  lay = R.layout.home;
-    	  
+    	  Log.i(TAG,"1");
       }
       else{
+    	  Log.i(TAG,"2");
     	  if(lay== R.layout.my_deals)
     	  {
+    		  Log.i(TAG,"3");
     		  lay = R.layout.home;
     		  
     	  }
     	  else
     	  {
+    		  Log.i(TAG,"4");
     		  if(lay == R.layout.stamp_card)
         	  {
+    			  Log.i(TAG,"5");
         		  if(!fromMyDeals)
         		  {
+        			  Log.i(TAG,"6");
         			  lay = R.layout.home;
         		  }
         		  else
         		  {
+        			  Log.i(TAG,"7");
         			  lay = R.layout.my_deals;
         			  fromMyDeals = false;
         		  }
@@ -1208,18 +1244,25 @@ public class Initialactivity extends Activity {
         	  }
         	  else
         	  {
+        		  Log.i(TAG,"8");
         		  if(lay == R.layout.my_coupons)
         		  {
+        			  Log.i(TAG,"9");
         			  lay = R.layout.home;
         		  }
         		  else{
+        			  Log.i(TAG,"10");
         			  if(lay == R.layout.coupon)
         			  {
+        				  Log.i(TAG,"11");
         				lay = R.layout.my_coupons;  
         			  }
         			  else
         			  {
+        				  Log.i(TAG,"12");
+        				  exit = true;
         				  finish();
+        				  
         			  }
         			  
         		  }
@@ -1233,7 +1276,8 @@ public class Initialactivity extends Activity {
     	  
     	  
       }
-      setScreenContent();
+      if(!exit)
+    	  setScreenContent();
        
     }
     
@@ -1510,7 +1554,12 @@ public class Initialactivity extends Activity {
 	    	else
 	    	{
 	    		dialogUpdateExtra.hide();
-	    		Toast.makeText(mContext, "Sin Respuesta.", Toast.LENGTH_LONG).show();
+	    		//Toast.makeText(mContext, "Sin Respuesta.", Toast.LENGTH_LONG).show();
+	    		
+	    		int menuWidth = menu.getMeasuredWidth();
+	    		scrollView.smoothScrollTo(menuWidth, 0);
+	    		
+	    		
 	    	}
     	}
     	
@@ -1589,7 +1638,9 @@ public class Initialactivity extends Activity {
 	    	else
 	    	{
 	    		dialogUpdateExtra.hide();
-	    		Toast.makeText(mContext, "Sin Respuesta.", Toast.LENGTH_LONG).show();
+	    		//Toast.makeText(mContext, "Sin Respuesta.", Toast.LENGTH_LONG).show();
+	    		int menuWidth = menu.getMeasuredWidth();
+	    		scrollView.smoothScrollTo(menuWidth, 0);
 	    	}
     	}
     	
@@ -1612,6 +1663,7 @@ public class Initialactivity extends Activity {
    					dialogUpdateExtra.hide();
    					lay = R.layout.home;
    					Toast.makeText(mContext, "No tienes tarjetas de sellos activas", Toast.LENGTH_LONG).show();
+   					validHome = false;
    					setScreenContent();
    				}
    				else
@@ -1708,6 +1760,7 @@ public class Initialactivity extends Activity {
    					dialogUpdateExtra.hide();
    					lay = R.layout.home;
    					Toast.makeText(mContext, "No tienes cupones activos", Toast.LENGTH_LONG).show();
+   					validHome = false;
    					setScreenContent();
    				}
    				else
@@ -1767,7 +1820,7 @@ public class Initialactivity extends Activity {
       * @param location  The new Location that you want to evaluate
       * @param currentBestLocation  The current Location fix, to which you want to compare the new one
       */
-    protected boolean isBetterLocation(Location location, Location currentBestLocation) {
+    /*protected boolean isBetterLocation(Location location, Location currentBestLocation) {
         if (currentBestLocation == null) {
             // A new location is always better than no location
             return true;
@@ -1807,15 +1860,15 @@ public class Initialactivity extends Activity {
             return true;
         }
         return false;
-    }
+    }*/
 
     /** Checks whether two providers are the same */
-    private boolean isSameProvider(String provider1, String provider2) {
+    /*private boolean isSameProvider(String provider1, String provider2) {
         if (provider1 == null) {
           return provider2 == null;
         }
         return provider1.equals(provider2);
-    }
+    }*/
     
     /*LocationListener locationListener = new LocationListener() {
         public void onLocationChanged(Location _location) {
@@ -1861,10 +1914,10 @@ public class Initialactivity extends Activity {
 
           @Override
           public void onClick(View v) {
-              Context context = menu.getContext();
-              String msg = "Slide " + new Date();
-              Toast.makeText(context, msg, 1000).show();
-              System.out.println(msg);
+              //Context context = menu.getContext();
+              //String msg = "Slide " + new Date();
+              //Toast.makeText(context, msg, 1000).show();
+              //System.out.println(msg);
 
               int menuWidth = menu.getMeasuredWidth();
 
