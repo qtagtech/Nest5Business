@@ -1281,6 +1281,8 @@ public class Initialactivity extends Activity {
        
     }
     
+   
+    
     public void fbLogin(View v){
     	Intent inten = new Intent(mContext,FacebookActivity.class);
     	//inten.putExtra("com.nest5.androidClient.layout", R.layout.deals);
