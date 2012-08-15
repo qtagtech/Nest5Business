@@ -8,6 +8,11 @@
             android:layout_height="wrap_content"
             android:src="@drawable/banner_menu"
             android:id="@+id/mennu_banner"/>
+        <ImageView 
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/separator"
+            android:id="@+id/mennu_separator"/>
         
     <ListView android:id="@+id/list" android:layout_width="match_parent" android:layout_height="wrap_content"
         android:background="#80ff0000" android:cacheColorHint="#ffff0000" android:scrollbars="none">
