@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/add_ingredient"
+    android:layout_width="700dip" 
+    android:layout_height="wrap_content"
+    android:layout_gravity="center" 
+    android:orientation="vertical"
+      >
+      <ScrollView 
+          android:id="@+id/add_ingredient_scroll"
+          android:layout_width="fill_parent"
+          android:layout_height="500dip"
+          android:padding="20dip"
+          >
+          <LinearLayout 
+              android:id="@+id/add_ingredient_inner"
+			    android:layout_width="fill_parent"
+			    android:layout_height="wrap_content"
+			    
+			    android:orientation="vertical">
+			    
+			    <EditText 
+			        android:id="@+id/ingredient_name_edit"
+			        android:layout_width="fill_parent"
+			        android:layout_height="50dip"
+			        android:inputType="text"
+			        android:hint="Nombre"
+			        android:imeOptions="actionNext"
+			        
+			        />
+			    <TextView 
+			        android:id="@+id/ingredient_category_label"
+			        android:text="Categoría"
+			        android:layout_width="fill_parent"
+			        android:layout_height="50dip"
+			        android:layout_marginTop="20dip"
+			        android:textSize="20dp"
+			        android:textStyle="bold"
+			        android:textColor="#007FFF"
+			        
+			        />
+			    <Spinner
+				    android:id="@+id/ingredient_category_spinner"
+				    android:layout_width="fill_parent"
+				    android:layout_height="wrap_content" />
+			    
+			    <TextView 
+			        android:id="@+id/ingredient_properties_label"
+			        android:text="Propiedades: "
+			        android:layout_width="fill_parent"
+			        android:layout_height="50dip"
+			        android:layout_marginTop="30dip"
+			        android:textSize="24dp"
+			        android:textStyle="bold"
+			        android:textColor="#007FFF"
+			        
+			        />
+			    
+			    <TextView 
+			        android:id="@+id/ingredient_unit_label"
+			        android:text="Unidad de Medida"
+			        android:layout_width="fill_parent"
+			        android:layout_height="50dip"
+			        android:layout_marginTop="20dip"
+			        android:textSize="20dp"
+			        android:textStyle="bold"
+			        android:textColor="#007FFF"
+			        
+			        />
+			    <Spinner
+				    android:id="@+id/ingredient_unit_spinner"
+				    android:layout_width="fill_parent"
+				    android:layout_height="wrap_content" />
+			    
+			    <LinearLayout 
+			        android:orientation="horizontal"
+			        android:layout_width="fill_parent"
+			        android:layout_height="wrap_content"
+			        android:padding="10dip"
+			        android:weightSum="1.0">
+				    <EditText 
+				        android:id="@+id/ingredient_cost_edit"
+				        android:layout_width="0dip"
+				        android:layout_height="50dip"
+				        android:inputType="number"
+				        android:hint="Costo de Adquisición"
+				        android:imeOptions="actionNext"
+				        android:layout_weight=".5"
+				        
+				        />
+				    <EditText 
+				        android:id="@+id/ingredient_cost_qty"
+				        android:layout_width="0dip"
+				        android:layout_height="50dip"
+				        android:inputType="number"
+				        android:hint="Cantidad"
+				        android:imeOptions="actionNext"
+				        android:layout_weight=".25"
+				        
+				        />
+				    <Spinner
+				    android:id="@+id/ingredient_cost_unit_spinner"
+				    android:layout_width="0dip"
+				    android:layout_height="wrap_content"
+				    android:layout_weight="0.25" />
+			    </LinearLayout>
+			    <LinearLayout 
+			        android:orientation="horizontal"
+			        android:layout_width="fill_parent"
+			        android:layout_height="wrap_content"
+			        android:padding="10dip"
+			        android:weightSum="1.0">
+				    <EditText 
+				        android:id="@+id/ingredient_price_edit"
+				        android:layout_width="0dip"
+				        android:layout_height="50dip"
+				        android:inputType="number"
+				        android:hint="Precio de Venta (TODO en 0 si NO se vende por separado.)"
+				        android:imeOptions="actionNext"
+				        android:layout_weight=".5"
+				      
+				        />
+				    <EditText 
+					        android:id="@+id/ingredient_price_qty"
+					        android:layout_width="0dip"
+					        android:layout_height="50dip"
+					        android:inputType="number"
+					        android:hint="Cantidad de Porción"
+					        android:imeOptions="actionNext"
+					        android:layout_weight=".25"
+					        
+					        />
+					    <Spinner
+					    android:id="@+id/ingredient_price_unit_spinner"
+					    android:layout_width="0dp"
+					    android:layout_height="wrap_content"
+					    android:layout_weight="0.25" />
+				    </LinearLayout>
+			    
+			    <TextView 
+			        android:id="@+id/ingredient_tax_label"
+			        android:text="Impuesto"
+			        android:layout_width="fill_parent"
+			        android:layout_height="50dip"
+			        android:layout_marginTop="20dip"
+			        android:textSize="20dp"
+			        android:textStyle="bold"
+			        android:textColor="#007FFF"
+			        
+			        />
+			    
+			    <TextView 
+			        android:id="@+id/ingredient_tax_label"
+			        android:text="Impuesto"
+			        android:layout_width="fill_parent"
+			        android:layout_height="50dip"
+			        android:layout_marginTop="20dip"
+			        
+			        />
+			    <CheckBox 
+			        android:id="@+id/ingredient_tax_included"
+			        android:checked="true"
+			        android:text="Marca si el Precio Indicado ya incluye el siguiente impuesto."
+			        android:height="20dip"
+			        android:layout_width="fill_parent"
+			        android:layout_height="wrap_content"
+			        android:gravity="center_vertical|center_horizontal"/>
+			    
+			    <Spinner
+				    android:id="@+id/ingredient_tax_spinner"
+				    android:layout_width="fill_parent"
+				    android:layout_height="wrap_content" />
+			    
+			    
+			    <LinearLayout 
+			        android:orientation="horizontal"
+			        android:layout_width="fill_parent"
+			        android:layout_height="wrap_content"
+			        android:gravity="center_vertical|center_horizontal"
+			        android:padding="10dip">
+			        
+			         <Button 
+				        android:id="@+id/ingredient_add_button"
+				        android:layout_width="200dip"
+				        android:layout_gravity="center_horizontal|center_vertical"
+				        android:background="@drawable/blue_button" 
+			        	style="@style/ButtonText"				       
+				        android:text="Guardar"/>
+				    <Button 
+				        android:id="@+id/ingredient_cancel_button"
+				        android:layout_width="200dip"
+				        android:layout_gravity="center_horizontal|center_vertical"
+				        android:background="@drawable/red_button" 
+			        	style="@style/ButtonText"
+				        android:text="Cancelar"/>
+			        
+			    </LinearLayout>
+			   
+              
+          </LinearLayout>
+      </ScrollView>
+	
+    
+</LinearLayout>
+
+
+
+
+
+

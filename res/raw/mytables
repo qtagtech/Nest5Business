@@ -1,0 +1,128 @@
+CREATE TABLE ingredient_category (
+_id			    integer PRIMARY KEY autoincrement NOT NULL,
+name            text not null
+);
+
+CREATE TABLE product_category (
+_id			    integer PRIMARY KEY autoincrement NOT NULL,
+name            text not null
+);
+
+CREATE TABLE ingredient (
+_id			    integer PRIMARY KEY autoincrement NOT NULL,
+name            text not null,
+category_id     integer,
+tax_id          real,
+unit_id		    integer,
+cost_per_unit   real,
+price_per_unit    real,
+price_measure    real,
+quantity         real,
+date             real,
+FOREIGN KEY (category_id) REFERENCES ingredient_category (_id),
+FOREIGN KEY (tax_id) REFERENCES tax (_id),
+FOREIGN KEY (unit_id) REFERENCES measurement_unit (_id)
+);
+
+CREATE TABLE product (
+_id			    integer PRIMARY KEY autoincrement NOT NULL,
+name            text not null,
+category_id     integer,
+automatic_cost  integer,
+cost 			real,
+price			real,
+tax_id				real,
+FOREIGN KEY (category_id) REFERENCES product_category (_id),
+FOREIGN KEY (tax_id) REFERENCES tax (_id)
+);
+
+CREATE TABLE combo (
+_id			    integer PRIMARY KEY autoincrement NOT NULL,
+name            text not null,
+automatic_cost  integer,
+cost 			real,
+price			real,
+tax_id				real,
+FOREIGN KEY (tax_id) REFERENCES tax (_id)
+);
+
+CREATE TABLE productingredient (
+_id			    integer PRIMARY KEY autoincrement NOT NULL,
+product_id		integer,
+ingredient_id	integer,
+qty             real,
+FOREIGN KEY (product_id) REFERENCES product (_id),
+FOREIGN KEY (ingredient_id) REFERENCES ingredient (_id)
+);
+
+CREATE TABLE comboingredient (
+_id			    integer PRIMARY KEY autoincrement NOT NULL,
+combo_id		integer,
+ingredient_id	integer,
+qty             real,
+FOREIGN KEY (combo_id) REFERENCES combo (_id),
+FOREIGN KEY (ingredient_id) REFERENCES ingredient (_id)
+);
+
+CREATE TABLE comboproduct (
+_id			    integer PRIMARY KEY autoincrement NOT NULL,
+combo_id		integer,
+product_id	integer,
+qty             real,
+FOREIGN KEY (combo_id) REFERENCES combo (_id),
+FOREIGN KEY (product_id) REFERENCES product (_id)
+);
+
+CREATE TABLE tax (
+_id			    integer PRIMARY KEY autoincrement NOT NULL,
+name            text not null,
+percentage     real
+);
+
+CREATE TABLE measurement_unit (
+_id			    integer PRIMARY KEY autoincrement NOT NULL,
+name            text not null,
+initials        text not null,
+multipliers     text
+);
+
+CREATE TABLE sale (
+_id			    integer PRIMARY KEY autoincrement NOT NULL,
+date            integer not null,
+received        real,
+payment_method  text
+);
+
+CREATE TABLE sale_item (
+_id			    integer PRIMARY KEY autoincrement NOT NULL,
+sale_id 		integer,
+sale_item_id	integer,
+sale_item_qty   real,
+sale_item_type  integer,
+FOREIGN KEY (sale_id) REFERENCES sale (_id)
+);
+
+INSERT INTO ingredient_category SELECT _id, name FROM ingredient_category_bu;
+
+INSERT INTO product_category SELECT _id, name FROM product_category_bu;
+
+INSERT INTO ingredient SELECT _id, name, category_id, tax_id, unit_id, cost_per_unit, price_per_unit, price_measure, quantity, date FROM ingredient_bu;
+
+INSERT INTO product SELECT _id, name, category_id, automatic_cost, cost, price, tax_id FROM product_bu;
+
+INSERT INTO combo SELECT _id, name, automatic_cost, cost, price, tax_id FROM combo_bu;
+
+INSERT INTO productingredient SELECT _id, product_id, ingredient_id, qty FROM productingredient_bu;
+
+INSERT INTO comboingredient SELECT _id, combo_id, ingredient_id, qty FROM comboingredient_bu;
+
+INSERT INTO comboproduct SELECT _id, combo_id, product_id, qty FROM comboproduct_bu;
+
+INSERT INTO tax SELECT _id, name, percentage FROM tax_bu;
+
+INSERT INTO measurement_unit SELECT _id, name, initials, multipliers FROM measurement_unit_bu;
+
+INSERT INTO sale SELECT _id, 0, received, payment_method FROM sale_bu;
+
+INSERT INTO sale_item SELECT _id, sale_id, sale_item_id, sale_item_qty, sale_item_type FROM sale_item_bu;
+

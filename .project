@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>Nest5Android</name>
+	<name>Nest5Business</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -30,4 +30,11 @@
 		<nature>com.android.ide.eclipse.adt.AndroidNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>bluetoothprinter</name>
+			<type>2</type>
+			<location>C:/Users/Juanda/Desktop/Bluetooth Printer/SDK for Android/Bluetooth printer Android SDK/bluetoothprinter</location>
+		</link>
+	</linkedResources>
 </projectDescription>

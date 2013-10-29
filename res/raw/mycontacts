@@ -1,0 +1,110 @@
+CREATE TABLE AddressLocation (
+AddressId           integer PRIMARY KEY NOT NULL,
+Latitude            numeric(9,6),
+Longitude           numeric(10,6),
+StreetName          char(50),
+StreetNumber        char(50),
+AddressType         char(100),
+CountryAndRegion    char(50),
+PlaceName           char(50),
+City                char(50),
+PostalCode          char(15),
+IsPrimary           boolean,
+TransactionId       integer,
+TransactionDate     timestamp,
+ModifiedDate        timestamp
+);
+
+CREATE TABLE EmailAddress (
+EmailAddressId     integer PRIMARY KEY NOT NULL,
+AddressType        char(100),
+EmailAddress       char(50) NOT NULL,
+IsPrimary          boolean,
+TransactionId      integer,
+TransactionDate    timestamp,
+ModifiedDate       timestamp
+);
+
+CREATE TABLE PhoneNumber (
+PhoneNumberId      integer PRIMARY KEY NOT NULL,
+PhoneType          char(50),
+PhoneNumber        char(255),
+IsPrimary          integer,
+TransactionId      integer,
+TransactionDate    timestamp,
+ModifiedDate       timestamp
+);
+
+CREATE TABLE Person (
+PersonId            integer PRIMARY KEY NOT NULL,
+Description         text,
+Name                char(100),
+TransactionId       integer,
+TransactionDate     timestamp,
+ModifiedDate        timestamp
+);
+
+CREATE TABLE PersonDetail (
+PersonId            integer PRIMARY KEY NOT NULL,
+DateOfBirth         char(10),
+Interests           text,
+GoalText            text,
+Ethnicity           char(6),
+Nationality         char(6),
+Gender              char(6),
+Height              numeric(4,1),
+Weight              numeric(4,1),
+TransactionId       integer,
+TransactionDate     timestamp,
+ModifiedDate        timestamp,
+/* Foreign keys */
+FOREIGN KEY (PersonId)
+REFERENCES Person(PersonId)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+);
+
+CREATE TABLE PersonAddressAssociation (
+PersonId     integer NOT NULL,
+AddressId    integer NOT NULL,
+PRIMARY KEY (PersonId, AddressId),
+/* Foreign keys */
+FOREIGN KEY (PersonId)
+REFERENCES Person(PersonId)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION,
+FOREIGN KEY (AddressId)
+REFERENCES AddressLocation(AddressId)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+);
+
+CREATE TABLE PersonEmailAssociation (
+PersonId           integer NOT NULL,
+EmailAddressId     integer NOT NULL,
+PRIMARY KEY (PersonId, EmailAddressId),
+/* Foreign keys */
+FOREIGN KEY (PersonId)
+REFERENCES Person(PersonId)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION,
+FOREIGN KEY (EmailAddressId)
+REFERENCES EmailAddress(EmailAddressId)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+);
+
+CREATE TABLE PersonPhoneAssociation (
+PersonId         integer NOT NULL,
+PhoneNumberId    integer NOT NULL,
+PRIMARY KEY (PersonId, PhoneNumberId),
+/* Foreign keys */
+FOREIGN KEY (PersonId)
+REFERENCES Person(PersonId)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION,
+FOREIGN KEY (PhoneNumberId)
+REFERENCES PhoneNumber(PhoneNumberId)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+);

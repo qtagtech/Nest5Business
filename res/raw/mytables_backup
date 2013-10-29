@@ -1,0 +1,128 @@
+CREATE TEMPORARY TABLE ingredient_category_bu (
+_id			    integer PRIMARY KEY autoincrement NOT NULL,
+name            text not null
+);
+
+CREATE TEMPORARY TABLE product_category_bu (
+_id			    integer PRIMARY KEY autoincrement NOT NULL,
+name            text not null
+);
+
+CREATE TEMPORARY TABLE ingredient_bu (
+_id			    integer PRIMARY KEY autoincrement NOT NULL,
+name            text not null,
+category_id     integer,
+tax_id          real,
+unit_id         integer,
+cost_per_unit   real,
+price_per_unit    real,
+price_measure     real,
+quantity          real,
+date              real,
+FOREIGN KEY (category_id) REFERENCES ingredient_category_bu (_id),
+FOREIGN KEY (tax_id) REFERENCES tax_bu (_id),
+FOREIGN KEY (unit_id) REFERENCES measurement_unit_bu (_id)
+);
+
+CREATE TEMPORARY TABLE product_bu (
+_id			    integer PRIMARY KEY autoincrement NOT NULL,
+name            text not null,
+category_id     integer,
+automatic_cost  integer,
+cost 			real,
+price			real,
+tax_id				real,
+FOREIGN KEY (category_id) REFERENCES product_category_bu (_id),
+FOREIGN KEY (tax_id) REFERENCES tax_bu (_id)
+);
+
+CREATE TEMPORARY TABLE combo_bu (
+_id			    integer PRIMARY KEY autoincrement NOT NULL,
+name            text not null,
+automatic_cost  integer,
+cost 			real,
+price			real,
+tax_id				real,
+FOREIGN KEY (tax_id) REFERENCES tax_bu (_id)
+);
+
+CREATE TEMPORARY TABLE productingredient_bu (
+_id			    integer PRIMARY KEY autoincrement NOT NULL,
+product_id		integer,
+ingredient_id	integer,
+qty             real,
+FOREIGN KEY (product_id) REFERENCES product_bu (_id),
+FOREIGN KEY (ingredient_id) REFERENCES ingredient_bu (_id)
+);
+
+CREATE TEMPORARY TABLE comboingredient_bu (
+_id			    integer PRIMARY KEY autoincrement NOT NULL,
+combo_id		integer,
+ingredient_id	integer,
+qty             real,
+FOREIGN KEY (combo_id) REFERENCES combo_bu (_id),
+FOREIGN KEY (ingredient_id) REFERENCES ingredient_bu (_id)
+);
+
+CREATE TEMPORARY TABLE comboproduct_bu (
+_id			    integer PRIMARY KEY autoincrement NOT NULL,
+combo_id		integer,
+product_id	integer,
+qty             real,
+FOREIGN KEY (combo_id) REFERENCES combo_bu (_id),
+FOREIGN KEY (product_id) REFERENCES product_bu (_id)
+);
+
+CREATE TEMPORARY TABLE tax_bu (
+_id			    integer PRIMARY KEY autoincrement NOT NULL,
+name            text not null,
+percentage     real
+);
+
+CREATE TEMPORARY TABLE measurement_unit_bu (
+_id			    integer PRIMARY KEY autoincrement NOT NULL,
+name            text not null,
+initials        text not null,
+multipliers     text
+);
+
+CREATE TEMPORARY TABLE sale_bu (
+_id			    integer PRIMARY KEY autoincrement NOT NULL,
+date            integer not null,
+received        real,
+payment_method  text
+);
+
+CREATE TEMPORARY TABLE sale_item_bu (
+_id			    integer PRIMARY KEY autoincrement NOT NULL,
+sale_id 		integer,
+sale_item_id	integer,
+sale_item_qty   real,
+sale_item_type  integer,
+FOREIGN KEY (sale_id) REFERENCES sale_bu (_id)
+);
+
+INSERT INTO ingredient_category_bu SELECT _id, name FROM ingredient_category;
+
+INSERT INTO product_category_bu SELECT _id, name FROM product_category;
+
+INSERT INTO ingredient_bu SELECT _id, name, category_id, tax_id, unit_id, cost_per_unit, price_per_unit, price_measure, quantity, date FROM ingredient;
+
+INSERT INTO product_bu SELECT _id, name, category_id, automatic_cost, cost, price, tax_id FROM product;
+
+INSERT INTO combo_bu SELECT _id, name, automatic_cost, cost, price, tax_id FROM combo;
+
+INSERT INTO productingredient_bu SELECT _id, product_id, ingredient_id, qty FROM productingredient;
+
+INSERT INTO comboingredient_bu SELECT _id, combo_id, ingredient_id, qty FROM comboingredient;
+
+INSERT INTO comboproduct_bu SELECT _id, combo_id, product_id, qty FROM comboproduct;
+
+INSERT INTO tax_bu SELECT _id, name, percentage FROM tax;
+
+INSERT INTO measurement_unit_bu SELECT _id, name, initials, multipliers FROM measurement_unit;
+
+INSERT INTO sale_bu SELECT _id, 0, received, payment_method FROM sale;
+
+INSERT INTO sale_item_bu SELECT _id, sale_id, sale_item_id, sale_item_qty, sale_item_type FROM sale_item;
+

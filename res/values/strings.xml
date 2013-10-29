@@ -9,7 +9,7 @@
     <string name="add_account">Agregar Cuenta...</string>
 
     <!--  Name of the application in the launcher [CHAR LIMIT=NONE] -->
-    <string name="app_name">Nest5</string>
+    <string name="app_name">Nest5 Business</string>
 
     <!-- Dialog title text [CHAR LIMIT=NONE] -->
     <string name="attention">Atención</string>

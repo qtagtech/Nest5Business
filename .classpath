@@ -3,11 +3,10 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
-	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
-	<classpathentry kind="lib" path="libs/c2dm-sources.jar"/>
-	<classpathentry kind="lib" path="libs/c2dm.jar"/>
-	<classpathentry kind="lib" path="libs/gson-2.1-javadoc.jar"/>
-	<classpathentry kind="lib" path="libs/gson-2.1-sources.jar"/>
-	<classpathentry kind="lib" path="libs/gson-2.1.jar"/>
+	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
+	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
+	<classpathentry kind="lib" path="C:/Users/Juandavid/Downloads/SDK/ACR31_LIB_Android_1005_A_Beta/ACR31_LIB_Android_1005_A_Beta/ACR31Demo/libs/acr31-1.0.0preview5.jar"/>
+	<classpathentry kind="lib" path="libs/aws-android-sdk-1.7.0-core.jar"/>
+	<classpathentry kind="lib" path="libs/aws-android-sdk-1.7.0-s3.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
