@@ -31,22 +31,11 @@ import android.widget.Toast;
  * well.
  */
 public class LoginActivity extends Activity {
-	/**
-	 * A dummy authentication store containing known user names and passwords.
-	 * TODO: remove after connecting to a real authentication system.
-	 */
-	private static final String[] DUMMY_CREDENTIALS = new String[] {
-			"foo@example.com:hello", "bar@example.com:world" };
+	
 
-	/**
-	 * The default email to populate the email field with.
-	 */
-	public static final String EXTRA_EMAIL = "com.example.android.authenticatordemo.extra.EMAIL";
 
-	/**
-	 * Keep track of the login task to ensure we can cancel it if requested.
-	 */
-	private UserLoginTask mAuthTask = null;
+
+
 
 	// Values for email and password at the time of the login attempt.
 	private String mEmail;
@@ -69,7 +58,7 @@ public class LoginActivity extends Activity {
 		setContentView(R.layout.activity_login);
 
 		// Set up the login form.
-		mEmail = getIntent().getStringExtra(EXTRA_EMAIL);
+		
 		mEmailView = (EditText) findViewById(R.id.email);
 		mEmailView.setText(mEmail);
 
@@ -98,7 +87,7 @@ public class LoginActivity extends Activity {
 						attemptLogin();
 					}
 				});
-		mContext = LoginActivity.this;
+		mContext = this;
 		 prefs = Util.getSharedPreferences(mContext);
 	}
 	
@@ -125,9 +114,7 @@ public class LoginActivity extends Activity {
 	 * errors are presented and no actual login attempt is made.
 	 */
 	public void attemptLogin() {
-		if (mAuthTask != null) {
-			return;
-		}
+		
 
 		// Reset errors.
 		mEmailView.setError(null);
@@ -175,13 +162,14 @@ public class LoginActivity extends Activity {
 
 			Log.i("MISPRUEBAS","EMPEZANDO REQUEST");
 			 restService = new RestService(sendCredentialsHandler, mContext,
-			 "http://192.168.5.126:5656/example/api/service");
+			 Setup.PROD_URL+"/company/checkLogin");
 			 restService.addParam("email", mEmail);
 			 restService.addParam("password", mPassword);		 
 			 restService.setCredentials("apiadmin", Setup.apiKey);
 			 try {
 			 restService.execute(RestService.POST);} catch (Exception e) {
-			 e.printStackTrace(); }
+			 e.printStackTrace(); 
+			 Log.i("MISPRUEBAS","Error empezando request");}
 			 
 		}
 	}
@@ -227,54 +215,7 @@ public class LoginActivity extends Activity {
 		}
 	}
 
-	/**
-	 * Represents an asynchronous login/registration task used to authenticate
-	 * the user.
-	 */
-	public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-		@Override
-		protected Boolean doInBackground(Void... params) {
-			// TODO: attempt authentication against a network service.
-
-			try {
-				// Simulate network access.
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {
-				return false;
-			}
-
-			for (String credential : DUMMY_CREDENTIALS) {
-				String[] pieces = credential.split(":");
-				if (pieces[0].equals(mEmail)) {
-					// Account exists, return true if the password matches.
-					return pieces[1].equals(mPassword);
-				}
-			}
-
-			// TODO: register the new account here.
-			return true;
-		}
-
-		@Override
-		protected void onPostExecute(final Boolean success) {
-			mAuthTask = null;
-			showProgress(false);
-
-			if (success) {
-				finish();
-			} else {
-				mPasswordView
-						.setError(getString(R.string.error_incorrect_password));
-				mPasswordView.requestFocus();
-			}
-		}
-
-		@Override
-		protected void onCancelled() {
-			mAuthTask = null;
-			showProgress(false);
-		}
-	}
+	
 	
 	private final Handler sendCredentialsHandler = new Handler() {
 		@Override
@@ -282,9 +223,9 @@ public class LoginActivity extends Activity {
 			showProgress(false);
 			
 			//temporal abre actividad loggeado
-			prefs.edit().putBoolean(Setup.LOGGED_IN, true).putString(Setup.COMPANY_ID, "12212").putString(Setup.COMPANY_NAME, "Nest5 Test Company").commit();
+		/*	prefs.edit().putBoolean(Setup.LOGGED_IN, true).putString(Setup.COMPANY_ID, "12212").putString(Setup.COMPANY_NAME, "Nest5 Test Company").commit();
 			Intent intenter= new Intent(mContext, Initialactivity.class);
-			startActivity(intenter);
+			startActivity(intenter);*/
 			JSONObject respuesta = null;
 				Log.i("MISPRUEBAS","LLEGUE");
 			try {
@@ -292,6 +233,7 @@ public class LoginActivity extends Activity {
 			} catch (Exception e) {
 				Log.i("MISPRUEBAS","ERROR JSON");
 				e.printStackTrace();
+				mEmailView.setError(getString(R.string.login_error));
 			}
 
 			if (respuesta != null) {
@@ -302,7 +244,7 @@ public class LoginActivity extends Activity {
 				try {
 					status = respuesta.getInt("status");
 					compid = respuesta.getString("id");
-					compname = respuesta.getString("company");
+					compname = respuesta.getString("name");
 
 				} catch (Exception e) {
 					Log.i("MISPRUEBAS","ERROR COGER DATOS");
@@ -318,12 +260,16 @@ public class LoginActivity extends Activity {
 					startActivity(inten);
 				} else {
 					mEmailView.setError(getString(R.string.login_error));
+					
 					//Abrir Nueva Activity porque esta registrado
-					prefs.edit().putBoolean(Setup.LOGGED_IN, false).putString(Setup.COMPANY_ID, "0").putString(Setup.COMPANY_NAME, "N/A").commit();
+					/*prefs.edit().putBoolean(Setup.LOGGED_IN, false).putString(Setup.COMPANY_ID, "0").putString(Setup.COMPANY_NAME, "N/A").commit();
 					Intent inten = new Intent(mContext, Initialactivity.class);
-					startActivity(inten);
+					startActivity(inten);*/
 				}
 
+			}
+			else{
+				mEmailView.setError(getString(R.string.login_error));
 			}
 
 		}

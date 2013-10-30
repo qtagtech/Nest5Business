@@ -121,8 +121,8 @@ public class Setup {
     /**
      * The URL of the production service.
      */
-    public static final String PROD_URL = "http://www.nest5.com";
-    
+   // public static final String PROD_URL = "http://www.nest5.com";
+    public static final String PROD_URL = "http://192.168.5.126:8080";
     public static final String STAGE_URL = "http://nest5stage.herokuapp.com";
     
     public static final String DEV_URL = "http://nest5testserver.herokuapp.com";

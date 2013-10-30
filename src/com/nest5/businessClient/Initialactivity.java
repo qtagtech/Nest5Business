@@ -2652,6 +2652,11 @@ public class Initialactivity extends FragmentActivity implements
 	private void backUpDb(){
 		File file = DbExportImport.exportDb();
 		UploadFileToS3 uploadTask = new UploadFileToS3();
+		mResetProgressDialog = new ProgressDialog(mContext);
+		mResetProgressDialog.setMessage("Protegiendo Base de Datos");
+		mResetProgressDialog.setCancelable(false);
+		mResetProgressDialog.setIndeterminate(true);
+		mResetProgressDialog.show();
 		uploadTask.execute(file);
 		
 	}
@@ -2661,9 +2666,9 @@ public class Initialactivity extends FragmentActivity implements
 	 * Represents an asynchronous login/registration task used to authenticate
 	 * the user.
 	 */
-	public class UploadFileToS3 extends AsyncTask<File, Void, Boolean> {
+	public class UploadFileToS3 extends AsyncTask<File, Void, File> {
 		@Override
-		protected Boolean doInBackground(File... params) {
+		protected File doInBackground(File... params) {
 			// TODO: attempt upload
 	        String accessKey = "AKIAIIQ5AOSHXVIRUSBA";
 	        String secretKey = "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";
@@ -2671,7 +2676,7 @@ public class Initialactivity extends FragmentActivity implements
 	        AmazonS3 conn = new AmazonS3Client(credentials);
 	        try{
 	        	Log.i("MISPRUEBAS","subiendo archivo");
-	        	conn.putObject("com.nest5.businessClient", params[0].getName()+".db", params[0]);
+	        	conn.putObject("com.nest5.businessClient", params[0].getName(), params[0]);
 	        }
 	        catch(com.amazonaws.AmazonServiceException e){
 	        	Log.i("MISPRUEBAS","exeption 1");
@@ -2689,20 +2694,91 @@ public class Initialactivity extends FragmentActivity implements
 		
 
 			// TODO: register the new account here.
-			return true;
+			return params[0];
 		}
 
 		@Override
-		protected void onPostExecute(final Boolean success) {
+		protected void onPostExecute(final File file) {
 				
 			Log.i("MISPRUEBAS","lelgo al final de la asynctask");
-        	
+        	//mResetProgressDialog.dismiss();
+        	//Guardar referencia a archivo y empresa en nest5.
+        	saveFileRecord(file);
 			
 		}
-
 		@Override
 		protected void onCancelled() {
 			
 		}
+		private RestService restService;
+		private void saveFileRecord(File file){
+			SharedPreferences prefs = Util.getSharedPreferences(mContext);
+			
+			restService = new RestService(fileSavedHandler, mContext,
+					 Setup.PROD_URL+"/company/saveDB");
+					 restService.addParam("company", prefs.getString(Setup.COMPANY_ID, "0"));
+					 restService.addParam("file", file.getName());		 
+					 restService.setCredentials("apiadmin", Setup.apiKey);
+					 try {
+					 restService.execute(RestService.POST);} catch (Exception e) {
+					 e.printStackTrace(); 
+					 Log.i("MISPRUEBAS","Error empezando request");}
+		}
+		private final Handler fileSavedHandler = new Handler() {
+			@Override
+			public void handleMessage(Message msg) {
+				mResetProgressDialog.dismiss();
+				
+				//temporal abre actividad loggeado
+			/*	prefs.edit().putBoolean(Setup.LOGGED_IN, true).putString(Setup.COMPANY_ID, "12212").putString(Setup.COMPANY_NAME, "Nest5 Test Company").commit();
+				Intent intenter= new Intent(mContext, Initialactivity.class);
+				startActivity(intenter);*/
+				JSONObject respuesta = null;
+					Log.i("MISPRUEBAS","LLEGUE");
+				try {
+					respuesta = new JSONObject((String) msg.obj);
+				} catch (Exception e) {
+					Log.i("MISPRUEBAS","ERROR JSON");
+					e.printStackTrace();
+					Toast.makeText(mContext, "Error guardando registro de backup de base de datos", Toast.LENGTH_LONG).show();
+				}
+
+				if (respuesta != null) {
+					Log.i("MISPRUEBAS","CON RESPUESTA");
+					int status = 0;
+					
+					try {
+						status = respuesta.getInt("status");
+						
+
+					} catch (Exception e) {
+						Log.i("MISPRUEBAS","ERROR COGER DATOS");
+						e.printStackTrace();
+						Toast.makeText(mContext, "Error guardando registro de backup de base de datos", Toast.LENGTH_LONG).show();
+					}
+					// quitar loading
+					
+					
+					if (status == 1) {
+						Log.i("MISPRUEBAS","listo");
+						//Abrir Nueva Activity porque esta registrado
+						Toast.makeText(mContext, "Datos guardados con éxito.", Toast.LENGTH_LONG).show();
+					} else {
+						Log.i("MISPRUEBAS","noooo");
+						Toast.makeText(mContext, "Error guardando registro de backup de base de datos", Toast.LENGTH_LONG).show();
+					}
+
+				}
+				else{
+					Toast.makeText(mContext, "Error guardando registro de backup de base de datos", Toast.LENGTH_LONG).show();
+				}
+
+			}
+		};
+		
+		
+
+		
 	}
+	
 }
