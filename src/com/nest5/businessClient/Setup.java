@@ -34,6 +34,9 @@ public class Setup {
     public static final String COMPANY_ID = "nest5_logged_id";
     public static final String COMPANY_NAME = "nest5_company_name";
     public static final String LOGGED_IN = "is_company_logged_in_nest5";
+
+    public static final String NEW_INSTALL = "is_new_install";
+
     
     //Ingredient Category Table
     public static final String TABLE_CATEGORY_INGREDIENTS = "ingredient_category";

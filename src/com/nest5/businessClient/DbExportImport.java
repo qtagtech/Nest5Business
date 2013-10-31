@@ -38,12 +38,16 @@ public class DbExportImport {
 
 	/** Saves the application database to the
 	 * export directory under MyDb.db **/
-	protected static  File exportDb(){
+
+	protected static  File exportDb(String name){
+
 		if( ! SdIsPresent() ) return null;
 		Log.i("MISPRUEBAS","si hay SD");
     	
 		File dbFile = DATA_DIRECTORY_DATABASE;
-		String filename = "MyDb.db";
+
+		String filename = name;
+
 
 		File exportDir = DATABASE_DIRECTORY;
 		File file = new File(exportDir, filename);

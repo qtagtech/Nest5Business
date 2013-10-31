@@ -7,18 +7,49 @@
     android:orientation="horizontal"
     android:weightSum="1.0" >
 
-    <ListView
-        android:id="@+id/finished_list"
+
+    <LinearLayout
+        android:id="@+id/read_variable_layout"
+
         android:layout_width="0dip"
         android:layout_height="500dip"
         android:layout_marginRight="10dp"
         android:layout_marginTop="20dip"
         android:layout_weight="0.4"
-        android:background="@drawable/blue_gradient" >
-    </ListView>
+
+        android:background="@drawable/blue_gradient"
+        android:orientation="vertical"
+        android:padding="10dip" >
+
+        <LinearLayout
+            android:id="@+id/manual_user_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="20dip"
+            android:orientation="vertical"
+            android:visibility="gone" >
+            <EditText
+                android:id="@+id/manual_email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Nombre de Usuario o Email"
+                android:inputType="textEmailAddress"
+                android:maxLines="1"
+                android:singleLine="true" />
+            <Button
+                android:id="@+id/stamp_manual_user"
+                style="@style/ButtonText"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/blue_button"
+                android:text="Sellar Tarjeta" />
+        </LinearLayout>
+    </LinearLayout>
 
     <ListView
-        android:id="@+id/turn_list"
+        android:id="@+id/manual_variable_list"
+
         android:layout_width="0dip"
         android:layout_height="500dip"
         android:layout_marginRight="10dp"
@@ -54,6 +85,16 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/blue_button"
                 android:text="Leer Tarjeta" />
+
+
+            <Button
+                android:id="@+id/read_manual_username"
+                style="@style/ButtonText"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/blue_button"
+                android:text="Registro Manual" />
+
         </LinearLayout>
     </ScrollView>
 

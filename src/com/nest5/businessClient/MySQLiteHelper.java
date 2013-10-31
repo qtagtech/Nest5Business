@@ -10,6 +10,9 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 import android.content.Context;
+
+import android.content.SharedPreferences;
+
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
@@ -41,13 +44,31 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 	  
 	  super(context, DATABASE_NAME, null, DATABASE_VERSION);
 	  mContext = context;
-	  try{
-		  getLoadFile(false);
+
+	  SharedPreferences prefs = Util.getSharedPreferences(mContext);
+	  if(prefs.getBoolean(Setup.NEW_INSTALL, true)){
+		  Log.i("MISPRUEBAS", "NUEVO INSTALL");
+		  try{
+			  getLoadFile(true);
+		  }
+		  catch(Exception e){
+			  
+		  } 
+		  prefs.edit().putBoolean(Setup.NEW_INSTALL, false).commit();
 	  }
-	  catch(Exception e){
+	  else{
+		  Log.i("MISPRUEBAS", " NO ESNUEVO INSTALL");
+		  try{
+			  getLoadFile(false);
+		  }
+		  catch(Exception e){
+			  
+		  }
 		  
 	  }
 	  
+	  
+
   }
 
   @Override
@@ -86,7 +107,9 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
      * predeterminados
      * 
      * */
-    for(int i = 0; i < DROP_SCRIPT.size() ; i++)
+
+    /*for(int i = 0; i < DROP_SCRIPT.size() ; i++)
+
 	  {
 		  db.execSQL(DROP_SCRIPT.get(i)); 
 	  }
@@ -101,7 +124,9 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 	  catch(Exception e){
 		  
 	  }
-	  onCreate(db);
+
+	  onCreate(db);*/
+
 	  
     /*
      * 
@@ -134,7 +159,9 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
      * */
     
     //Toma todo de mytables_backup, crea tabals temporales e inserta todo lo de las tablas reales en las temporales, con los comnados que hay en el archivo
-    /*Log.w(MySQLiteHelper.class.getName(),"+ELIMINANDO TABLAS TEMPORALES POR SI EXISTIAN+");
+
+    Log.w(MySQLiteHelper.class.getName(),"+ELIMINANDO TABLAS TEMPORALES POR SI EXISTIAN+");
+
     for(int i = 0; i < DROP_TEMP_SCRIPT.size() ; i++)
 	  {
 		  db.execSQL(DROP_TEMP_SCRIPT.get(i)); 
@@ -170,7 +197,9 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 	  {
 		  db.execSQL(DROP_TEMP_SCRIPT.get(i)); 
 	  }
-    Log.w(MySQLiteHelper.class.getName(),"+TABLAS TEMPORALES ELIMINADAS+");*/
+
+    Log.w(MySQLiteHelper.class.getName(),"+TABLAS TEMPORALES ELIMINADAS+");
+
     /*
      * 
      * ACA TERMINA LA PARTE PARA ACTUALIZAR BASE DE DATOS
@@ -353,5 +382,34 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
       }
       return false;
   }
+
+  
+  public void cleanDatabase(SQLiteDatabase db){
+	  /*
+	     * Cuando se quiera limpiar la base de datos se usan los siguientes dos loops y al final se va a onCreate, primero se toma todo de los archivos para borrar temps y originiales
+	     * porque manda el parametro nuevaDB en false, en el construcor de esta clase, de resto se usa lo que hay despues de la explicacion larga que es para actualizar db, tomando
+	     * siempre  todo con nuevaDB = false
+	     * al final luego de borrar todo lo que hubiera, temps y originales, toma con nueva db true para solo usar el archivo q es para nueva db y poner lo valores iniciales
+	     * predeterminados
+	     * 
+	     * */
+	    for(int i = 0; i < DROP_SCRIPT.size() ; i++)
+		  {
+			  db.execSQL(DROP_SCRIPT.get(i)); 
+		  }
+	    for(int i = 0; i < DROP_TEMP_SCRIPT.size() ; i++)
+		  {
+			  db.execSQL(DROP_TEMP_SCRIPT.get(i)); 
+		  }
+	  //carga archivos de sql raw
+		  try{
+			  getLoadFile(true);
+		  }
+		  catch(Exception e){
+			  
+		  }
+		  onCreate(db);
+  }
+
 
 } 
