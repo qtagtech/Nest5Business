@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/add_ingredient"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content"
+     android:layout_gravity="center" 
+    android:orientation="vertical"
+
+      >
+      <ScrollView 
+          android:id="@+id/add_product_scroll"
+          android:layout_width="fill_parent"
+          android:layout_height="300dip"
+          android:padding="20dip"
+          >
+          <LinearLayout 
+              android:id="@+id/add_product_inner"
+			    android:layout_width="fill_parent"
+			    android:layout_height="wrap_content"
+			     
+			    android:orientation="vertical">
+			    <TextView 
+			        android:id="@+id/product_category_label"
+			        android:text="Categoría"
+			        android:layout_width="fill_parent"
+			        android:layout_height="50dip"
+			        android:layout_marginTop="20dip"
+			        
+			        />
+			    <Spinner
+				    android:id="@+id/product_category_spinner"
+				    android:layout_width="fill_parent"
+				    android:layout_height="wrap_content" />
+			    
+			    <EditText 
+			        android:id="@+id/product_name_edit"
+			        android:layout_width="fill_parent"
+			        android:layout_height="50dip"
+			        android:inputType="text"
+			        android:hint="Nombre"
+			        android:imeOptions="actionNext"
+			        
+			        />
+			    
+			    <TextView 
+			        android:id="@+id/product_automaticost_label"
+			        android:text="Propiedades: "
+			        android:layout_width="fill_parent"
+			        android:layout_height="50dip"
+			        android:layout_marginTop="30dip"
+			        
+			        />
+			    <CheckBox 
+			        android:id="@+id/product_automatic_cost"
+			        android:checked="false"
+			        android:text="¿Calcular Costo Automático?"
+			        android:height="20dip"
+			        android:layout_width="fill_parent"
+			        android:layout_height="wrap_content"
+			        android:gravity="center_vertical|center_horizontal"/>
+			    
+			    <EditText 
+			        android:id="@+id/product_cost_edit"
+			        android:layout_width="fill_parent"
+			        android:layout_height="50dip"
+			        android:inputType="number"
+			        android:hint="Costo de Producción"
+			        android:imeOptions="actionNext"
+			        
+			        />
+			    <EditText 
+			        android:id="@+id/product_price_edit"
+			        android:layout_width="fill_parent"
+			        android:layout_height="50dip"
+			        android:inputType="number"
+			        android:hint="Precio de Venta"
+			        android:imeOptions="actionNext"
+			        
+			        />
+			    
+			    <TextView 
+			        android:id="@+id/product_tax_label"
+			        android:text="Impuesto"
+			        android:layout_width="fill_parent"
+			        android:layout_height="50dip"
+			        android:layout_marginTop="20dip"
+			        
+			        />
+			    <CheckBox 
+			        android:id="@+id/product_tax_included"
+			        android:checked="true"
+			        android:text="Marca si el Precio Indicado incluye el siguiente impuesto."
+			        android:height="20dip"
+			        android:layout_width="fill_parent"
+			        android:layout_height="wrap_content"
+			        android:gravity="center_vertical|center_horizontal"/>
+			    <Spinner
+				    android:id="@+id/product_tax_spinner"
+				    android:layout_width="fill_parent"
+				    android:layout_height="wrap_content" />
+			    
+			    
+			    
+			    <LinearLayout 
+			        android:orientation="horizontal"
+			        android:layout_width="fill_parent"
+			        android:layout_height="wrap_content"
+			        android:padding="10dip">
+			        
+			         <Button 
+				        android:id="@+id/product_add_button"
+				        android:layout_width="wrap_content"
+				        android:layout_height="50dip"
+				        android:layout_gravity="center_horizontal|center_vertical"
+				       
+				        android:text="Guardar"/>
+				    <Button 
+				        android:id="@+id/product_cancel_button"
+				        android:layout_width="wrap_content"
+				        android:layout_height="50dip"
+				        android:layout_gravity="center_horizontal|center_vertical"
+				        android:text="Cancelar"/>
+			        
+			    </LinearLayout>
+			   
+              
+          </LinearLayout>
+      </ScrollView>
+	
+    
+</LinearLayout>
+
+
+
+
+
+

@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Common -->
+
+    <style name="home_background">
+        <item name="android:background">@drawable/rosewood</item>
+    </style>
+
+    <style name="scan_button">
+        <item name="android:background">@drawable/bt_scan</item>
+        <item name="android:layout_width">300dip</item>
+        <item name="android:layout_height">50dip</item>
+        <item name="android:text">@string/scan</item>
+        <item name="android:textSize">25sp</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+    </style>
+
+    <style name="header_title">
+        <item name="android:background">@drawable/title_bar_default</item>
+        <item name="android:layout_alignParentTop">true</item>
+        <item name="android:layout_alignParentLeft">true</item>
+        <item name="android:layout_height">50dip</item>
+        <item name="android:layout_width">fill_parent</item>
+    </style>
+
+    <style name="logo_button">
+        <item name="android:src">@drawable/big_logo</item>
+        <item name="android:background">@null</item>
+        <item name="android:contentDescription">@string/app_name</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:layout_height">fill_parent</item>
+        <item name="android:layout_width">50dip</item>
+    </style>
+
+    <style name="header_username">
+        <item name="android:layout_width">240dip</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">25sp</item>
+    </style>
+
+    <style name="header_status">
+        <item name="android:layout_width">30dip</item>
+        <item name="android:layout_height">30dip</item>
+        <item name="android:src">@drawable/tick</item>
+        <item name="android:scaleType">fitCenter</item>
+    </style>
+
+    <!-- Main -->
+
+    <style name="fb_login">
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:layout_marginTop">60dip</item>
+        <item name="android:layout_centerHorizontal">true</item>
+    </style>
+
+    <style name="tw_login">
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:layout_marginTop">20dip</item>
+        <item name="android:layout_centerHorizontal">true</item>
+    </style>
+
+    <!-- Login -->
+    <style name="login_user">
+        <item name="android:layout_height">35dip</item>
+        <item name="android:textSize">20dp</item>
+        <item name="android:background">@drawable/company_coupon_background</item>
+        <item name="android:textColor">#000000</item>
+        <item name="android:layout_marginBottom">10dip</item>
+        <item name="android:padding">5dip</item>
+    </style>
+
+    <style name="login_password">
+        <item name="android:layout_height">35dip</item>
+        <item name="android:textSize">20dp</item>
+        <item name="android:background">@drawable/company_coupon_background</item>
+        <item name="android:textColor">#000000</item>
+        <item name="android:layout_marginBottom">10dip</item>
+        <item name="android:padding">5dip</item>
+    </style>
+
+    <style name="login_button"></style>
+
+    <style name="extra_info">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">25sp</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <!-- Home -->
+    <style name="spinner_container">
+        <item name="android:orientation">vertical</item>
+        <item name="android:background">@null</item>
+        <item name="android:layout_below">@id/home_layout</item>
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_centerHorizontal">true</item>
+        <item name="android:layout_centerVertical">true</item>
+        <item name="android:padding">3dip</item>
+    </style>
+
+    <!-- Deals -->
+    <style name="deal_image">
+        <item name="android:padding">5dip</item>
+    </style>
+
+    <style name="deal_list">
+        <item name="android:listSelector">@drawable/list_selector</item>
+    </style>
+
+    <style name="list_separator">
+        <item name="android:textColor">#ffffff</item>
+        <item name="android:textSize">20dip</item>
+        <item name="android:background">@drawable/list_selector_pressed</item>
+        <item name="android:paddingLeft">5dip</item>
+        <item name="android:visibility">gone</item>
+    </style>
+
+    <style name="list_item">
+        <item name="android:background">#aaffffff</item>
+    </style>
+
+    <style name="company_info">
+        <item name="android:layout_height">150dip</item>
+        <item name="android:background">@drawable/item_title_gradient</item>
+        <item name="android:textColor">#ffffff</item>
+    </style>
+
+    <style name="company_image">
+        <item name="android:layout_width">100dip</item>
+        <item name="android:layout_height">100dip</item>
+        <item name="android:padding">8dip</item>
+    </style>
+
+    <style name="company_title">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">10dip</item>
+        <item name="android:textSize">25dip</item>
+        <item name="android:textColor">#ffffff</item>
+        <item name="android:gravity">center_horizontal|center_vertical</item>
+    </style>
+
+    <style name="company_item">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">8dip</item>
+        <item name="android:textSize">15dip</item>
+        <item name="android:textColor">#000000</item>
+        <item name="android:gravity">left|center_vertical</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">marquee</item>
+        <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">true</item>
+        <item name="android:marqueeRepeatLimit">marquee_forever</item>
+        <item name="android:scrollHorizontally">true</item>
+        <item name="android:background">@drawable/company_item_text</item>
+    </style>
+
+    <style name="company_coupon">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:padding">8dip</item>
+        <item name="android:textSize">15dip</item>
+        <item name="android:textColor">#000000</item>
+        <item name="android:gravity">left|center_vertical</item>
+        <item name="android:layout_marginBottom">10dip</item>
+        <item name="android:background">@drawable/company_coupon_background</item>
+    </style>
+
+    <style name="company_promos">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">fill_parent</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:padding">8dip</item>
+    </style>
+
+    <style name="company_promo_title">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">10dip</item>
+        <item name="android:textSize">25dip</item>
+        <item name="android:textColor">#000000</item>
+        <item name="android:gravity">left|center_vertical</item>
+        <item name="android:background">@drawable/promo_title_gradient</item>
+    </style>
+
+    <style name="company_nest5_text">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">2dip</item>
+        <item name="android:textSize">10dip</item>
+        <item name="android:textColor">#000000</item>
+        <item name="android:gravity">center_horizontal|center_vertical</item>
+    </style>
+
+    <!-- Íconos y Text View informativos -->
+    <style name="icon_button">
+        <item name="android:src">@drawable/big_logo</item>
+        <item name="android:background">@null</item>
+        <item name="android:contentDescription">@string/app_name</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:layout_height">fill_parent</item>
+        <item name="android:layout_width">50dip</item>
+    </style>
+
+    <style name="info_text">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">#FFFFFF</item>
+    </style>
+
+    <!-- BOTONES NEST5 Business -->
+
+    <style name="ButtonText">
+        <item name="android:layout_width">200dip</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">#ffffff</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_margin">3dp</item>
+        <item name="android:textSize">30dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:shadowColor">#000000</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">2</item>
+    </style>
+
+    <!-- Dimensions -->
+
+    <dimen name="page_margin_default">5sp</dimen>
+
+    <style name="LoginFormContainer">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">16dp</item>
+    </style>
+
+</resources>

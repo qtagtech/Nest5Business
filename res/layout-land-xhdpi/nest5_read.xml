@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/nest5_read_layout"
+    style="?homeBackground"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal"
+    android:weightSum="1.0" >
+
+    <LinearLayout
+        android:id="@+id/read_variable_layout"
+        android:layout_width="0dip"
+        android:layout_height="500dip"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="20dip"
+        android:layout_weight="0.4"
+        android:background="@drawable/blue_gradient"
+        android:orientation="vertical"
+        android:padding="10dip" >
+
+        <LinearLayout
+            android:id="@+id/manual_user_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="20dip"
+            android:orientation="vertical"
+            android:visibility="gone" >
+            <EditText
+                android:id="@+id/manual_email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Nombre de Usuario o Email"
+                android:inputType="textEmailAddress"
+                android:maxLines="1"
+                android:singleLine="true" />
+            <Button
+                android:id="@+id/stamp_manual_user"
+                style="@style/ButtonText"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/blue_button"
+                android:text="Sellar Tarjeta" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/manual_variable_list"
+        android:layout_width="0dip"
+        android:layout_height="500dip"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="20dip"
+        android:layout_weight="0.4"
+        android:background="@drawable/blue_gradient" >
+    </ListView>
+
+    <ScrollView
+        android:id="@+id/nest5_read_buttons_scroll"
+        android:layout_width="0dip"
+        android:layout_height="fill_parent"
+        android:layout_marginTop="20dip"
+        android:layout_weight="0.2" >
+
+        <LinearLayout
+            android:id="@+id/nest5_read_buttons"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/nest5_read_title"
+                style="@style/ButtonText"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Usuarios Nest5" />
+
+            <Button
+                android:id="@+id/read_magnetic_card"
+                style="@style/ButtonText"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/blue_button"
+                android:text="Leer Tarjeta" />
+
+            <Button
+                android:id="@+id/read_manual_username"
+                style="@style/ButtonText"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/blue_button"
+                android:text="Registro Manual" />
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

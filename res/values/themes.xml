@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<style name="Nest5" parent="android:Theme.Holo.Light">
+		<item name="pageMargin">2sp</item>
+		<!-- <item name="android:windowNoTitle">true</item>-->
+	</style>
+	
+<style name="Nest5.Default">
+    <!-- Common -->
+<item name="homeBackground">@style/home_background</item>
+<item name="headerTitle">@style/header_title</item>
+<item name="logoButton">@style/logo_button</item>
+<item name="scanButton">@style/scan_button</item>
+<item name="headerUsername">@style/header_username</item>
+<item name="headerStatus">@style/header_status</item>
+<item name="extraInfo">@style/extra_info</item>
+<!-- Main -->
+<item name="fb_login_button">@style/fb_login</item>
+<item name="tw_login_button">@style/tw_login</item>
+
+
+
+<!-- Login -->
+
+<item name="loginUser">@style/login_user</item>
+<item name="loginPassword">@style/login_password</item>
+<item name="loginButton">@style/login_button</item>
+
+<!-- Home -->
+
+<item name="spinnerContainer">@style/spinner_container</item>
+
+
+<!-- Deals -->
+<item name="dealImage">@style/deal_image</item>
+<item name="dealList">@style/deal_list</item>
+<item name="listSeparator">@style/list_separator</item>
+<item name="listItem">@style/list_item</item>
+
+
+<!-- Company Deals -->
+<item name="companyInfo">@style/company_info</item>
+<item name="companyImage">@style/company_image</item>
+<item name="companyTitle">@style/company_title</item>
+<item name="companyItem">@style/company_item</item>
+<item name="companyCoupon">@style/company_coupon</item>
+<item name="companyPromos">@style/company_promos</item>
+<item name="companyPromoTitle">@style/company_promo_title</item>
+<item name="companyNest5Text">@style/company_nest5_text</item>
+
+<!-- InfoTextView -->
+<item name="iconButton">@style/icon_button</item>
+<item name="infoText">@style/info_text</item>
+</style>
+</resources>

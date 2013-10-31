@@ -1,0 +1,19 @@
+<resources>
+
+    <string name="title_activity_login">Nest5 Empresas</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Clave</string>
+    <string name="action_sign_in_register"><b>Ingresar</b></string>
+    <string name="action_sign_in_short">Ingresar</string>
+    <string name="action_forgot_password">Recuperar Clave</string>
+    <string name="login_progress_signing_in">Iniciando Sesión&#8230;</string>
+    <string name="error_invalid_email">Direccióon de Email inválida</string>
+    <string name="error_invalid_password">Clave demasiado corta</string>
+    <string name="error_incorrect_password">Clave incorrecta</string>
+    <string name="error_field_required">Este campo es obligatorio</string>
+    <string name="action_register">Regístrate</string>
+    <string name="login_error">Datos de acceso incorrectos. Inténtalo de nuevo por favor.</string>
+
+</resources>

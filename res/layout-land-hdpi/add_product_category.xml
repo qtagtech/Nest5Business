@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/add_ingredient"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_gravity="center" 
+    android:orientation="vertical"
+      >
+      <ScrollView 
+          android:id="@+id/add_product_category_scroll"
+          android:layout_width="400dip"
+          android:layout_height="300dip"
+          android:padding="20dip"
+          >
+          <LinearLayout 
+              android:id="@+id/add_product_category_inner"
+			    android:layout_width="fill_parent"
+			    android:layout_height="wrap_content"
+			    android:layout_gravity="center" 
+			    android:orientation="vertical">
+			    
+			    <EditText 
+			        android:id="@+id/product_category_name_edit"
+			        android:layout_width="fill_parent"
+			        android:layout_height="50dip"
+			        android:inputType="text"
+			        android:hint="Nombre"
+			        android:imeOptions="actionNext"
+			        
+			        />
+			    
+			   
+			    <LinearLayout 
+			        android:orientation="horizontal"
+			        android:layout_width="fill_parent"
+			        android:layout_height="wrap_content"
+			        android:padding="10dip">
+			        
+			         <Button 
+				        android:id="@+id/product_category_add_button"
+				        android:layout_width="wrap_content"
+				        android:layout_height="50dip"
+				        android:layout_gravity="center_horizontal|center_vertical"
+				       
+				        android:text="Guardar"/>
+				    <Button 
+				        android:id="@+id/product_category_cancel_button"
+				        android:layout_width="wrap_content"
+				        android:layout_height="50dip"
+				        android:layout_gravity="center_horizontal|center_vertical"
+				        android:text="Cancelar"/>
+			        
+			    </LinearLayout>
+			   
+              
+          </LinearLayout>
+      </ScrollView>
+	
+    
+</LinearLayout>
+
+
+
+
+
+

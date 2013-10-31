@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Menu item text [CHAR LIMIT=NONE] -->
+    <string name="accounts">Cuentas</string>
+    <string name="logout">Salir</string>
+
+    <!-- Dialog button [CHAR LIMIT=NONE] -->
+    <string name="add_account">Agregar Cuenta...</string>
+
+    <!--  Name of the application in the launcher [CHAR LIMIT=NONE] -->
+    <string name="app_name">Nest5 Business</string>
+
+    <!-- Dialog title text [CHAR LIMIT=NONE] -->
+    <string name="attention">Atención</string>
+
+    <!-- Button text [CHAR LIMIT=NONE] -->
+    <string name="connect">Conectar</string>
+    
+    <!-- Button text [CHAR LIMIT=NONE] -->
+    <string name="scan">¡Sella tu Tarjeta!</string>
+    <string name="redeem">¡Redime tu Cupón!</string>
+    <string name="goToCoupons">Ir a Mis Cupones</string>
+
+    <!-- Message text for "Connect" screen [CHAR LIMIT=NONE] -->
+    <string name="connect_text">Selecciona una cuenta con la que inicias sesión en Nest5 o con la que deseas registrarte.</string>
+
+    <!-- Header text for "Connect" screen [CHAR LIMIT=NONE] -->
+    <string name="connect_to_the_cloud">Conectar</string>
+
+    <!-- Header text for "Connected" screen [CHAR LIMIT=NONE] -->
+    <string name="connected_to_the_cloud">Conectado</string>
+
+    <!-- Message text [CHAR LIMIT=NONE] -->
+    <string name="contacting_server">Comunicándose con el Servidor...</string>
+
+    <!-- Button text [CHAR LIMIT=NONE] -->
+    <string name="disconnect">Disconnect</string>
+
+    <!-- Informational text for "Connected" screen with placeholder for account name [CHAR LIMIT=NONE] -->
+    <string name="disconnect_text">Este dispositivo se encuentra conectado como: %1$s.</string>
+
+    <!-- Footer text for "Connect" screen [CHAR LIMIT=NONE] -->
+    <string name="do_you_want_to_connect">¿Te deseas Conectar?</string>
+
+    <!-- Footer text for "Disconnect" screen [CHAR LIMIT=NONE] -->
+    <string name="do_you_want_to_disconnect">¿Te deseas Desconectar?</string>
+
+    <!-- Initial "hello, world" informational message [CHAR LIMIT=NONE] -->
+    <string name="hello_world_info_text">Press the \"Say Hello\" button to receive a message from the App Engine server.</string>
+
+    <!-- Initial "hello, world" response message [CHAR LIMIT=NONE] -->
+    <string name="hello_world_text"></string>
+
+    <!-- Dialog message text [CHAR LIMIT=NONE] -->
+    <string name="needs_account">To receive notifications from this app, you must first create an account.</string>
+
+    <!-- Notification message [CHAR LIMIT=NONE] -->
+    <string name="registration_error">Failed to register/unregister %1$s.</string>
+
+    <!-- Notification message [CHAR LIMIT=NONE] -->
+    <string name="registration_succeeded">Registered %1$s for receiving notifications.</string>
+
+    <!-- Button text [CHAR LIMIT=NONE] -->
+    <string name="say_hello">Say Hello</string>
+
+    <!-- List view header text [CHAR LIMIT=NONE] -->
+    <string name="select_account">Selecciona la cuenta que deseas autorizar:</string>
+
+    <!-- Dialog button text [CHAR LIMIT=NONE] -->
+    <string name="skip">Saltar</string>
+
+    <!-- Notification message [CHAR LIMIT=NONE] -->
+    <string name="unregistration_succeeded">Unegistered %1$s for from receiving notifications.</string>
+    
+    <!-- Login -->
+    <string name="user">Tu Email</string>
+    <string name="password">Contraseña</string>
+    <string name="login">Guardar Datos</string>
+    <string name="extrainfo">¡Solo un paso más para comenzar con Nest5!</string>
+    <string name="putname">Nombre Completo</string>
+    
+    <!-- Home -->
+    <string name="logo_big_description">Nest5, una Historia de Amor entre Marcas y Consumidores</string>
+    <string name="close_deals">Promociones</string>
+    <string name="directory">Directorio</string>
+    <string name="share">Comparte Nest5</string>
+    <string name="my_promos">Mis Promociones</string>
+    <string name="my_coupons">Mis Cupones</string>
+    
+    <!-- Deals -->
+    <string name="emptyImage">Lo sentimos, no hay promociones cercanas.</string>
+    <string name="buyPerk">Comprando %1$d %2$s.</string>
+    <string name="visitPerk">Por visitar %1$d veces %2$s.</string>
+    
+    <!-- Company -->
+    <string name="withNest5">Con Nest5, obtén:</string>
+
+</resources>

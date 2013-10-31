@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/empty"
+        style="?homeBackground"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+
+        <ImageView
+            android:id="@+id/EmptyImage"
+            android:layout_height="fill_parent"
+            android:layout_width="fill_parent"
+            android:background="@drawable/stub"
+            android:contentDescription="@string/emptyImage"            
+            />
+    </RelativeLayout>

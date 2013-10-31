@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/menu_add"
+          android:icon="@drawable/add"
+          android:title="Agregar"
+          android:showAsAction="always"
+           />
+    <item android:id="@+id/menu_load_register"
+          android:icon="@drawable/database"
+          android:title="Cargar Ventas Guardadas"
+          android:showAsAction="always"
+           />
+    <item android:id="@+id/menu_connect_device"
+          android:icon="@drawable/link"
+          android:title="Conectar Dispositivo de Aviso"
+          android:showAsAction="always"
+           />
+    <item android:id="@+id/menu_sync"
+          android:icon="@drawable/cloud"
+          android:title="Sincronizar con La Nube"
+          android:showAsAction="always" />
+    <item android:id="@+id/menu_settings"
+          android:icon="@drawable/settings"
+          android:title="Ajustes"
+          android:showAsAction="never" />
+    <item android:id="@+id/menu_user"
+          android:icon="@drawable/dancer"
+          android:title="Usuario"
+          android:showAsAction="never" />
+    
+</menu>

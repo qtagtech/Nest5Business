@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/home_layout"
+        style="?homeBackground"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+
+        <com.nest5.androidClient.HeaderBar
+            android:id="@+id/header"
+           
+            style="?headerTitle" />
+        <ScrollView 
+            android:id="@+id/info_container"
+            android:layout_below="@id/header"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+            
+            
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent" 
+                >
+                
+                	<LinearLayout 
+            android:id="@+id/spinner_layout"
+            style="?spinnerContainer"
+            >
+            <TextView
+	                   android:id="@+id/card_info_title"
+	                   style="?companyTitle" />
+	
+	               <com.nest5.androidClient.ScrollingTextView
+	                   android:id="@+id/card_info_requirement"
+	                   style="?companyItem"  />
+	               
+	               <TextView
+                   android:id="@+id/card_row_nest5"
+                  style="?companyNest5Text"
+                  android:text="@string/withNest5" />
+	
+	               <com.nest5.androidClient.ScrollingTextView
+	                   android:id="@+id/card_info_perk"
+	                   style="?companyItem"  />
+            <ImageView 
+                android:id="@+id/couponStar"
+                android:src="@drawable/estrella_cupon"
+                android:scaleType="fitCenter"
+                android:layout_width="fill_parent"
+                android:layout_height="200dip"
+                android:contentDescription="Cupón Nest5"/>
+            <Button 
+               android:id="@+id/redeemButton"
+                android:onClick="redeemCoupon"
+                style="?scanButton"
+                android:text="@string/redeem"
+                />
+            
+        </LinearLayout>
+                </LinearLayout>
+            </ScrollView>
+        
+
+
+    </RelativeLayout>
