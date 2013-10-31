@@ -42,7 +42,7 @@ import com.nest5.businessClient.Registrable;
 
 
 
->>>>>>> 99af34001e84f60a46233abd529f995f9df516e9
+
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -53,17 +53,12 @@ import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-<<<<<<< HEAD
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.util.ArrayList;
-=======
+
 import java.security.GeneralSecurityException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
->>>>>>> 99af34001e84f60a46233abd529f995f9df516e9
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
@@ -276,7 +271,7 @@ public class Initialactivity extends FragmentActivity implements
 	// Saber si llama poner stampCard desde lista de promociones de usuario
 	Boolean fromMyDeals = false;
 
-	// Validar si botón redime cupón o sello
+	// Validar si botï¿½n redime cupï¿½n o sello
 
 	Boolean redeemCoupon = false;
 
@@ -370,7 +365,7 @@ public class Initialactivity extends FragmentActivity implements
 	private long init;
 	private long end;
 
-	// Propiedades de lector magnético ACR31 de ACS Ltd.
+	// Propiedades de lector magnï¿½tico ACR31 de ACS Ltd.
 	private AudioManager mAudioManager;
 	private ACR31Reader mReader;
 	private ProgressDialog mResetProgressDialog;
@@ -606,7 +601,7 @@ public class Initialactivity extends FragmentActivity implements
 
 		Tab homeTab = actionBar.newTab().setText("Inicio")
 				.setTabListener(tabListener);
-		Tab ordersTab = actionBar.newTab().setText("Órdenes")
+		Tab ordersTab = actionBar.newTab().setText("ï¿½rdenes")
 				.setTabListener(tabListener);
 		Tab dailyTab = actionBar.newTab().setText("Registros")
 				.setTabListener(tabListener);
@@ -639,7 +634,7 @@ public class Initialactivity extends FragmentActivity implements
 		VarelaFont = Typeface.createFromAsset(getAssets(),
 				"fonts/Varela-Regular.otf");
 
-		// Lector de tarjetas magnéticas
+		// Lector de tarjetas magnï¿½ticas
 		mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		mReader = new ACR31Reader(mAudioManager);
 		/* Initialize the reset progress dialog */
@@ -691,7 +686,7 @@ public class Initialactivity extends FragmentActivity implements
 						@Override
 						public void run() {
 							
-							mResetProgressDialog.setMessage("Solicitando Información al Servidor...");
+							mResetProgressDialog.setMessage("Solicitando Informaciï¿½n al Servidor...");
 							mResetProgressDialog.setCancelable(false);
 							mResetProgressDialog.setIndeterminate(true);
 							mResetProgressDialog.show();
@@ -846,12 +841,12 @@ public class Initialactivity extends FragmentActivity implements
 		if (prefs.getInt(Util.INTERNET_CONNECTION, 0) == 1) {
 
 		} else {
-			// Toast.makeText(mContext, "No tienes conexión a internet.",
+			// Toast.makeText(mContext, "No tienes conexiï¿½n a internet.",
 			// Toast.LENGTH_LONG).show();
 			/*
 			 * AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			 * builder.setMessage(
-			 * "No tienes una conexión a internet activa. Habilítala haciendo click en aceptar y seleccionando luego una red."
+			 * "No tienes una conexiï¿½n a internet activa. Habilï¿½tala haciendo click en aceptar y seleccionando luego una red."
 			 * ) .setCancelable(false) .setPositiveButton("Aceptar", new
 			 * DialogInterface.OnClickListener() { public void
 			 * onClick(DialogInterface dialog, int id) { Intent intent = new
@@ -902,14 +897,14 @@ public class Initialactivity extends FragmentActivity implements
 
 				@Override
 				public void onSuccess() {
-					Toast.makeText(Initialactivity.this, "Búsqueda Iniciada",
+					Toast.makeText(Initialactivity.this, "Bï¿½squeda Iniciada",
 							Toast.LENGTH_SHORT).show();
 				}
 
 				@Override
 				public void onFailure(int reasonCode) {
 					Toast.makeText(Initialactivity.this,
-							"Búsqueda Fallida: " + reasonCode,
+							"Bï¿½squeda Fallida: " + reasonCode,
 							Toast.LENGTH_SHORT).show();
 				}
 			});
@@ -1311,7 +1306,7 @@ public class Initialactivity extends FragmentActivity implements
 
 					// ordersList.setOnItemClickListener(orderListListener);
 					// makeTable("NA");
-					sale_name.setText("Venta Guardada con Éxito");
+					sale_name.setText("Venta Guardada con ï¿½xito");
 					sale_details
 							.setText("Selecciona otro elemento para ver detalles.");
 					updateSaleValue();
@@ -2113,7 +2108,7 @@ public class Initialactivity extends FragmentActivity implements
 
 		int lines = 0;
 		StringBuilder factura = new StringBuilder();
-		factura.append("MR. PASTOR COMIDA\r\nRÁPIDA MEXICANA" + "\r\n");
+		factura.append("MR. PASTOR COMIDA\r\nRï¿½PIDA MEXICANA" + "\r\n");
 		lines++;
 		lines++;
 		lines++;
@@ -2232,7 +2227,7 @@ public class Initialactivity extends FragmentActivity implements
 		lines++;
 		factura.append("Ingresa a www.mrpastor.com\r\n");
 		lines++;
-		factura.append("Síguenos en\r\n");
+		factura.append("Sï¿½guenos en\r\n");
 		lines++;
 		factura.append("facebook/misterpastor\r\n");
 		lines++;
@@ -2252,7 +2247,7 @@ public class Initialactivity extends FragmentActivity implements
 		// new WiFiSend().execute(factura.toString());
 		/*
 		 * StringBuilder factura = new StringBuilder();
-		 * factura.append("MR. PASTOR COMIDA RÁPIDA MEXICANA"+"\r\n\r\n\r\n");
+		 * factura.append("MR. PASTOR COMIDA Rï¿½PIDA MEXICANA"+"\r\n\r\n\r\n");
 		 * Date date = new Date(); String fecha =
 		 * DateFormat.getDateFormat(mContext).format(date);
 		 * 
@@ -2272,7 +2267,7 @@ public class Initialactivity extends FragmentActivity implements
 		 * factura.append("\r\n\r\n Gracias Por Comprar en Mr. Pastor.\r\n");
 		 * factura.append("Ingresa http://www.mrpastor.com\r\n");
 		 * factura.append(
-		 * "O Síguenos en facebook/misterpastor - Twiiter.com/comidasmrpastor");
+		 * "O Sï¿½guenos en facebook/misterpastor - Twiiter.com/comidasmrpastor");
 		 */
 
 	}
@@ -2429,7 +2424,7 @@ public class Initialactivity extends FragmentActivity implements
 			@Override
 			public void onFailure(int reason) {
 				Toast.makeText(Initialactivity.this,
-						"La conexión falló. Reinténtalo de nuevo.",
+						"La conexiï¿½n fallï¿½. Reintï¿½ntalo de nuevo.",
 						Toast.LENGTH_SHORT).show();
 			}
 		});
@@ -2442,7 +2437,7 @@ public class Initialactivity extends FragmentActivity implements
 
 			@Override
 			public void onFailure(int reasonCode) {
-				Log.d(TAG, "La desconexión falló, la razón es:" + reasonCode);
+				Log.d(TAG, "La desconexiï¿½n fallï¿½, la razï¿½n es:" + reasonCode);
 
 			}
 
@@ -2489,7 +2484,7 @@ public class Initialactivity extends FragmentActivity implements
 		// we will try once more
 		if (manager != null && !retryChannel) {
 			Toast.makeText(this,
-					"Se perdió la conexión con el canal, inténtalo de nuevo.",
+					"Se perdiï¿½ la conexiï¿½n con el canal, intï¿½ntalo de nuevo.",
 					Toast.LENGTH_LONG).show();
 			// resetData();
 			retryChannel = true;
@@ -2497,7 +2492,7 @@ public class Initialactivity extends FragmentActivity implements
 		} else {
 			Toast.makeText(
 					this,
-					"¡Error grave!. Se perdió por completo la conexión con dispositivos. Reintenta Desactivando/Activando WifiDirect otra vez.",
+					"ï¿½Error grave!. Se perdiï¿½ por completo la conexiï¿½n con dispositivos. Reintenta Desactivando/Activando WifiDirect otra vez.",
 					Toast.LENGTH_LONG).show();
 		}
 	}
@@ -2635,7 +2630,7 @@ public class Initialactivity extends FragmentActivity implements
 			}
 			DecimalFormat dec = new DecimalFormat("$###,###,###");
 
-			saleValue.setText("Ventas del Día: " + dec.format(total));
+			saleValue.setText("Ventas del Dï¿½a: " + dec.format(total));
 
 		}
 	}
@@ -2687,8 +2682,8 @@ public class Initialactivity extends FragmentActivity implements
 		if (currentVolume < maxVolume) {
 
 			showMessageDialog(
-					"Atención",
-					"Para leer una tarjeta Nest5 debes subir el volumen de tu dispositivo al máximo.");
+					"Atenciï¿½n",
+					"Para leer una tarjeta Nest5 debes subir el volumen de tu dispositivo al mï¿½ximo.");
 			ret = false;
 		}
 
@@ -2801,7 +2796,7 @@ public class Initialactivity extends FragmentActivity implements
 				if (status == 1) {
 					Log.i("MISPRUEBAS","listo");
 					//Abrir Nueva Activity porque esta registrado
-					//Toast.makeText(mContext, "Datos guardados con éxito.", Toast.LENGTH_LONG).show();
+					//Toast.makeText(mContext, "Datos guardados con ï¿½xito.", Toast.LENGTH_LONG).show();
 					File file = DbExportImport.exportDb(name);
 					UploadFileToS3 uploadTask = new UploadFileToS3();
 					uploadTask.execute(file);
@@ -2820,7 +2815,7 @@ public class Initialactivity extends FragmentActivity implements
 		}
 	};
 	
-9
+
 	/**
 	 * Represents an asynchronous login/registration task used to authenticate
 	 * the user.
@@ -2870,9 +2865,9 @@ public class Initialactivity extends FragmentActivity implements
 		protected void onPostExecute(final Boolean status) {
 			mResetProgressDialog.dismiss();	
 			if(status)
-				Toast.makeText(mContext, "Datos guardados con éxito.", Toast.LENGTH_LONG).show();
+				Toast.makeText(mContext, "Datos guardados con ï¿½xito.", Toast.LENGTH_LONG).show();
 			else
-				Toast.makeText(mContext, "Error guardando el archivo en la nube, inténtalo de nuevo por favor0..", Toast.LENGTH_LONG).show();
+				Toast.makeText(mContext, "Error guardando el archivo en la nube, intï¿½ntalo de nuevo por favor0..", Toast.LENGTH_LONG).show();
 			Log.i("MISPRUEBAS","lelgo al final de la asynctask");
         	//mResetProgressDialog.dismiss();
         	//Guardar referencia a archivo y empresa en nest5.
@@ -2904,7 +2899,7 @@ public class Initialactivity extends FragmentActivity implements
     		Promo[] promos = null;
     		User user= null;
     		JSONObject respuesta = null;
-    		String mensaje = "Error de Comunicación con Nest5, inténtalo de nuevo por favor.";
+    		String mensaje = "Error de Comunicaciï¿½n con Nest5, intï¿½ntalo de nuevo por favor.";
     		int status = 0;
 	    	try{
 	    		respuesta = new JSONObject((String) msg.obj);
@@ -2928,6 +2923,7 @@ public class Initialactivity extends FragmentActivity implements
 			    		user = gson2.fromJson((String) respuesta.getString("user"), User.class);
 	    			}catch(Exception e){
 	    				showMessageDialog("ERROR", mensaje);
+	    				e.printStackTrace();
 	    			}
 	    			//showMessageDialog("Listo", "Promo:" + promos[0].name+" Usuario: "+user.name);
 	    			
@@ -3004,7 +3000,7 @@ public class Initialactivity extends FragmentActivity implements
     	public void handleMessage(Message msg){
     		mResetProgressDialog.dismiss();
     		JSONObject respuesta = null;
-    		String mensaje = "Error de Comunicación con Nest5, inténtalo de nuevo por favor.";
+    		String mensaje = "Error de Comunicaciï¿½n con Nest5, intï¿½ntalo de nuevo por favor.";
     		int status = 0;
     		int sellos = 0;
     		int coupones = 0;
@@ -3035,7 +3031,7 @@ public class Initialactivity extends FragmentActivity implements
 	    				showMessageDialog("ERROR", mensaje);
 	    				Log.i("MISPRUEBAS","ERROR 2");
 	    			}
-	    			showMessageDialog("Tarjeta sellada con Éxito", currentUser.name+" con este ha acumulado "+sellos+" sellos y "+coupones+" cupones.");
+	    			showMessageDialog("Tarjeta sellada con ï¿½xito", currentUser.name+" con este ha acumulado "+sellos+" sellos y "+coupones+" cupones.");
 	    			
 	    			
 	    		}

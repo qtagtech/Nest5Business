@@ -125,7 +125,8 @@ public class Setup {
      * The URL of the production service.
      */
    // public static final String PROD_URL = "http://www.nest5.com";
-    public static final String PROD_URL = "http://192.168.5.126:8080";
+    //public static final String PROD_URL = "http://192.168.5.126:8080";
+    public static final String PROD_URL = "http://192.168.88.25:8080";
     public static final String STAGE_URL = "http://nest5stage.herokuapp.com";
     
     public static final String DEV_URL = "http://nest5testserver.herokuapp.com";
@@ -138,7 +139,7 @@ public class Setup {
     
     public static final String apiKey = "zAxEE9U1691Nq0h5JiJ0X20tcayF5RTpmzIOctVGNQNBByHslznDR0VP7rWOuyW";
     
-    //Íconos
+    //ï¿½conos
     public static final int ICON_WIN_STAR = 99;
     public static final int ICON_FACE_WIN = 0;
     public static final int ICON_FACE_ONE = 1;
