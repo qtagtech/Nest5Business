@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/sales_layout"
+    style="?homeBackground"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal"
+    android:weightSum="1.0" >
+
+    <ListView
+        android:id="@+id/finished_list"
+        android:layout_width="0dip"
+        android:layout_height="500dip"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="20dip"
+        android:layout_weight="0.4"
+        android:background="@drawable/blue_gradient" >
+    </ListView>
+
+    <ListView
+        android:id="@+id/turn_list"
+        android:layout_width="0dip"
+        android:layout_height="500dip"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="20dip"
+        android:layout_weight="0.4"
+        android:background="@drawable/blue_gradient" >
+    </ListView>
+
+    <ScrollView
+        android:id="@+id/sales_buttons_scroll"
+        android:layout_width="0dip"
+        android:layout_height="fill_parent"
+        android:layout_marginTop="20dip"
+        android:layout_weight="0.2" >
+
+        <LinearLayout
+            android:id="@+id/sales_buttons"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/sale_title"
+                style="@style/ButtonText"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Venta Seleccionada" />
+
+            <TextView
+                android:id="@+id/sale_name"
+                style="@style/ButtonText"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Ninguna"
+                android:textSize="16dip" />
+
+            <TextView
+                android:id="@+id/sale_details"
+                style="@style/ButtonText"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="99"
+                android:text="No hay detalles"
+                android:textSize="13dip" />
+
+            <Button
+                android:id="@+id/close_turn"
+                style="@style/ButtonText"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/blue_button"
+                android:text="Entregar" />
+
+            <Button
+                android:id="@+id/edit_turn"
+                style="@style/ButtonText"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/blue_button"
+                android:text="Editar" />
+
+            <Button
+                android:id="@+id/delete_turn"
+                style="@style/ButtonText"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/red_button"
+                android:text="Eliminar" />
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

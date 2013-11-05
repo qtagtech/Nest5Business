@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/daily_layout"
+        style="?homeBackground"
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent" >
+
+        
+		
+        <RelativeLayout
+            android:id="@+id/daily_records_display"
+            android:layout_width="830dip"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="20dip"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/blue_gradient" >
+            
+            	
+            <ScrollView
+			    android:layout_height="match_parent"
+			    android:layout_width="fill_parent"
+			    android:id="@+id/daily_table_scroll" 
+			    android:background="@drawable/lt_white_grunge_01">
+			    <TableLayout
+			        android:id="@+id/daily_my_table"
+			        android:layout_height="fill_parent"
+			        android:layout_width="fill_parent"
+			        android:stretchColumns="1"
+			        android:shrinkColumns="1"/>
+			</ScrollView>	
+            	
+            	
+            	    
+            	    
+            	    
+            	
+
+        </RelativeLayout>
+        
+        
+        <RelativeLayout
+            android:id="@+id/daily_records_buttons"
+            android:layout_width="300dip"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="20dip"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/blue_gradient" >
+        <ScrollView 
+  		    android:id="@+id/daily_buttons_scroll"
+            android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+	        
+	        android:layout_marginTop="10dip"
+	        
+	        >
+	        <LinearLayout 
+	            android:id="@+id/daily_buttons"
+        
+		        android:layout_width="match_parent"
+		        android:layout_height="match_parent"
+		        android:orientation="vertical"
+		        
+	            
+	            >
+	             
+	           
+	            
+	            <Button 
+			        android:id="@+id/daily_today"
+			        
+			        android:layout_height="wrap_content"
+			        android:layout_width="fill_parent"
+			        android:background="@drawable/blue_button" 
+			        style="@style/ButtonText"
+			        android:text="Hoy"/>
+  		    <Button 
+			        android:id="@+id/daily_all"
+			        android:layout_width="fill_parent"
+			        android:layout_height="wrap_content"
+			        android:background="@drawable/blue_button" 
+			        style="@style/ButtonText"
+			        android:text="Todo"/>
+  		    
+
+	        </LinearLayout>
+	        
+  		    
+  		    
+  		    
+  		</ScrollView>
+  		</RelativeLayout>
+        
+        
+
+        
+
+    </RelativeLayout>

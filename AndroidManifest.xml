@@ -2,10 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.nest5.businessClient"
     android:installLocation="preferExternal"
-    android:versionCode="1"
+    android:versionCode="2"
     android:versionName="0.1" >
 
-    <uses-sdk android:minSdkVersion="15" android:targetSdkVersion="18" />
+    <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="19" />
      
 
     <supports-screens android:xlargeScreens="true" />
@@ -15,12 +15,9 @@
 
 
 
-    <!-- Permission to request authtokens from the AccountManager -->
-    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
+    
 
-    <!-- Send the registration id to the server -->
     <uses-permission android:name="android.permission.INTERNET" />
-    <!-- <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
@@ -35,7 +32,7 @@
         android:label="@string/app_name"
         android:theme="@style/Nest5.Default"
         android:allowBackup="true" >
-        <uses-library android:name="com.google.android.maps" />
+        
 
         <activity
             android:name="com.nest5.businessClient.Initialactivity"
@@ -43,20 +40,6 @@
             android:screenOrientation="landscape" >
             
         </activity>
-
-      
-
-        
-        <activity
-            android:name="com.nest5.businessClient.FacebookActivity"
-            android:label="@string/app_name" >
-        </activity>
-
-        
-
-       
-
-       
 
         <activity
             android:name="com.nest5.businessClient.LoginActivity"
