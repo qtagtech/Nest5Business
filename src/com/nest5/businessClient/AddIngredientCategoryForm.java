@@ -61,7 +61,7 @@ public void onAttach(Activity activity){
     /* ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
              R.array.planets_array, android.R.layout.simple_spinner_item);*/
      
-     getDialog().setTitle("Agregar Nueva Categoría de Ingrediente");
+     getDialog().setTitle("Agregar Nueva CategorÃ­a de Ingrediente");
      
      saveBtn.setOnClickListener(new OnClickListener() {
 		

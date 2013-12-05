@@ -46,7 +46,7 @@ public void onAttach(Activity activity){
 	 frag = this;
      View view = inflater.inflate(R.layout.add_menu, container);
      ListView list = (ListView) view.findViewById(R.id.add_item_list);
-     String[] options = {"Agregar Ingrediente","Agregar Producto","Agregar Combo","Agregar Categoría de Ingrediente","Agregar Categoría de Producto"};
+     String[] options = {"Agregar Ingrediente","Agregar Producto","Agregar Combo","Agregar CategorÃ­a de Ingrediente","Agregar CategorÃ­a de Producto"};
      ImageAndTextAdapter adapter = new ImageAndTextAdapter(view.getContext(),options, list, inflater);
      list.setAdapter(adapter);
      getDialog().setTitle("Agregar Nuevo Item");

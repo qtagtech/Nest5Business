@@ -279,7 +279,7 @@ public void onAttach(Activity activity){
 			else if((price == null || price.isEmpty()) && (priceQty != null || !priceQty.isEmpty())){
 				
 				txtPrice.findFocus();
-				Toast.makeText(getActivity(), "Es necesario indicar un precio de Ingrediente si se indica un valor de porción", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getActivity(), "Es necesario indicar un precio de Ingrediente si se indica un valor de porciÃ³n", Toast.LENGTH_SHORT).show();
 			}//Un ingrediente si perimite tener precio en 0.0, siempre y cuando la cantidad de venta este en cero tambien, eso siginifica que no se vende por separado.
 			else
 			{

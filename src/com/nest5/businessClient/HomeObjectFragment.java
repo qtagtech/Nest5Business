@@ -96,7 +96,7 @@ public View onCreateView(LayoutInflater inflater,
         // Integer.toString(args.getInt(ARG_OBJECT)));
 Drawable background = getResources().getDrawable(R.drawable.rosewood);
  background.setAlpha(50);
- RelativeLayout backLayout = (RelativeLayout) rootView.findViewById(R.id.home_layout);
+ LinearLayout backLayout = (LinearLayout) rootView.findViewById(R.id.home_layout);
  backLayout.setBackgroundDrawable(background);
  //LinearLayout ll = (LinearLayout) rootView.findViewById(R.id.ingredient_categories_buttons);
 		 //values = new long[ingredients.size()];

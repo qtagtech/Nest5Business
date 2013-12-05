@@ -92,7 +92,7 @@ public class DemoCollectionPagerAdapter extends FragmentStatePagerAdapter {
 	 {
 	 case 0: title =  "INICIO - PUNTO DE VENTA Nest5";
 		 break;
-	 case 1: title =  "DETALLE DE ÓRDENES";
+	 case 1: title =  "DETALLE DE Ã“RDENES";
 	 break;
 	 case 2: title =  "DETALLE DE REGISTROS";
 	 break;
