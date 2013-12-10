@@ -6,7 +6,8 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="horizontal"
-    android:weightSum="1" >
+    android:weightSum="1"
+    android:baselineAligned="false" >
 
     <!-- Contenedor de tiquete de registro -->
 
@@ -114,7 +115,7 @@
                 android:id="@+id/ingrediet_categories"
                 android:layout_width="match_parent"
                 android:layout_height="0dip"
-                android:layout_weight="0.3" >
+                android:layout_weight="0.2" >
 
                 <LinearLayout
                     android:id="@+id/ingredient_categories_buttons"
@@ -128,14 +129,14 @@
                 android:id="@+id/gridview"
                 android:layout_width="match_parent"
                 android:layout_height="0dip"
-                android:layout_marginTop="70dip"
-                android:layout_weight="0.7"
+                android:layout_marginTop="10dip"
+                android:layout_weight="0.8"
                 android:columnWidth="90dp"
                 android:gravity="center"
-                android:horizontalSpacing="10dp"
+                android:horizontalSpacing="5dp"
                 android:numColumns="auto_fit"
                 android:stretchMode="columnWidth"
-                android:verticalSpacing="10dp" />
+                android:verticalSpacing="5dp" />
         </LinearLayout>
 
         <TextView

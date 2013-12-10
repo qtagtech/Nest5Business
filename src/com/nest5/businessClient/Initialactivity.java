@@ -2621,8 +2621,8 @@ public class Initialactivity extends FragmentActivity implements
 		if (currentVolume < maxVolume) {
 
 			showMessageDialog(
-					"AtenciÃ³n",
-					"Para leer una tarjeta Nest5 debes subir el volumen de tu dispositivo al mÃ¡ximo.");
+					"Atención",
+					"Para leer una tarjeta Nest5 debes subir el volumen de tu dispositivo al máximo.");
 			ret = false;
 		}
 

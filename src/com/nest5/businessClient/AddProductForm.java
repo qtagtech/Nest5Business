@@ -106,9 +106,9 @@ public void onAttach(Activity activity){
     	chkAutomaticCost.setVisibility(View.GONE);
     	taxDesc.setVisibility(View.GONE);
     	desc.setVisibility(View.GONE);
-    	saveBtn.setText("Crear Nueva Categoría");
+    	saveBtn.setText("Crear Nueva CategorÃ­a");
     	TextView title = (TextView) view.findViewById(R.id.product_category_label);
-    	title.setText("Para crear un Producto, primero debes tener categorías configuradas.\nHaz clic en crear ahora.");
+    	title.setText("Para crear un Producto, primero debes tener categorÃ­as configuradas.\nHaz clic en crear ahora.");
     	saveBtn.setOnClickListener(new OnClickListener() {
 			
 			@Override

@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:minHeight="1000dp"
+    android:minWidth="1000dp" >
+
+    <RelativeLayout
+        android:id="@+id/home_layout"
+        style="?homeBackground"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+
+        <RelativeLayout
+            android:id="@+id/ingredients_display"
+            android:layout_width="730dip"
+            android:layout_height="500dip"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="20dip"
+            android:background="@drawable/blue_gradient" >
+
+
+            <HorizontalScrollView
+                android:id="@+id/ingrediet_categories"
+                android:layout_width="fill_parent"
+                android:layout_height="50dip"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true" >
+
+                <LinearLayout
+                    android:id="@+id/ingredient_categories_buttons"
+                    android:layout_width="wrap_content"
+                    android:layout_height="fill_parent"
+                    android:orientation="horizontal" >
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <GridView
+                android:id="@+id/gridview_ingredients"
+                android:layout_width="fill_parent"
+                android:layout_height="300dip"
+                android:layout_marginTop="70dip"
+                android:columnWidth="90dp"
+                android:gravity="center"
+                android:horizontalSpacing="10dp"
+                android:numColumns="auto_fit"
+                android:stretchMode="columnWidth"
+                android:verticalSpacing="10dp" />
+
+            <LinearLayout
+                android:id="@+id/combo_properties"
+                android:layout_width="fill_parent"
+                android:layout_height="150dip"
+                android:layout_below="@id/gridview_ingredients"
+                android:gravity="center_vertical|center_horizontal"
+                android:orientation="vertical" >
+
+                <LinearLayout
+                    android:id="@+id/combo_properties"
+                    android:layout_width="fill_parent"
+                    android:layout_height="100dip"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:orientation="horizontal"
+                    android:weightSum="1.0" >
+
+                    <EditText
+                        android:id="@+id/combo_name_edit"
+                        android:layout_width="0dip"
+                        android:layout_height="100dip"
+                        android:layout_weight="0.3"
+                        android:hint="Nombre"
+                        android:imeOptions="actionNext"
+                        android:inputType="text" />
+
+                    <EditText
+                        android:id="@+id/combo_cost_edit"
+                        android:layout_width="0dip"
+                        android:layout_height="100dip"
+                        android:layout_weight="0.3"
+                        android:hint="Costo de Producción"
+                        android:imeOptions="actionNext"
+                        android:inputType="number" />
+
+                    <EditText
+                        android:id="@+id/combo_price_edit"
+                        android:layout_width="0dip"
+                        android:layout_height="100dip"
+                        android:layout_weight="0.3"
+                        android:hint="Precio de Venta"
+                        android:imeOptions="actionNext"
+                        android:inputType="number" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/combo_taxes"
+                    android:layout_width="fill_parent"
+                    android:layout_height="100dip"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:orientation="horizontal"
+                    android:weightSum="1.0" >
+
+                    <CheckBox
+                        android:id="@+id/combo_tax_included"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.3"
+                        android:checked="true"
+                        android:gravity="center_vertical|center_horizontal"
+                        android:height="50dip"
+                        android:text="Marca si el Precio Indicado incluye el siguiente impuesto."
+                        android:width="0dip" />
+
+                    <Spinner
+                        android:id="@+id/combo_tax_spinner"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.7" />
+                </LinearLayout>
+            </LinearLayout>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/ingredients_selected_display"
+            android:layout_width="450dip"
+            android:layout_height="650dip"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/blue_gradient" >
+
+            <ScrollView
+                android:id="@+id/shelves"
+                android:layout_width="fill_parent"
+                android:layout_height="300dip"
+                android:layout_alignParentTop="true"
+                android:background="@drawable/wood_texture" >
+
+                <LinearLayout
+                    android:id="@+id/ingredient_shelve"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:weightSum="1" >
+                </LinearLayout>
+            </ScrollView>
+
+            <ListView
+                android:id="@+id/product_add_list"
+                android:layout_width="fill_parent"
+                android:layout_height="200dip"
+                android:layout_below="@id/shelves"
+                android:background="@drawable/lt_white_grunge_01" >
+            </ListView>
+
+            <ListView
+                android:id="@+id/ingredient_add_list"
+                android:layout_width="fill_parent"
+                android:layout_height="200dip"
+                android:layout_below="@id/product_add_list"
+                android:background="@drawable/lt_white_grunge_01" >
+            </ListView>
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/ticket_buttons"
+            android:layout_width="wrap_content"
+            android:layout_height="100dip"
+            android:layout_alignBottom="@id/ingredients_selected_display"
+            android:layout_alignLeft="@id/ingredients_display"
+            android:gravity="center_vertical|center_horizontal"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/save_recepie"
+                style="@style/ButtonText"
+                android:layout_height="wrap_content"
+                android:background="@drawable/blue_button"
+                android:text="Guardar" />
+
+            <Button
+                android:id="@+id/cancel_recepie"
+                style="@style/ButtonText"
+                android:layout_height="wrap_content"
+                android:background="@drawable/red_button"
+                android:text="Cancelar" />
+        </LinearLayout>
+    </RelativeLayout>
+
+</LinearLayout>

@@ -60,7 +60,7 @@ public View onCreateView(LayoutInflater inflater,
 	        // Integer.toString(args.getInt(ARG_OBJECT)));
 	Drawable background = getResources().getDrawable(R.drawable.rosewood);
 	 background.setAlpha(50);
-	 RelativeLayout backLayout = (RelativeLayout) rootView.findViewById(R.id.inventory_layout);
+	 LinearLayout backLayout = (LinearLayout) rootView.findViewById(R.id.inventory_layout);
 	 backLayout.setBackgroundDrawable(background);
 	 return rootView;
 }
