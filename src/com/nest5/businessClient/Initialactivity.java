@@ -21,42 +21,14 @@ package com.nest5.businessClient;
  * */
 
 
-import com.nest5.businessClient.User;
-
-import com.nest5.businessClient.AddIngredientCategoryForm.OnAddIngredientCategoryListener;
-import com.nest5.businessClient.AddProductCategoryForm.OnAddProductCategoryListener;
-import com.nest5.businessClient.AddProductForm.OnAddProductListener;
-import com.nest5.businessClient.CreateComboView.OnCreateComboListener;
-import com.nest5.businessClient.CreateProductView.OnCreateProductListener;
-import com.nest5.businessClient.DailyObjectFragment.OnDailyObjectFragmentCreatedListener;
-import com.nest5.businessClient.HomeObjectFragment.OnHomeObjectFragmentCreatedListener;
-import com.nest5.businessClient.InventoryObjectFragment.OnInventoryObjectFragmentCreatedListener;
-import com.nest5.businessClient.Nest5ReadObjectFragment.OnNest5ReadObjectFragmentCreatedListener;
-import com.nest5.businessClient.R;
-import com.nest5.businessClient.PaymentForm.OnPayListener;
-import com.nest5.businessClient.SalesObjectFragment.OnSalesObjectFragmentCreatedListener;
-import com.nest5.businessClient.SelectAddItem.OnAddItemSelectedListener;
-import com.nest5.businessClient.AddIngredientForm.OnAddIngredientListener;
-import com.nest5.businessClient.HomeObjectFragment.OnIngredientCategorySelectedListener;
-import com.nest5.businessClient.Registrable;
-
-
-
-
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-
-import java.security.GeneralSecurityException;
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -67,51 +39,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
-//import com.example.android.BluetoothChat.BluetoothChat;
-
-import com.nest5.businessClient.WifiDirectDialog.DeviceActionListener;
-
-import com.acs.acr31.ACR31Reader;
-
-import com.acs.acr31.Track1Data;
-import com.acs.acr31.Track2Data;
-import com.acs.acr31.TrackData;
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.google.gson.Gson;
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
-
-import com.nest5.businessClient.ViewUtils;
-
-import android.R.color;
 import android.app.ActionBar;
-import android.app.ActionBar.LayoutParams;
 import android.app.ActionBar.Tab;
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -126,19 +63,9 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
-import android.location.Address;
-import android.location.Criteria;
-import android.location.Geocoder;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.media.MediaPlayer.OnCompletionListener;
 import android.media.RingtoneManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
@@ -157,7 +84,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -165,18 +91,11 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnLongClickListener;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
-import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -184,20 +103,40 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.PopupMenu;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
-import android.widget.TabHost;
-import android.widget.TabHost.TabSpec;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.acs.acr31.ACR31Reader;
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.google.gson.Gson;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
+import com.nest5.businessClient.AddIngredientCategoryForm.OnAddIngredientCategoryListener;
+import com.nest5.businessClient.AddIngredientForm.OnAddIngredientListener;
+import com.nest5.businessClient.AddProductCategoryForm.OnAddProductCategoryListener;
+import com.nest5.businessClient.AddProductForm.OnAddProductListener;
+import com.nest5.businessClient.CreateComboView.OnCreateComboListener;
+import com.nest5.businessClient.CreateProductView.OnCreateProductListener;
+import com.nest5.businessClient.DailyObjectFragment.OnDailyObjectFragmentCreatedListener;
+import com.nest5.businessClient.HomeObjectFragment.OnHomeObjectFragmentCreatedListener;
+import com.nest5.businessClient.HomeObjectFragment.OnIngredientCategorySelectedListener;
+import com.nest5.businessClient.InventoryObjectFragment.OnInventoryObjectFragmentCreatedListener;
+import com.nest5.businessClient.Nest5ReadObjectFragment.OnNest5ReadObjectFragmentCreatedListener;
+import com.nest5.businessClient.PaymentForm.OnPayListener;
+import com.nest5.businessClient.SalesObjectFragment.OnSalesObjectFragmentCreatedListener;
+import com.nest5.businessClient.SelectAddItem.OnAddItemSelectedListener;
+import com.nest5.businessClient.WifiDirectDialog.DeviceActionListener;
+//import com.example.android.BluetoothChat.BluetoothChat;
 
 /**
  * Main activity - requests "Hello, World" messages from the server and provides
@@ -271,7 +210,7 @@ public class Initialactivity extends FragmentActivity implements
 	// Saber si llama poner stampCard desde lista de promociones de usuario
 	Boolean fromMyDeals = false;
 
-	// Validar si botón redime cupón o sello
+	// Validar si botÃ³n redime cupÃ³n o sello
 
 	Boolean redeemCoupon = false;
 
@@ -365,7 +304,7 @@ public class Initialactivity extends FragmentActivity implements
 	private long init;
 	private long end;
 
-	// Propiedades de lector magnético ACR31 de ACS Ltd.
+	// Propiedades de lector magnÃ©tico ACR31 de ACS Ltd.
 	private AudioManager mAudioManager;
 	private ACR31Reader mReader;
 	private ProgressDialog mResetProgressDialog;
@@ -601,7 +540,7 @@ public class Initialactivity extends FragmentActivity implements
 
 		Tab homeTab = actionBar.newTab().setText("Inicio")
 				.setTabListener(tabListener);
-		Tab ordersTab = actionBar.newTab().setText("Órdenes")
+		Tab ordersTab = actionBar.newTab().setText("Ã“rdenes")
 				.setTabListener(tabListener);
 		Tab dailyTab = actionBar.newTab().setText("Registros")
 				.setTabListener(tabListener);
@@ -634,7 +573,7 @@ public class Initialactivity extends FragmentActivity implements
 		VarelaFont = Typeface.createFromAsset(getAssets(),
 				"fonts/Varela-Regular.otf");
 
-		// Lector de tarjetas magnéticas
+		// Lector de tarjetas magnÃ©ticas
 		mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		mReader = new ACR31Reader(mAudioManager);
 		/* Initialize the reset progress dialog */
@@ -686,7 +625,7 @@ public class Initialactivity extends FragmentActivity implements
 						@Override
 						public void run() {
 							
-							mResetProgressDialog.setMessage("Solicitando Información al Servidor...");
+							mResetProgressDialog.setMessage("Solicitando InformaciÃ³n al Servidor...");
 							mResetProgressDialog.setCancelable(false);
 							mResetProgressDialog.setIndeterminate(true);
 							mResetProgressDialog.show();
@@ -841,12 +780,12 @@ public class Initialactivity extends FragmentActivity implements
 		if (prefs.getInt(Util.INTERNET_CONNECTION, 0) == 1) {
 
 		} else {
-			// Toast.makeText(mContext, "No tienes conexión a internet.",
+			// Toast.makeText(mContext, "No tienes conexiÃ³n a internet.",
 			// Toast.LENGTH_LONG).show();
 			/*
 			 * AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			 * builder.setMessage(
-			 * "No tienes una conexión a internet activa. Habilítala haciendo click en aceptar y seleccionando luego una red."
+			 * "No tienes una conexiÃ³n a internet activa. HabilÃ­tala haciendo click en aceptar y seleccionando luego una red."
 			 * ) .setCancelable(false) .setPositiveButton("Aceptar", new
 			 * DialogInterface.OnClickListener() { public void
 			 * onClick(DialogInterface dialog, int id) { Intent intent = new
@@ -897,14 +836,14 @@ public class Initialactivity extends FragmentActivity implements
 
 				@Override
 				public void onSuccess() {
-					Toast.makeText(Initialactivity.this, "Búsqueda Iniciada",
+					Toast.makeText(Initialactivity.this, "BÃºsqueda Iniciada",
 							Toast.LENGTH_SHORT).show();
 				}
 
 				@Override
 				public void onFailure(int reasonCode) {
 					Toast.makeText(Initialactivity.this,
-							"Búsqueda Fallida: " + reasonCode,
+							"BÃºsqueda Fallida: " + reasonCode,
 							Toast.LENGTH_SHORT).show();
 				}
 			});
@@ -1306,7 +1245,7 @@ public class Initialactivity extends FragmentActivity implements
 
 					// ordersList.setOnItemClickListener(orderListListener);
 					// makeTable("NA");
-					sale_name.setText("Venta Guardada con Éxito");
+					sale_name.setText("Venta Guardada con Ã‰xito");
 					sale_details
 							.setText("Selecciona otro elemento para ver detalles.");
 					updateSaleValue();
@@ -2227,7 +2166,7 @@ public class Initialactivity extends FragmentActivity implements
 		lines++;
 		factura.append("Ingresa a www.mrpastor.com\r\n");
 		lines++;
-		factura.append("Síguenos en\r\n");
+		factura.append("SÃ­guenos en\r\n");
 		lines++;
 		factura.append("facebook/misterpastor\r\n");
 		lines++;
@@ -2267,7 +2206,7 @@ public class Initialactivity extends FragmentActivity implements
 		 * factura.append("\r\n\r\n Gracias Por Comprar en Mr. Pastor.\r\n");
 		 * factura.append("Ingresa http://www.mrpastor.com\r\n");
 		 * factura.append(
-		 * "O Síguenos en facebook/misterpastor - Twiiter.com/comidasmrpastor");
+		 * "O SÃ­guenos en facebook/misterpastor - Twiiter.com/comidasmrpastor");
 		 */
 
 	}
@@ -2424,7 +2363,7 @@ public class Initialactivity extends FragmentActivity implements
 			@Override
 			public void onFailure(int reason) {
 				Toast.makeText(Initialactivity.this,
-						"La conexión falló. Reinténtalo de nuevo.",
+						"La conexiÃ³n fallÃ³. ReintÃ©ntalo de nuevo.",
 						Toast.LENGTH_SHORT).show();
 			}
 		});
@@ -2437,7 +2376,7 @@ public class Initialactivity extends FragmentActivity implements
 
 			@Override
 			public void onFailure(int reasonCode) {
-				Log.d(TAG, "La desconexión falló, la razón es:" + reasonCode);
+				Log.d(TAG, "La desconexiÃ³n fallÃ³, la razÃ³n es:" + reasonCode);
 
 			}
 
@@ -2484,7 +2423,7 @@ public class Initialactivity extends FragmentActivity implements
 		// we will try once more
 		if (manager != null && !retryChannel) {
 			Toast.makeText(this,
-					"Se perdió la conexión con el canal, inténtalo de nuevo.",
+					"Se perdiÃ³ la conexiÃ³n con el canal, intÃ©ntalo de nuevo.",
 					Toast.LENGTH_LONG).show();
 			// resetData();
 			retryChannel = true;
@@ -2492,7 +2431,7 @@ public class Initialactivity extends FragmentActivity implements
 		} else {
 			Toast.makeText(
 					this,
-					"¡Error grave!. Se perdió por completo la conexión con dispositivos. Reintenta Desactivando/Activando WifiDirect otra vez.",
+					"Â¡Error grave!. Se perdiÃ³ por completo la conexiÃ³n con dispositivos. Reintenta Desactivando/Activando WifiDirect otra vez.",
 					Toast.LENGTH_LONG).show();
 		}
 	}
@@ -2630,7 +2569,7 @@ public class Initialactivity extends FragmentActivity implements
 			}
 			DecimalFormat dec = new DecimalFormat("$###,###,###");
 
-			saleValue.setText("Ventas del Día: " + dec.format(total));
+			saleValue.setText("Ventas del DÃ­a: " + dec.format(total));
 
 		}
 	}
@@ -2682,8 +2621,8 @@ public class Initialactivity extends FragmentActivity implements
 		if (currentVolume < maxVolume) {
 
 			showMessageDialog(
-					"Atención",
-					"Para leer una tarjeta Nest5 debes subir el volumen de tu dispositivo al máximo.");
+					"AtenciÃ³n",
+					"Para leer una tarjeta Nest5 debes subir el volumen de tu dispositivo al mÃ¡ximo.");
 			ret = false;
 		}
 
@@ -2796,7 +2735,7 @@ public class Initialactivity extends FragmentActivity implements
 				if (status == 1) {
 					Log.i("MISPRUEBAS","listo");
 					//Abrir Nueva Activity porque esta registrado
-					//Toast.makeText(mContext, "Datos guardados con éxito.", Toast.LENGTH_LONG).show();
+					//Toast.makeText(mContext, "Datos guardados con Ã©xito.", Toast.LENGTH_LONG).show();
 					File file = DbExportImport.exportDb(name);
 					UploadFileToS3 uploadTask = new UploadFileToS3();
 					uploadTask.execute(file);
@@ -2865,9 +2804,9 @@ public class Initialactivity extends FragmentActivity implements
 		protected void onPostExecute(final Boolean status) {
 			mResetProgressDialog.dismiss();	
 			if(status)
-				Toast.makeText(mContext, "Datos guardados con éxito.", Toast.LENGTH_LONG).show();
+				Toast.makeText(mContext, "Datos guardados con Ã©xito.", Toast.LENGTH_LONG).show();
 			else
-				Toast.makeText(mContext, "Error guardando el archivo en la nube, inténtalo de nuevo por favor0..", Toast.LENGTH_LONG).show();
+				Toast.makeText(mContext, "Error guardando el archivo en la nube, intÃ©ntalo de nuevo por favor0..", Toast.LENGTH_LONG).show();
 			Log.i("MISPRUEBAS","lelgo al final de la asynctask");
         	//mResetProgressDialog.dismiss();
         	//Guardar referencia a archivo y empresa en nest5.
@@ -2899,7 +2838,7 @@ public class Initialactivity extends FragmentActivity implements
     		Promo[] promos = null;
     		User user= null;
     		JSONObject respuesta = null;
-    		String mensaje = "Error de Comunicación con Nest5, inténtalo de nuevo por favor.";
+    		String mensaje = "Error de ComunicaciÃ³n con Nest5, intÃ©ntalo de nuevo por favor.";
     		int status = 0;
 	    	try{
 	    		respuesta = new JSONObject((String) msg.obj);
@@ -3000,7 +2939,7 @@ public class Initialactivity extends FragmentActivity implements
     	public void handleMessage(Message msg){
     		mResetProgressDialog.dismiss();
     		JSONObject respuesta = null;
-    		String mensaje = "Error de Comunicación con Nest5, inténtalo de nuevo por favor.";
+    		String mensaje = "Error de ComunicaciÃ³n con Nest5, intÃ©ntalo de nuevo por favor.";
     		int status = 0;
     		int sellos = 0;
     		int coupones = 0;
@@ -3031,7 +2970,7 @@ public class Initialactivity extends FragmentActivity implements
 	    				showMessageDialog("ERROR", mensaje);
 	    				Log.i("MISPRUEBAS","ERROR 2");
 	    			}
-	    			showMessageDialog("Tarjeta sellada con éxito", currentUser.name+" con este ha acumulado "+sellos+" sellos y "+coupones+" cupones.");
+	    			showMessageDialog("Tarjeta sellada con Ã©xito", currentUser.name+" con este ha acumulado "+sellos+" sellos y "+coupones+" cupones.");
 	    			
 	    			
 	    		}
