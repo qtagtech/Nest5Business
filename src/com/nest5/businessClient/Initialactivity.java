@@ -540,7 +540,7 @@ public class Initialactivity extends FragmentActivity implements
 
 		Tab homeTab = actionBar.newTab().setText("Inicio")
 				.setTabListener(tabListener);
-		Tab ordersTab = actionBar.newTab().setText("Ã“rdenes")
+		Tab ordersTab = actionBar.newTab().setText("Órdenes")
 				.setTabListener(tabListener);
 		Tab dailyTab = actionBar.newTab().setText("Registros")
 				.setTabListener(tabListener);
