@@ -33,7 +33,7 @@ public static final String ARG_OBJECT = "object";
 public interface OnNest5ReadObjectFragmentCreatedListener {
     public void OnNest5ReadObjectFragmentCreated(View v);
 
-    public void OnManualReadPressed(String email);
+    public void OnManualReadPressed(String email,Boolean redeem);
     
 }
 
@@ -42,6 +42,7 @@ private  View rootView;
 private Button readManualBtn;
 private Button manualButton;
 private EditText manualEmail;
+private Button manualRedeem;
 
 
 @Override
@@ -79,6 +80,39 @@ public View onCreateView(LayoutInflater inflater,
 
 	 readManualBtn = (Button) rootView.findViewById(R.id.read_manual_username);
 	 readManualBtn.setOnClickListener(displayManualUsernameListener);
+	 //Temporal, mientras la prioridad es el lector manual y no el banda magnética
+	 manualEmail = (EditText) rootView.findViewById(R.id.manual_email);
+	 if(manualEmail != null){
+		 manualButton = (Button) rootView.findViewById(R.id.stamp_manual_user);
+		 manualRedeem = (Button) rootView.findViewById(R.id.redeem_manual_user);
+			manualButton.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					
+					
+					if (!manualEmail.getText().toString().trim().equals(""))
+					{
+						mCallback.OnManualReadPressed(manualEmail.getText().toString(),false);
+					}
+					
+				}
+			});
+manualRedeem.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					
+					
+					if (!manualEmail.getText().toString().trim().equals(""))
+					{
+						mCallback.OnManualReadPressed(manualEmail.getText().toString(),true);
+					}
+					
+				}
+			}); 
+	 }//acaba lo temporal
+		
 
 	 return rootView;
 }
@@ -91,25 +125,30 @@ private OnClickListener displayManualUsernameListener = new OnClickListener() {
 	public void onClick(View v) {
 		LinearLayout frame = (LinearLayout) rootView.findViewById(R.id.manual_user_layout);
 		frame.setVisibility(View.VISIBLE);
-		manualEmail = (EditText) rootView.findViewById(R.id.manual_email);
-		manualButton = (Button) rootView.findViewById(R.id.stamp_manual_user);
-		manualButton.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
+		if(manualEmail == null){
+			manualEmail = (EditText) rootView.findViewById(R.id.manual_email);
+			manualButton = (Button) rootView.findViewById(R.id.stamp_manual_user);
+			manualButton.setOnClickListener(new OnClickListener() {
 				
-				
-				if (!manualEmail.getText().toString().trim().equals(""))
-				{
-					mCallback.OnManualReadPressed(manualEmail.getText().toString());
+				@Override
+				public void onClick(View v) {
+					
+					
+					if (!manualEmail.getText().toString().trim().equals(""))
+					{
+						mCallback.OnManualReadPressed(manualEmail.getText().toString(),false);
+					}
+					
 				}
-				
-			}
-		});
+			});
+		}
+		
 		
 
 	}
 };
+
+
 
 
 

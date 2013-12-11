@@ -20,7 +20,6 @@ package com.nest5.businessClient;
  * 
  * */
 
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -136,6 +135,7 @@ import com.nest5.businessClient.PaymentForm.OnPayListener;
 import com.nest5.businessClient.SalesObjectFragment.OnSalesObjectFragmentCreatedListener;
 import com.nest5.businessClient.SelectAddItem.OnAddItemSelectedListener;
 import com.nest5.businessClient.WifiDirectDialog.DeviceActionListener;
+
 //import com.example.android.BluetoothChat.BluetoothChat;
 
 /**
@@ -314,14 +314,10 @@ public class Initialactivity extends FragmentActivity implements
 
 	private Button readCardBtn;
 
-	
-
 	private SharedPreferences prefs;
-	
+
 	private List<Promo> companyPromos;
 	private User currentUser;
-	
-
 
 	/**
 	 * @param isWifiP2pEnabled
@@ -579,9 +575,6 @@ public class Initialactivity extends FragmentActivity implements
 		/* Initialize the reset progress dialog */
 		mResetProgressDialog = new ProgressDialog(mContext);
 
-		
-
-
 		// ACR31 RESET CALLBACK
 		mReader.setOnResetCompleteListener(new ACR31Reader.OnResetCompleteListener() {
 
@@ -619,36 +612,40 @@ public class Initialactivity extends FragmentActivity implements
 								: " (Checksum Error)");
 
 				Log.i("MISPRUEBAS", hexString);
-				if(reader.verifyData(rawData)){
+				if (reader.verifyData(rawData)) {
 					runOnUiThread(new Runnable() {
-						
+
 						@Override
 						public void run() {
-							
-							mResetProgressDialog.setMessage("Solicitando InformaciÃ³n al Servidor...");
+
+							mResetProgressDialog
+									.setMessage("Solicitando InformaciÃ³n al Servidor...");
 							mResetProgressDialog.setCancelable(false);
 							mResetProgressDialog.setIndeterminate(true);
 							mResetProgressDialog.show();
-							
+
 						}
 					});
-					SharedPreferences prefs = Util.getSharedPreferences(mContext);
-					
-					restService = new RestService(recievePromoandUserHandler, mContext,
-							 Setup.PROD_URL+"/company/initMagneticStamp");
-							 restService.addParam("company", prefs.getString(Setup.COMPANY_ID, "0"));
-							 restService.addParam("magnetic5", hexString);
-							 restService.setCredentials("apiadmin", Setup.apiKey);
-							 try {
-							 restService.execute(RestService.POST);} catch (Exception e) {
-							 e.printStackTrace(); 
-							 Log.i("MISPRUEBAS","Error empezando request");}
+					SharedPreferences prefs = Util
+							.getSharedPreferences(mContext);
+
+					restService = new RestService(recievePromoandUserHandler,
+							mContext, Setup.PROD_URL
+									+ "/company/initMagneticStamp");
+					restService.addParam("company",
+							prefs.getString(Setup.COMPANY_ID, "0"));
+					restService.addParam("magnetic5", hexString);
+					restService.setCredentials("apiadmin", Setup.apiKey);
+					try {
+						restService.execute(RestService.POST);
+					} catch (Exception e) {
+						e.printStackTrace();
+						Log.i("MISPRUEBAS", "Error empezando request");
+					}
 				}
-				
+
 			}
 		});
-		
-		
 
 	}
 
@@ -815,8 +812,10 @@ public class Initialactivity extends FragmentActivity implements
 			showAddItemDialog();
 			return true;
 		case R.id.menu_sync:
-			/*Toast.makeText(mContext, " " + salesFromToday.size(),
-					Toast.LENGTH_LONG).show();*/
+			/*
+			 * Toast.makeText(mContext, " " + salesFromToday.size(),
+			 * Toast.LENGTH_LONG).show();
+			 */
 			backUpDb();
 			return true;
 		case R.id.menu_load_register:
@@ -1373,8 +1372,6 @@ public class Initialactivity extends FragmentActivity implements
 		readCardBtn = (Button) v.findViewById(R.id.read_magnetic_card);
 		readCardBtn.setOnClickListener(readMagneticCardListener);
 
-		
-
 	}
 
 	private OnClickListener readMagneticCardListener = new OnClickListener() {
@@ -1384,7 +1381,8 @@ public class Initialactivity extends FragmentActivity implements
 			/* Check the reset volume. */
 			if (checkResetVolume()) {
 
-				mResetProgressDialog.setMessage("Preparando Lector de Tarjetas...");
+				mResetProgressDialog
+						.setMessage("Preparando Lector de Tarjetas...");
 				mResetProgressDialog.setCancelable(false);
 				mResetProgressDialog.setIndeterminate(true);
 
@@ -1395,28 +1393,51 @@ public class Initialactivity extends FragmentActivity implements
 		}
 	};
 
-	
-	//lectira manual de usuario, es decir con correo electronico, esto es un metodo que viene del fragment de nest5ead
+	// lectira manual de usuario, es decir con correo electronico, esto es un
+	// metodo que viene del fragment de nest5ead
 	@Override
-	public void OnManualReadPressed(String email) {
-		mResetProgressDialog.setMessage("Sellando Tarjeta...");
-		mResetProgressDialog.setCancelable(false);
-		mResetProgressDialog.setIndeterminate(true);
-		mResetProgressDialog.show();
-		SharedPreferences prefs = Util.getSharedPreferences(mContext);
-		
-		restService = new RestService(recievePromoandUserHandler, mContext,
-				 Setup.PROD_URL+"/company/initManualStamp");
-				 restService.addParam("company", prefs.getString(Setup.COMPANY_ID, "0"));
-				 restService.addParam("email", email);
-				 restService.setCredentials("apiadmin", Setup.apiKey);
-				 try {
-				 restService.execute(RestService.POST);} catch (Exception e) {
-				 e.printStackTrace(); 
-				 Log.i("MISPRUEBAS","Error empezando request");}
-		
-	}
+	public void OnManualReadPressed(String email, Boolean redeem) {
+		if (!redeem) {
+			mResetProgressDialog.setMessage("Sellando Tarjeta...");
+			mResetProgressDialog.setCancelable(false);
+			mResetProgressDialog.setIndeterminate(true);
+			mResetProgressDialog.show();
+			SharedPreferences prefs = Util.getSharedPreferences(mContext);
 
+			restService = new RestService(recievePromoandUserHandler, mContext,
+					Setup.PROD_URL + "/company/initManualStamp");
+			restService.addParam("company",
+					prefs.getString(Setup.COMPANY_ID, "0"));
+			restService.addParam("email", email);
+			restService.setCredentials("apiadmin", Setup.apiKey);
+			try {
+				restService.execute(RestService.POST);
+			} catch (Exception e) {
+				e.printStackTrace();
+				Log.i("MISPRUEBAS", "Error empezando request");
+			}
+		} else {
+			mResetProgressDialog.setMessage("Redimiendo Beneficios...");
+			mResetProgressDialog.setCancelable(false);
+			mResetProgressDialog.setIndeterminate(true);
+			mResetProgressDialog.show();
+			SharedPreferences prefs = Util.getSharedPreferences(mContext);
+
+			restService = new RestService(recieveRedeemConfirm, mContext,
+					Setup.PROD_URL + "/company/initManualRedeem");
+			restService.addParam("company",
+					prefs.getString(Setup.COMPANY_ID, "0"));
+			restService.addParam("email", email);
+			restService.setCredentials("apiadmin", Setup.apiKey);
+			try {
+				restService.execute(RestService.POST);
+			} catch (Exception e) {
+				e.printStackTrace();
+				Log.i("MISPRUEBAS", "Error empezando request");
+			}
+		}
+
+	}
 
 	private OnItemSelectedListener ingSpinListener = new OnItemSelectedListener() {
 		@Override
@@ -2206,7 +2227,8 @@ public class Initialactivity extends FragmentActivity implements
 		 * factura.append("\r\n\r\n Gracias Por Comprar en Mr. Pastor.\r\n");
 		 * factura.append("Ingresa http://www.mrpastor.com\r\n");
 		 * factura.append(
-		 * "O SÃ­guenos en facebook/misterpastor - Twiiter.com/comidasmrpastor");
+		 * "O SÃ­guenos en facebook/misterpastor - Twiiter.com/comidasmrpastor"
+		 * );
 		 */
 
 	}
@@ -2422,7 +2444,8 @@ public class Initialactivity extends FragmentActivity implements
 	public void onChannelDisconnected() {
 		// we will try once more
 		if (manager != null && !retryChannel) {
-			Toast.makeText(this,
+			Toast.makeText(
+					this,
 					"Se perdiÃ³ la conexiÃ³n con el canal, intÃ©ntalo de nuevo.",
 					Toast.LENGTH_LONG).show();
 			// resetData();
@@ -2663,10 +2686,8 @@ public class Initialactivity extends FragmentActivity implements
 			startActivity(inten);
 		}
 	}
-	
-	private void backUpDb(){
 
-		
+	private void backUpDb() {
 
 		mResetProgressDialog = new ProgressDialog(mContext);
 		mResetProgressDialog.setMessage("Protegiendo Base de Datos");
@@ -2675,125 +2696,132 @@ public class Initialactivity extends FragmentActivity implements
 		mResetProgressDialog.show();
 
 		saveFileRecord();
-		
-		
+
 	}
-	
-	//Amazon S3 Upload Images guarda el archivo en base de datos recibe nombre a usar para el archivo y sube a s3
-	
-	private void saveFileRecord(){
+
+	// Amazon S3 Upload Images guarda el archivo en base de datos recibe nombre
+	// a usar para el archivo y sube a s3
+
+	private void saveFileRecord() {
 		SharedPreferences prefs = Util.getSharedPreferences(mContext);
-		
+
 		restService = new RestService(fileSavedHandler, mContext,
-				 Setup.PROD_URL+"/company/saveDB");
-				 restService.addParam("company", prefs.getString(Setup.COMPANY_ID, "0"));	 
-				 restService.setCredentials("apiadmin", Setup.apiKey);
-				 try {
-				 restService.execute(RestService.POST);} catch (Exception e) {
-				 e.printStackTrace(); 
-				 Log.i("MISPRUEBAS","Error empezando request");}
+				Setup.PROD_URL + "/company/saveDB");
+		restService.addParam("company", prefs.getString(Setup.COMPANY_ID, "0"));
+		restService.setCredentials("apiadmin", Setup.apiKey);
+		try {
+			restService.execute(RestService.POST);
+		} catch (Exception e) {
+			e.printStackTrace();
+			Log.i("MISPRUEBAS", "Error empezando request");
+		}
 	}
+
 	private final Handler fileSavedHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
-			//mResetProgressDialog.dismiss();
-			
-			//temporal abre actividad loggeado
-		/*	prefs.edit().putBoolean(Setup.LOGGED_IN, true).putString(Setup.COMPANY_ID, "12212").putString(Setup.COMPANY_NAME, "Nest5 Test Company").commit();
-			Intent intenter= new Intent(mContext, Initialactivity.class);
-			startActivity(intenter);*/
+			// mResetProgressDialog.dismiss();
+
+			// temporal abre actividad loggeado
+			/*
+			 * prefs.edit().putBoolean(Setup.LOGGED_IN,
+			 * true).putString(Setup.COMPANY_ID,
+			 * "12212").putString(Setup.COMPANY_NAME,
+			 * "Nest5 Test Company").commit(); Intent intenter= new
+			 * Intent(mContext, Initialactivity.class); startActivity(intenter);
+			 */
 			JSONObject respuesta = null;
-				Log.i("MISPRUEBAS","LLEGUE");
+			Log.i("MISPRUEBAS", "LLEGUE");
 			try {
 				respuesta = new JSONObject((String) msg.obj);
 			} catch (Exception e) {
-				Log.i("MISPRUEBAS","ERROR JSON");
+				Log.i("MISPRUEBAS", "ERROR JSON");
 				e.printStackTrace();
 				mResetProgressDialog.dismiss();
-				Toast.makeText(mContext, "Error guardando registro de backup de base de datos", Toast.LENGTH_LONG).show();
+				Toast.makeText(mContext,
+						"Error guardando registro de backup de base de datos",
+						Toast.LENGTH_LONG).show();
 			}
 
 			if (respuesta != null) {
-				Log.i("MISPRUEBAS","CON RESPUESTA");
+				Log.i("MISPRUEBAS", "CON RESPUESTA");
 				int status = 0;
 				String name = "";
-				
+
 				try {
 					status = respuesta.getInt("status");
 					name = respuesta.getString("name");
-					
 
 				} catch (Exception e) {
-					Log.i("MISPRUEBAS","ERROR COGER DATOS");
+					Log.i("MISPRUEBAS", "ERROR COGER DATOS");
 					e.printStackTrace();
 					mResetProgressDialog.dismiss();
-					Toast.makeText(mContext, "Error guardando registro de backup de base de datos", Toast.LENGTH_LONG).show();
+					Toast.makeText(
+							mContext,
+							"Error guardando registro de backup de base de datos",
+							Toast.LENGTH_LONG).show();
 				}
 				// quitar loading
-				
-				
+
 				if (status == 1) {
-					Log.i("MISPRUEBAS","listo");
-					//Abrir Nueva Activity porque esta registrado
-					//Toast.makeText(mContext, "Datos guardados con Ã©xito.", Toast.LENGTH_LONG).show();
+					Log.i("MISPRUEBAS", "listo");
+					// Abrir Nueva Activity porque esta registrado
+					// Toast.makeText(mContext, "Datos guardados con Ã©xito.",
+					// Toast.LENGTH_LONG).show();
 					File file = DbExportImport.exportDb(name);
 					UploadFileToS3 uploadTask = new UploadFileToS3();
 					uploadTask.execute(file);
 				} else {
-					Log.i("MISPRUEBAS","noooo");
+					Log.i("MISPRUEBAS", "noooo");
 					mResetProgressDialog.dismiss();
-					Toast.makeText(mContext, "Error guardando registro de backup de base de datos", Toast.LENGTH_LONG).show();
+					Toast.makeText(
+							mContext,
+							"Error guardando registro de backup de base de datos",
+							Toast.LENGTH_LONG).show();
 				}
 
-			}
-			else{
+			} else {
 				mResetProgressDialog.dismiss();
-				Toast.makeText(mContext, "Error guardando registro de backup de base de datos", Toast.LENGTH_LONG).show();
+				Toast.makeText(mContext,
+						"Error guardando registro de backup de base de datos",
+						Toast.LENGTH_LONG).show();
 			}
 
 		}
 	};
-	
 
 	/**
 	 * Represents an asynchronous login/registration task used to authenticate
 	 * the user.
 	 */
 
-	
 	public class UploadFileToS3 extends AsyncTask<File, Void, Boolean> {
 		@Override
 		protected Boolean doInBackground(File... params) {
 
 			// TODO: attempt upload
-	        String accessKey = "AKIAIIQ5AOSHXVIRUSBA";
-	        String secretKey = "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";
-	        AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
-	        AmazonS3 conn = new AmazonS3Client(credentials);
-	        try{
-	        	Log.i("MISPRUEBAS","subiendo archivo");
-	        	conn.putObject("com.nest5.businessClient", params[0].getName(), params[0]);
-	        }
-	        catch(com.amazonaws.AmazonServiceException e){
-	        	Log.i("MISPRUEBAS","exeption 1");
-	        	e.printStackTrace();
+			String accessKey = "AKIAIIQ5AOSHXVIRUSBA";
+			String secretKey = "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";
+			AWSCredentials credentials = new BasicAWSCredentials(accessKey,
+					secretKey);
+			AmazonS3 conn = new AmazonS3Client(credentials);
+			try {
+				Log.i("MISPRUEBAS", "subiendo archivo");
+				conn.putObject("com.nest5.businessClient", params[0].getName(),
+						params[0]);
+			} catch (com.amazonaws.AmazonServiceException e) {
+				Log.i("MISPRUEBAS", "exeption 1");
+				e.printStackTrace();
 
-	        	return false;
+				return false;
 
-	        	
-	        }
-	        catch(com.amazonaws.AmazonClientException e){
-	        	Log.i("MISPRUEBAS","exeption 2");
-	        	e.printStackTrace();
+			} catch (com.amazonaws.AmazonClientException e) {
+				Log.i("MISPRUEBAS", "exeption 2");
+				e.printStackTrace();
 
-	        	return false;
+				return false;
 
-	        }
-	       
-	        
-			
-
-		
+			}
 
 			// TODO: register the new account here.
 
@@ -2802,226 +2830,384 @@ public class Initialactivity extends FragmentActivity implements
 
 		@Override
 		protected void onPostExecute(final Boolean status) {
-			mResetProgressDialog.dismiss();	
-			if(status)
-				Toast.makeText(mContext, "Datos guardados con Ã©xito.", Toast.LENGTH_LONG).show();
+			mResetProgressDialog.dismiss();
+			if (status)
+				Toast.makeText(mContext, "Datos guardados con Ã©xito.",
+						Toast.LENGTH_LONG).show();
 			else
-				Toast.makeText(mContext, "Error guardando el archivo en la nube, intÃ©ntalo de nuevo por favor0..", Toast.LENGTH_LONG).show();
-			Log.i("MISPRUEBAS","lelgo al final de la asynctask");
-        	//mResetProgressDialog.dismiss();
-        	//Guardar referencia a archivo y empresa en nest5.
-        	
+				Toast.makeText(
+						mContext,
+						"Error guardando el archivo en la nube, intÃ©ntalo de nuevo por favor0..",
+						Toast.LENGTH_LONG).show();
+			Log.i("MISPRUEBAS", "lelgo al final de la asynctask");
+			// mResetProgressDialog.dismiss();
+			// Guardar referencia a archivo y empresa en nest5.
 
-			
 		}
+
 		@Override
 		protected void onCancelled() {
-			
+
 		}
 
-		
-
-		
-		
-
-		
 	}
-	
 
-	/*Recibe datos de promocion y usuario al leer tarjeta magnetica, o al enviar email de usuario a API */
-	private final Handler recievePromoandUserHandler = new Handler()
-    {
-    	
-    	@Override
-    	public void handleMessage(Message msg){
-    		mResetProgressDialog.dismiss();
-    		Promo[] promos = null;
-    		User user= null;
-    		JSONObject respuesta = null;
-    		String mensaje = "Error de ComunicaciÃ³n con Nest5, intÃ©ntalo de nuevo por favor.";
-    		int status = 0;
-	    	try{
-	    		respuesta = new JSONObject((String) msg.obj);
-	    	}
-	    	catch(Exception e){
-	    		showMessageDialog("ERROR", mensaje);
-	    	}
-	    	if(respuesta != null){
-	    		try{
-	    			mensaje = respuesta.getString("message");
-	    			status = respuesta.getInt("status");
-	    		}
-	    		catch(Exception e){
-	    			showMessageDialog("ERROR", mensaje);
-	    		}
-	    		if(status == 1){
-	    			try{
-	    				Gson gson = new Gson();
-	    				Gson gson2 = new Gson();
-			    		promos = gson.fromJson((String) respuesta.getString("promos"), Promo[].class);		    		
-			    		user = gson2.fromJson((String) respuesta.getString("user"), User.class);
-	    			}catch(Exception e){
-	    				showMessageDialog("ERROR", mensaje);
-	    				e.printStackTrace();
-	    			}
-	    			//showMessageDialog("Listo", "Promo:" + promos[0].name+" Usuario: "+user.name);
-	    			
-	    			//Llenar lista con adaptador de array
-	    			companyPromos = Arrays.asList(promos);
-	    			currentUser = user;
-	    			ListView list = (ListView) findViewById(R.id.manual_variable_list);
-	    			
-	    			ArrayAdapter<Promo> promociones = new ArrayAdapter<Promo>(mContext, android.R.layout.simple_list_item_1,promos){
-	    				@Override
-	    			    public View getView(int position, View convertView, ViewGroup parent) {
-	    			        TextView textView = (TextView) super.getView(position, convertView, parent);
-	    			        Promo obj = getItem(position);
-	    			        String name = obj.name +" En: "+obj.store;
-	    			        textView.setText(name);
-	    			        return textView;
-	    			    }
-	    			};
-	    			list.setAdapter(promociones);
-	    			list.setOnItemClickListener(new OnItemClickListener() {
+	/*
+	 * Recibe datos de promocion y usuario al leer tarjeta magnetica, o al
+	 * enviar email de usuario a API
+	 */
+	private final Handler recievePromoandUserHandler = new Handler() {
+
+		@Override
+		public void handleMessage(Message msg) {
+			mResetProgressDialog.dismiss();
+			Promo[] promos = null;
+			User user = null;
+			JSONObject respuesta = null;
+			String mensaje = "Error de Comunicación con Nest5, inténtalo de nuevo por favor.";
+			int status = 0;
+			try {
+				respuesta = new JSONObject((String) msg.obj);
+			} catch (Exception e) {
+				showMessageDialog("ERROR", mensaje);
+			}
+			if (respuesta != null) {
+				try {
+					mensaje = respuesta.getString("message");
+					status = respuesta.getInt("status");
+				} catch (Exception e) {
+					showMessageDialog("ERROR", mensaje);
+				}
+				if (status == 1) {
+					try {
+						Gson gson = new Gson();
+						Gson gson2 = new Gson();
+						promos = gson.fromJson(
+								(String) respuesta.getString("promos"),
+								Promo[].class);
+						user = gson2.fromJson(
+								(String) respuesta.getString("user"),
+								User.class);
+					} catch (Exception e) {
+						showMessageDialog("ERROR", mensaje);
+						e.printStackTrace();
+					}
+					// showMessageDialog("Listo", "Promo:" +
+					// promos[0].name+" Usuario: "+user.name);
+
+					// Llenar lista con adaptador de array
+					companyPromos = Arrays.asList(promos);
+					currentUser = user;
+					ListView list = (ListView) findViewById(R.id.manual_variable_list);
+
+					ArrayAdapter<Promo> promociones = new ArrayAdapter<Promo>(
+							mContext, android.R.layout.simple_list_item_1,
+							promos) {
+						@Override
+						public View getView(int position, View convertView,
+								ViewGroup parent) {
+							TextView textView = (TextView) super.getView(
+									position, convertView, parent);
+							Promo obj = getItem(position);
+							String name = obj.name + " En: " + obj.store;
+							textView.setText(name);
+							return textView;
+						}
+					};
+					list.setAdapter(promociones);
+					list.setOnItemClickListener(new OnItemClickListener() {
 
 						@Override
 						public void onItemClick(AdapterView<?> arg0, View arg1,
 								int position, long arg3) {
 							// TODO Auto-generated method stub
-							//enviar empresa, usuario y promocion que sellara
+							// enviar empresa, usuario y promocion que sellara
 							mResetProgressDialog = new ProgressDialog(mContext);
-							mResetProgressDialog.setMessage("Sellando Tarjeta Nest5 de "+currentUser.name+"...");
+							mResetProgressDialog
+									.setMessage("Sellando Tarjeta Nest5 de "
+											+ currentUser.name + "...");
 							mResetProgressDialog.setCancelable(false);
 							mResetProgressDialog.setIndeterminate(true);
 							mResetProgressDialog.show();
 							int promoid = companyPromos.get(position).id;
 							int userid = currentUser.id;
-							SharedPreferences prefs = Util.getSharedPreferences(mContext);
-							restService = new RestService(recieveStampsAndCouponsUser, mContext,
-									 Setup.PROD_URL+"/promo/beLucky");
-									 
-									 restService.addParam("code",Integer.toString(promoid));
-									 restService.addParam("id", Integer.toString(userid));
-									 restService.addParam("frombusiness", "claro");
-									 restService.setCredentials("apiadmin", Setup.apiKey);
-									 try {
-									 restService.execute(RestService.POST);} catch (Exception e) {
-									 e.printStackTrace(); 
-									 Log.i("MISPRUEBAS","Error empezando request");}
-							
+							SharedPreferences prefs = Util
+									.getSharedPreferences(mContext);
+							restService = new RestService(
+									recieveStampsAndCouponsUser, mContext,
+									Setup.PROD_URL + "/promo/beLucky");
+
+							restService.addParam("code",
+									Integer.toString(promoid));
+							restService.addParam("id", Integer.toString(userid));
+							restService.addParam("frombusiness", "claro");
+							restService
+									.setCredentials("apiadmin", Setup.apiKey);
+							try {
+								restService.execute(RestService.POST);
+							} catch (Exception e) {
+								e.printStackTrace();
+								Log.i("MISPRUEBAS", "Error empezando request");
+							}
+
 						}
 					});
-	    			
-	    			
-	    		}
-	    		else{
-	    			showMessageDialog("ERROR", mensaje);
-	    		}
-	    		
-	    		
-	    	}
-	    	else{
-	    		showMessageDialog("ERROR", mensaje);
-	    	}
-	    	
-	    	
-	    	
-	    	
-    	}
-    	
-    };
-    
-    /*Recibe datos de promocion y usuario al leer tarjeta magnetica, o al enviar email de usuario a API */
-	private final Handler recieveStampsAndCouponsUser = new Handler()
-    {
-    	
-    	@Override
-    	public void handleMessage(Message msg){
-    		mResetProgressDialog.dismiss();
-    		JSONObject respuesta = null;
-    		String mensaje = "Error de ComunicaciÃ³n con Nest5, intÃ©ntalo de nuevo por favor.";
-    		int status = 0;
-    		int sellos = 0;
-    		int coupones = 0;
-	    	try{
-	    		respuesta = new JSONObject((String) msg.obj);
-	    	}
-	    	catch(Exception e){
-	    		Log.i("MISPRUEBAS","ERROR 0");
-	    		showMessageDialog("ERROR", mensaje);
-	    		
-	    	}
-	    	if(respuesta != null){
-	    		try{
-	    			
-	    			status = respuesta.getInt("status");
-	    			
-	    			
-	    		}
-	    		catch(Exception e){
-	    			Log.i("MISPRUEBAS","ERROR 1");
-	    			showMessageDialog("ERROR", mensaje);
-	    		}
-	    		if(status == 1){
-	    			try{
-	    				sellos = respuesta.getInt("stamps");
-	    				coupones = respuesta.getInt("coupons");
-	    			}catch(Exception e){
-	    				showMessageDialog("ERROR", mensaje);
-	    				Log.i("MISPRUEBAS","ERROR 2");
-	    			}
-	    			showMessageDialog("Tarjeta sellada con Ã©xito", currentUser.name+" con este ha acumulado "+sellos+" sellos y "+coupones+" cupones.");
-	    			
-	    			
-	    		}
-	    		else{
-	    			Log.i("MISPRUEBAS","ERROR 3");
-	    			showMessageDialog("ERROR", mensaje);
-	    		}
-	    		
-	    		
-	    	}
-	    	else{
-	    		Log.i("MISPRUEBAS","ERROR 4");
-	    		showMessageDialog("ERROR", mensaje);
-	    	}
 
-    	}
-    	
-    };
-    
-    
-    
-    //Load image from url
-    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
-    	  ImageView bmImage;
+				} else {
+					showMessageDialog("ERROR", mensaje);
+				}
 
-    	  public DownloadImageTask(ImageView bmImage) {
-    	      this.bmImage = bmImage;
-    	  }
+			} else {
+				showMessageDialog("ERROR", mensaje);
+			}
 
-    	  protected Bitmap doInBackground(String... urls) {
-    	      String urldisplay = urls[0];
-    	      Bitmap mIcon11 = null;
-    	      try {
-    	        InputStream in = new java.net.URL(urldisplay).openStream();
-    	        mIcon11 = BitmapFactory.decodeStream(in);
-    	      } catch (Exception e) {
-    	          Log.e("Error", e.getMessage());
-    	          e.printStackTrace();
-    	      }
-    	      return mIcon11;
-    	  }
+		}
 
-    	  protected void onPostExecute(Bitmap result) {
-    	      bmImage.setImageBitmap(result);
-    	  }
-    	}
-    
+	};
 
+	/*
+	 * recieveRedeemConfirm Redime beneficios del usuario, recibe las
+	 * promociones y el número de cupones del usuario en cada una
+	 */
+	private final Handler recieveRedeemConfirm = new Handler() {
 
+		@Override
+		public void handleMessage(Message msg) {
+			mResetProgressDialog.dismiss();
+			Promo[] promos = null;
+			User user = null;
+			JSONObject respuesta = null;
+			String mensaje = "Error de Comunicación con Nest5, inténtalo de nuevo por favor.";
+			int status = 0;
+			try {
+				respuesta = new JSONObject((String) msg.obj);
+			} catch (Exception e) {
+				showMessageDialog("ERROR", mensaje);
+			}
+			if (respuesta != null) {
+				try {
+					mensaje = respuesta.getString("message");
+					status = respuesta.getInt("status");
+				} catch (Exception e) {
+					showMessageDialog("ERROR", mensaje);
+				}
+				if (status == 1) {
+					try {
+						Gson gson = new Gson();
+						Gson gson2 = new Gson();
+						promos = gson.fromJson(
+								(String) respuesta.getString("promos"),
+								Promo[].class);
+						user = gson2.fromJson(
+								(String) respuesta.getString("user"),
+								User.class);
+					} catch (Exception e) {
+						showMessageDialog("ERROR", mensaje);
+						e.printStackTrace();
+					}
+					// showMessageDialog("Listo", "Promo:" +
+					// promos[0].name+" Usuario: "+user.name);
 
-	
-	
+					// Llenar lista con adaptador de array
+					companyPromos = Arrays.asList(promos);
+					currentUser = user;
+					ListView list = (ListView) findViewById(R.id.manual_variable_list);
+
+					ArrayAdapter<Promo> promociones = new ArrayAdapter<Promo>(
+							mContext, android.R.layout.simple_list_item_1,
+							promos) {
+						@Override
+						public View getView(int position, View convertView,
+								ViewGroup parent) {
+							TextView textView = (TextView) super.getView(
+									position, convertView, parent);
+							Promo obj = getItem(position);
+							String name = obj.name + " En: " + obj.store;
+							textView.setText(name);
+							return textView;
+						}
+					};
+					list.setAdapter(promociones);
+					list.setOnItemClickListener(new OnItemClickListener() {
+
+						@Override
+						public void onItemClick(AdapterView<?> arg0, View arg1,
+								int position, long arg3) {
+							// TODO Auto-generated method stub
+							// enviar empresa, usuario y promocion que sellara
+							mResetProgressDialog = new ProgressDialog(mContext);
+							mResetProgressDialog
+									.setMessage("Redimiendo Beneficio Nest5 de "
+											+ currentUser.name + "...");
+							mResetProgressDialog.setCancelable(false);
+							mResetProgressDialog.setIndeterminate(true);
+							mResetProgressDialog.show();
+							int promoid = companyPromos.get(position).id;
+							int userid = currentUser.id;
+							SharedPreferences prefs = Util
+									.getSharedPreferences(mContext);
+							restService = new RestService(recieveRedeemedUser,
+									mContext, Setup.PROD_URL
+											+ "/promo/redeemCouponBusiness");
+
+							restService.addParam("code",
+									Integer.toString(promoid));
+							restService.addParam("id", Integer.toString(userid));
+							restService.addParam("frombusiness", "claro");
+							restService
+									.setCredentials("apiadmin", Setup.apiKey);
+							try {
+								restService.execute(RestService.POST);
+							} catch (Exception e) {
+								e.printStackTrace();
+								Log.i("MISPRUEBAS", "Error empezando request");
+							}
+
+						}
+					});
+
+				} else {
+					showMessageDialog("ERROR", mensaje);
+				}
+
+			} else {
+				showMessageDialog("ERROR", mensaje);
+			}
+
+		}
+
+	};
+
+	/*
+	 * Recibe datos de promocion y usuario al leer tarjeta magnetica, o al
+	 * enviar email de usuario a API
+	 */
+	private final Handler recieveStampsAndCouponsUser = new Handler() {
+
+		@Override
+		public void handleMessage(Message msg) {
+			mResetProgressDialog.dismiss();
+			JSONObject respuesta = null;
+			String mensaje = "Error de Comunicación con Nest5, inténtalo de nuevo por favor.";
+			int status = 0;
+			int sellos = 0;
+			int coupones = 0;
+			try {
+				respuesta = new JSONObject((String) msg.obj);
+			} catch (Exception e) {
+				Log.i("MISPRUEBAS", "ERROR 0");
+				showMessageDialog("ERROR", mensaje);
+
+			}
+			if (respuesta != null) {
+				try {
+
+					status = respuesta.getInt("status");
+
+				} catch (Exception e) {
+					Log.i("MISPRUEBAS", "ERROR 1");
+					showMessageDialog("ERROR", mensaje);
+				}
+				if (status == 1) {
+					try {
+						sellos = respuesta.getInt("stamps");
+						coupones = respuesta.getInt("coupons");
+					} catch (Exception e) {
+						showMessageDialog("ERROR", mensaje);
+						Log.i("MISPRUEBAS", "ERROR 2");
+					}
+					showMessageDialog("Tarjeta sellada con Éxito",
+							currentUser.name + " con este ha acumulado "
+									+ sellos + " sellos y " + coupones
+									+ " cupones.");
+
+				} else {
+					Log.i("MISPRUEBAS", "ERROR 3");
+					showMessageDialog("ERROR", mensaje);
+				}
+
+			} else {
+				Log.i("MISPRUEBAS", "ERROR 4");
+				showMessageDialog("ERROR", mensaje);
+			}
+
+		}
+
+	};
+
+	/*
+	 * recieveRedeemedUser recive si redimio bien el beneficio
+	 */
+	private final Handler recieveRedeemedUser = new Handler() {
+
+		@Override
+		public void handleMessage(Message msg) {
+			mResetProgressDialog.dismiss();
+			JSONObject respuesta = null;
+			String mensaje = "Error de Comunicación con Nest5, inténtalo de nuevo por favor.";
+			int status = 0;
+
+			try {
+				respuesta = new JSONObject((String) msg.obj);
+			} catch (Exception e) {
+				Log.i("MISPRUEBAS", "ERROR 0");
+				showMessageDialog("ERROR", mensaje);
+
+			}
+			if (respuesta != null) {
+				try {
+
+					status = respuesta.getInt("status");
+
+				} catch (Exception e) {
+					Log.i("MISPRUEBAS", "ERROR 1");
+					showMessageDialog("ERROR", mensaje);
+				}
+				if (status == 1) {
+
+					showMessageDialog(
+							"Beneficio redimido con Éxito",
+							currentUser.name
+									+ " ha redimido un beneficio y ahora enamóralo entregándoselo.");
+
+				} else {
+					Log.i("MISPRUEBAS", "ERROR 3");
+					showMessageDialog("ERROR", mensaje);
+				}
+
+			} else {
+				Log.i("MISPRUEBAS", "ERROR 4");
+				showMessageDialog("ERROR", mensaje);
+			}
+
+		}
+
+	};
+
+	// Load image from url
+	private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+		ImageView bmImage;
+
+		public DownloadImageTask(ImageView bmImage) {
+			this.bmImage = bmImage;
+		}
+
+		protected Bitmap doInBackground(String... urls) {
+			String urldisplay = urls[0];
+			Bitmap mIcon11 = null;
+			try {
+				InputStream in = new java.net.URL(urldisplay).openStream();
+				mIcon11 = BitmapFactory.decodeStream(in);
+			} catch (Exception e) {
+				Log.e("Error", e.getMessage());
+				e.printStackTrace();
+			}
+			return mIcon11;
+		}
+
+		protected void onPostExecute(Bitmap result) {
+			bmImage.setImageBitmap(result);
+		}
+	}
 
 }

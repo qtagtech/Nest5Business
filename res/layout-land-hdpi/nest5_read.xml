@@ -26,7 +26,9 @@
             android:layout_marginTop="20dip"
             android:orientation="vertical"
             android:visibility="visible" >
-<!--  Temporalmente la propiedad de arriba se pone visible, cuando lea tareta sera gone para activarse cuando le de al boton manul -->
+
+            <!-- Temporalmente la propiedad de arriba se pone visible, cuando lea tareta sera gone para activarse cuando le de al boton manul -->
+
             <EditText
                 android:id="@+id/manual_email"
                 android:layout_width="match_parent"
@@ -43,6 +45,14 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/blue_button"
                 android:text="Sellar Tarjeta" />
+
+            <Button
+                android:id="@+id/redeem_manual_user"
+                style="@style/ButtonText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/blue_button"
+                android:text="Redimir Beneficio" />
         </LinearLayout>
     </LinearLayout>
 
@@ -84,6 +94,7 @@
                 android:background="@drawable/blue_button"
                 android:text="Leer Tarjeta"
                 android:visibility="gone" />
+
             <Button
                 android:id="@+id/read_manual_username"
                 style="@style/ButtonText"
@@ -91,8 +102,6 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/blue_button"
                 android:text="Registro Manual" />
-
-            
         </LinearLayout>
     </ScrollView>
 
