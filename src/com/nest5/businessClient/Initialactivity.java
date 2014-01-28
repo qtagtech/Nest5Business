@@ -318,6 +318,13 @@ public class Initialactivity extends FragmentActivity implements
 
 	private List<Promo> companyPromos;
 	private User currentUser;
+	
+	/*
+	 * Sync Server - Big Data Server Variables
+	 * 
+	 * */
+	
+	private static String deviceID;
 
 	/**
 	 * @param isWifiP2pEnabled
@@ -417,6 +424,8 @@ public class Initialactivity extends FragmentActivity implements
 		db = ingredientCategoryDatasource.open();
 		ingredientCategories = ingredientCategoryDatasource
 				.getAllIngredientCategory();
+		//hago esto solo para actuakizar asr
+		Log.i("nada","hola");
 		// ingredientCategoryDatasource.close();
 		productCategoryDatasource = new ProductCategoryDataSource(this);
 		productCategoryDatasource.open(db);
@@ -563,13 +572,15 @@ public class Initialactivity extends FragmentActivity implements
 		cookingOrdersReceived = new LinkedHashMap<LinkedHashMap<Registrable, Integer>, Double>();
 		frases = getResources().getStringArray(R.array.phrases);
 		timer = new Timer();
+		deviceID = DeviceID.getDeviceId(mContext);
+		Log.i("AACCCAAAID",deviceID);
 
 		BebasFont = Typeface
 				.createFromAsset(getAssets(), "fonts/BebasNeue.otf");
 		VarelaFont = Typeface.createFromAsset(getAssets(),
 				"fonts/Varela-Regular.otf");
 
-		// Lector de tarjetas magnÃ©ticas
+		// Lector de tarjetas magnéticas
 		mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		mReader = new ACR31Reader(mAudioManager);
 		/* Initialize the reset progress dialog */
@@ -578,6 +589,8 @@ public class Initialactivity extends FragmentActivity implements
 		// ACR31 RESET CALLBACK
 		mReader.setOnResetCompleteListener(new ACR31Reader.OnResetCompleteListener() {
 
+			
+			//hola como estas
 			@Override
 			public void onResetComplete(ACR31Reader reader) {
 
@@ -2682,6 +2695,14 @@ public class Initialactivity extends FragmentActivity implements
 			prefs.edit().putBoolean(Setup.LOGGED_IN, false)
 					.putString(Setup.COMPANY_ID, "0")
 					.putString(Setup.COMPANY_NAME, "N/A").commit();
+			Intent inten = new Intent(mContext, LoginActivity.class);
+			startActivity(inten);
+		}
+		if (!prefs.getBoolean(Setup.DEVICE_REGISTERED, false)) { //forces logout so the user logs in again and the device gets registered
+			prefs.edit().putBoolean(Setup.LOGGED_IN, false)
+					.putString(Setup.COMPANY_ID, "0")
+					.putString(Setup.COMPANY_NAME, "N/A")
+					.putBoolean(Setup.DEVICE_REGISTERED, false).commit();
 			Intent inten = new Intent(mContext, LoginActivity.class);
 			startActivity(inten);
 		}

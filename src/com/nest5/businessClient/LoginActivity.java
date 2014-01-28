@@ -1,5 +1,6 @@
 package com.nest5.businessClient;
 
+import java.util.List;
 import java.util.prefs.Preferences;
 
 import org.json.JSONObject;
@@ -8,12 +9,19 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
@@ -50,6 +58,7 @@ public class LoginActivity extends Activity {
 	private RestService restService;
 	private Context mContext;
 	private SharedPreferences prefs;
+	private static String deviceID;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +98,7 @@ public class LoginActivity extends Activity {
 				});
 		mContext = this;
 		 prefs = Util.getSharedPreferences(mContext);
+		 registerReceiver(onSyncDownloadComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 	}
 	
 	@Override
@@ -100,6 +110,11 @@ public class LoginActivity extends Activity {
 			startActivity(inten);
 		}
 		
+	}
+	@Override
+	protected void onPause(){
+		super.onPause();
+		unregisterReceiver(onSyncDownloadComplete);
 	}
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -220,7 +235,7 @@ public class LoginActivity extends Activity {
 	private final Handler sendCredentialsHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
-			showProgress(false);
+			//showProgress(false); We don't remove the progress indicator since it is going to send DEvideid to the Bdata server
 			
 			//temporal abre actividad loggeado
 		/*	prefs.edit().putBoolean(Setup.LOGGED_IN, true).putString(Setup.COMPANY_ID, "12212").putString(Setup.COMPANY_NAME, "Nest5 Test Company").commit();
@@ -254,10 +269,23 @@ public class LoginActivity extends Activity {
 				
 				
 				if (status == 1) {
-					//Abrir Nueva Activity porque esta registrado
+					//Abrir Nueva Activity porque esta registrado ---- Enero de 2014, registrar dispositivo para la empresa actual en Nest5BigData Server
+					deviceID = DeviceID.getDeviceId(mContext);
+					//Log.i("AACCCAAAID", deviceID);
 					prefs.edit().putBoolean(Setup.LOGGED_IN, true).putString(Setup.COMPANY_ID, compid).putString(Setup.COMPANY_NAME, compname).commit();
-					Intent inten = new Intent(mContext, Initialactivity.class);
-					startActivity(inten);
+					//Intent inten = new Intent(mContext, Initialactivity.class);
+					//startActivity(inten);
+					Log.i("MISPRUEBAS","EMPEZANDO REQUEST PARA DEVICE ID");
+					//http://localhost:8080/Nest5BusinessData/deviceOps/registerDevice?payload={%22device_id%22:%220A01B18B436A002555AF%22,%22company%22:1}
+					 restService = new RestService(sendDeviceHandler, mContext,
+					 Setup.PROD_BIGDATA_URL+"/deviceOps/registerDevice");
+					 String jString = "{device_id:"+deviceID+",company:"+compid+"}";
+					 restService.addParam("payload", jString);		 
+					 restService.setCredentials("apiadmin", Setup.apiKey);
+					 try {
+					 restService.execute(RestService.POST);} catch (Exception e) {
+					 e.printStackTrace(); 
+					 Log.i("MISPRUEBAS","Error empezando request de deviceid");}
 				} else {
 					mEmailView.setError(getString(R.string.login_error));
 					
@@ -273,5 +301,134 @@ public class LoginActivity extends Activity {
 			}
 
 		}
+	};
+	private final Handler sendDeviceHandler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			showProgress(false); 
+		
+			JSONObject respuesta = null;
+				Log.i("MISPRUEBAS","LLEGUE DE REGISTRAR DEVICEID");
+			try {
+				respuesta = new JSONObject((String) msg.obj);
+			} catch (Exception e) {
+				Log.i("MISPRUEBAS","ERROR JSON en device id");
+				e.printStackTrace();
+				mEmailView.setError(getString(R.string.device_error));
+			}
+
+			if (respuesta != null) {
+				Log.i("MISPRUEBAS","CON RESPUESTA de device id");
+				int status = 0;
+				int responsecode = 0;
+				String message = "";
+				try {
+					status = respuesta.getInt("status");
+					responsecode = respuesta.getInt("code");
+					message = respuesta.getString("message");
+
+				} catch (Exception e) {
+					Log.i("MISPRUEBAS","ERROR COGER DATOS en device id");
+					e.printStackTrace();
+				}
+				// quitar loading
+				
+				
+				if (status == 200) {
+					//ok! status received, but still we have to check for code 555 that says everything done in Nest5 as expected.
+					if(responsecode == 555){
+				    	mLoginStatusMessageView.setText("Sincronizando Base de Datos");
+						showProgress(true);
+						prefs.edit().putBoolean(Setup.DEVICE_REGISTERED, true).commit();
+						//before opening the main activity, sync the database
+						String url = Setup.PROD_BIGDATA_URL+"/databaseOps/importDatabase?payload={\"company\":1}";
+						DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+						request.setDescription("Archivo de sincronización Nest5 POS.");
+						request.setTitle("Sincronizadon Nest5 POS");
+						// in order for this if to run, you must use the android 3.2 to compile your app
+						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+						    request.allowScanningByMediaScanner();
+						    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+						}
+						request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "dbestructurenest5.sql");
+
+						// get download service and enqueue file
+						DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+						manager.enqueue(request);
+						//Intent inten = new Intent(mContext, Initialactivity.class);
+						//startActivity(inten);
+					}
+					else{
+						if(responsecode == 55511){
+					    	mLoginStatusMessageView.setText("Sincronizando Base de Datos");
+							showProgress(true);
+							Log.i("MISPRUEBAS",message);
+							prefs.edit().putBoolean(Setup.DEVICE_REGISTERED, true).commit();
+							//before opening the main activity, sync the database
+							String url = Setup.PROD_BIGDATA_URL+"/databaseOps/importDatabase?payload={\"company\":1}";
+							DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+							request.setDescription("Archivo de sincronización Nest5 POS.");
+							request.setTitle("Sincronizadon Nest5 POS");
+							// in order for this if to run, you must use the android 3.2 to compile your app
+							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+							    request.allowScanningByMediaScanner();
+							    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+							}
+							request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "dbestructurenest5.sql");
+
+							// get download service and enqueue file
+							DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+							manager.enqueue(request);
+							//Intent inten = new Intent(mContext, Initialactivity.class);
+							//startActivity(inten);
+						}
+						else{
+							mEmailView.setError(message);
+						}
+						
+					}
+					
+					
+				} else {
+					mEmailView.setError(getString(R.string.device_error));
+					
+					
+				}
+
+			}
+			else{
+				mEmailView.setError(getString(R.string.device_error));
+			}
+
+		}
+	};
+	
+	/**
+	 * @param context used to check the device version and DownloadManager information
+	 * @return true if the download manager is available
+	 */
+	public static boolean isDownloadManagerAvailable(Context context) {
+	    try {
+	        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.GINGERBREAD) {
+	            return false;
+	        }
+	        Intent intent = new Intent(Intent.ACTION_MAIN);
+	        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+	        intent.setClassName("com.android.providers.downloads.ui", "com.android.providers.downloads.ui.DownloadList");
+	        List<ResolveInfo> list = context.getPackageManager().queryIntentActivities(intent,
+	                PackageManager.MATCH_DEFAULT_ONLY);
+	        return list.size() > 0;
+	    } catch (Exception e) {
+	        return false;
+	    }
+	}
+	
+	BroadcastReceiver onSyncDownloadComplete=new BroadcastReceiver() {
+	    public void onReceive(Context ctxt, Intent intent) {
+	        // Do Something
+	    	showProgress(false);
+	    	Intent inten = new Intent(mContext, Initialactivity.class);
+			startActivity(inten);
+	    }
 	};
 }

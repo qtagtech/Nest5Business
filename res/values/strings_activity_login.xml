@@ -15,5 +15,6 @@
     <string name="error_field_required">Este campo es obligatorio</string>
     <string name="action_register">Regístrate</string>
     <string name="login_error">Datos de acceso incorrectos. Inténtalo de nuevo por favor.</string>
+    <string name="device_error">No pudimos conectar este dispositivo con tu cuenta. Inténtalo de nuevo por favor.</string>
 
 </resources>

@@ -628,6 +628,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
  Message text [CHAR LIMIT=NONE] 
          */
         public static final int contacting_server=0x7f07000c;
+        public static final int device_error=0x7f070036;
         public static final int directory=0x7f070021;
         /**  Button text [CHAR LIMIT=NONE] 
  Button text [CHAR LIMIT=NONE] 

@@ -34,7 +34,7 @@ public class Setup {
     public static final String COMPANY_ID = "nest5_logged_id";
     public static final String COMPANY_NAME = "nest5_company_name";
     public static final String LOGGED_IN = "is_company_logged_in_nest5";
-
+    public static final String DEVICE_REGISTERED = "is_device_registered_in_nest5_big_data_server";
     public static final String NEW_INSTALL = "is_new_install";
 
     
@@ -129,6 +129,8 @@ public class Setup {
     //public static final String PROD_URL = "http://192.168.88.25:8080";
     public static final String PROD_URL = "http://nest5api.aws.af.cm/";
     public static final String STAGE_URL = "http://nest5stage.herokuapp.com";
+    public static final String PROD_BIGDATA_URL = "http://192.168.2.6:8080/Nest5BusinessData";
+    
     
     public static final String DEV_URL = "http://nest5testserver.herokuapp.com";
 
