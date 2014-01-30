@@ -1,5 +1,6 @@
 package com.nest5.businessClient;
 
+import java.io.File;
 import java.util.List;
 import java.util.prefs.Preferences;
 
@@ -343,15 +344,17 @@ public class LoginActivity extends Activity {
 						//before opening the main activity, sync the database
 						String url = Setup.PROD_BIGDATA_URL+"/databaseOps/importDatabase?payload={\"company\":1}";
 						DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-						request.setDescription("Archivo de sincronización Nest5 POS.");
-						request.setTitle("Sincronizadon Nest5 POS");
+						
 						// in order for this if to run, you must use the android 3.2 to compile your app
 						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 						    request.allowScanningByMediaScanner();
-						    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+						    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
 						}
-						request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "dbestructurenest5.sql");
 
+
+ 
+						request.setDestinationInExternalFilesDir(mContext, Environment.getDataDirectory() + "/databases/", "nest5posinit.sql");
+						request.setVisibleInDownloadsUi(false);
 						// get download service and enqueue file
 						DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
 						manager.enqueue(request);
@@ -367,15 +370,14 @@ public class LoginActivity extends Activity {
 							//before opening the main activity, sync the database
 							String url = Setup.PROD_BIGDATA_URL+"/databaseOps/importDatabase?payload={\"company\":1}";
 							DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-							request.setDescription("Archivo de sincronización Nest5 POS.");
-							request.setTitle("Sincronizadon Nest5 POS");
+							
 							// in order for this if to run, you must use the android 3.2 to compile your app
 							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 							    request.allowScanningByMediaScanner();
-							    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+							    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
 							}
-							request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "dbestructurenest5.sql");
-
+							request.setDestinationInExternalFilesDir(mContext, Environment.getDataDirectory() + "/databases/", "nest5posinit.sql");
+							request.setVisibleInDownloadsUi(false);
 							// get download service and enqueue file
 							DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
 							manager.enqueue(request);

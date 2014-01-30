@@ -79,6 +79,7 @@ import android.net.wifi.p2p.WifiP2pManager.ConnectionInfoListener;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
@@ -424,7 +425,8 @@ public class Initialactivity extends FragmentActivity implements
 		db = ingredientCategoryDatasource.open();
 		ingredientCategories = ingredientCategoryDatasource
 				.getAllIngredientCategory();
-		//hago esto solo para actuakizar asr
+		
+		
 		Log.i("nada","hola");
 		// ingredientCategoryDatasource.close();
 		productCategoryDatasource = new ProductCategoryDataSource(this);
@@ -682,7 +684,8 @@ public class Initialactivity extends FragmentActivity implements
 	@Override
 	public void onResume() {
 		super.onResume();
-
+		Log.i("DIRECTORIOS",Environment.getExternalStorageDirectory() + Environment.getDataDirectory().getAbsolutePath()+"/databases/"+"nest5posinit.sql");
+		
 		receiver = new WiFiDirectBroadcastReceiver(manager, channel, this);
 		registerReceiver(receiver, intentFilter);
 
@@ -716,10 +719,19 @@ public class Initialactivity extends FragmentActivity implements
 		 * 
 		 * setScreenContent(); } }
 		 */
-
+		File base = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"/dbestructurenest5.sql"); //delete database file if it is present
+		try{
+			Log.i("BORANDO","borrando archivo de db");
+			base.delete();
+			
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
 		lay = R.layout.home;
 
 		setScreenContent();
+		
 
 	}
 

@@ -42,6 +42,9 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
   public MySQLiteHelper(Context context) {
 	  
 	  super(context, DATABASE_NAME, null, DATABASE_VERSION);
+	 
+		Log.i("DIRECTORIOS",Environment.getExternalStorageDirectory() + Environment.getDataDirectory().getPath()+"/databases/"+"nest5posinit.sql");
+	
 	  mContext = context;
 
 		  
@@ -104,16 +107,20 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 	    StringBuilder text = new StringBuilder();
 	    ArrayList<String> sqlStmts = new ArrayList<String>();
 	    ArrayList<String> sqlDropStmts = new ArrayList<String>();
-	    StringBuilder text2 = new StringBuilder();
-	    ArrayList<String> sqlTempStmts = new ArrayList<String>();
-	    ArrayList<String> dropTempStmts = new ArrayList<String>();
+	    
 	    
 		   Log.d("ACAAAAAAAAA","en nueva base de datos");
+		   File base = null;
+		   BufferedReader buffreader = null;
+		   InputStream inputStream = null;
+		   
 		   try {
-		        InputStream inputStream = new FileInputStream(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"/dbestructurenest5.sql"));//mContext.getResources().openRawResource(R.raw.mytables_dbnueva);
+			   
+			    base = new File(Environment.getExternalStorageDirectory() + Environment.getDataDirectory().getAbsolutePath()+"/data/" + "com.nest5.businessClient" + "/databases/", "nest5posinit.sql");
+		         inputStream = new FileInputStream(base);//mContext.getResources().openRawResource(R.raw.mytables_dbnueva);
 		        
 		        InputStreamReader inputreader = new InputStreamReader(inputStream);
-		        BufferedReader buffreader = new BufferedReader(inputreader);
+		         buffreader = new BufferedReader(inputreader);
 
 		        while (( line = buffreader.readLine()) != null) {
 		            // Build the Create statements
@@ -145,13 +152,19 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 		                sqlDropStmts.add("DROP VIEW IF EXISTS " + text.substring(13, text.length()).trim().toString());
 		            }
 		        }
+		        
 		    } catch (IOException ie) {
 		        // We have an error to look up
 		        Log.e("MySQLLiteHelper", "This Error Occured " + ie.toString());
 		    } catch (Exception e) {
 		        // We have an error to look up
 		        Log.e("MySQLLiteHelper", "This Error Occured " + e.toString());
-		    }  
+		    }
+		   finally{
+			   base.delete();
+			   inputStream.close();
+			   buffreader.close();
+		   }
 	   
 	    
 	    
@@ -160,7 +173,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 	    
 	   
 	 }
-  public static String DB_FILEPATH = Environment.getDataDirectory() +"/data/com.nest5.businessClient/databases/nest5pos.db";
+  public static String DB_FILEPATH = Environment.getDataDirectory().getAbsolutePath() +"/data/com.nest5.businessClient/databases/nest5pos.db";
 
   /**
    * Copies the database file at the specified location over the current
@@ -207,6 +220,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 		  }
 		  onCreate(db);
   }
+  
 
 
 } 
