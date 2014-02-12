@@ -24,13 +24,6 @@ public class ViewCacheProductAdd {
         this.baseView = baseView;
     }
  
-    /*public TextView getNameView() {
-        if (nameView== null) {
-            nameView = (TextView) baseView.findViewById(R.id.item_name);
-        }
-        return nameView;
-    }*/
-    
     public TextView getTitleView() {
         if (titleView== null) {
             titleView = (TextView) baseView.findViewById(R.id.product_row_title);

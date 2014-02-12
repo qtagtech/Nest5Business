@@ -115,7 +115,12 @@ public class LoginActivity extends Activity {
 	@Override
 	protected void onPause(){
 		super.onPause();
-		unregisterReceiver(onSyncDownloadComplete);
+		try{
+			unregisterReceiver(onSyncDownloadComplete);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
 	}
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -273,7 +278,7 @@ public class LoginActivity extends Activity {
 					//Abrir Nueva Activity porque esta registrado ---- Enero de 2014, registrar dispositivo para la empresa actual en Nest5BigData Server
 					deviceID = DeviceID.getDeviceId(mContext);
 					//Log.i("AACCCAAAID", deviceID);
-					prefs.edit().putBoolean(Setup.LOGGED_IN, true).putString(Setup.COMPANY_ID, compid).putString(Setup.COMPANY_NAME, compname).commit();
+					
 					//Intent inten = new Intent(mContext, Initialactivity.class);
 					//startActivity(inten);
 					Log.i("MISPRUEBAS","EMPEZANDO REQUEST PARA DEVICE ID");
@@ -281,6 +286,7 @@ public class LoginActivity extends Activity {
 					 restService = new RestService(sendDeviceHandler, mContext,
 					 Setup.PROD_BIGDATA_URL+"/deviceOps/registerDevice");
 					 String jString = "{device_id:"+deviceID+",company:"+compid+"}";
+					 prefs.edit().putBoolean(Setup.LOGGED_IN, true).putString(Setup.COMPANY_ID, compid).putString(Setup.COMPANY_NAME, compname).putString(Setup.DEVICE_REGISTERED_ID, deviceID).commit();
 					 restService.addParam("payload", jString);		 
 					 restService.setCredentials("apiadmin", Setup.apiKey);
 					 try {
@@ -342,7 +348,7 @@ public class LoginActivity extends Activity {
 						showProgress(true);
 						prefs.edit().putBoolean(Setup.DEVICE_REGISTERED, true).commit();
 						//before opening the main activity, sync the database
-						String url = Setup.PROD_BIGDATA_URL+"/databaseOps/importDatabase?payload={\"company\":1}";
+						String url = Setup.PROD_BIGDATA_URL+"/databaseOps/importDatabase?payload={\"company\":"+prefs.getString(Setup.COMPANY_ID, "0")+"}";
 						DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
 						
 						// in order for this if to run, you must use the android 3.2 to compile your app
@@ -368,7 +374,7 @@ public class LoginActivity extends Activity {
 							Log.i("MISPRUEBAS",message);
 							prefs.edit().putBoolean(Setup.DEVICE_REGISTERED, true).commit();
 							//before opening the main activity, sync the database
-							String url = Setup.PROD_BIGDATA_URL+"/databaseOps/importDatabase?payload={\"company\":1}";
+							String url = Setup.PROD_BIGDATA_URL+"/databaseOps/importDatabase?payload={\"company\":"+prefs.getString(Setup.COMPANY_ID, "0")+"}";
 							DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
 							
 							// in order for this if to run, you must use the android 3.2 to compile your app
@@ -385,6 +391,8 @@ public class LoginActivity extends Activity {
 							//startActivity(inten);
 						}
 						else{
+							SharedPreferences prefs = Util.getSharedPreferences(mContext);
+							prefs.edit().putString(Setup.DEVICE_REGISTERED_ID, "null").commit();
 							mEmailView.setError(message);
 						}
 						
@@ -392,6 +400,8 @@ public class LoginActivity extends Activity {
 					
 					
 				} else {
+					SharedPreferences prefs = Util.getSharedPreferences(mContext);
+					prefs.edit().putString(Setup.DEVICE_REGISTERED_ID, "null").commit();
 					mEmailView.setError(getString(R.string.device_error));
 					
 					

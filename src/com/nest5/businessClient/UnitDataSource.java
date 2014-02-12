@@ -16,12 +16,10 @@ public class UnitDataSource {
 	// Database fields
 	  private SQLiteDatabase database;
 	  private MySQLiteHelper dbHelper;
-	  private Context mContext;
-	  private String[] allColumns = { Setup.COLUMN_ID,Setup.COLUMN_NAME,Setup.COLUMN_UNIT_INITIALS,Setup.COLUMN_UNIT_MULTIPLIERS };
+	  private String[] allColumns = { Setup.COLUMN_ID,Setup.COLUMN_NAME,Setup.COLUMN_UNIT_INITIALS,Setup.COLUMN_UNIT_MULTIPLIERS, Setup.COLUMN_OWN_SYNC_ID };
 
-	  public UnitDataSource(Context context) {
-	    dbHelper = new MySQLiteHelper(context);
-	    mContext = context;
+	  public UnitDataSource(MySQLiteHelper _dbHelper) {
+	    dbHelper = _dbHelper;
 	  }
 
 	  public SQLiteDatabase open() throws SQLException {
@@ -38,11 +36,12 @@ public class UnitDataSource {
 	    dbHelper.close();
 	  }
 
-	  public Unit createUnit(String name,String initials,String multipliers) {
+	  public Unit createUnit(String name,String initials,String multipliers,long syncId) {
 	    ContentValues values = new ContentValues();
 	    values.put(Setup.COLUMN_NAME, name);
 	    values.put(Setup.COLUMN_UNIT_INITIALS, initials);
 	    values.put(Setup.COLUMN_UNIT_MULTIPLIERS, multipliers);
+	    values.put(Setup.COLUMN_OWN_SYNC_ID, syncId);
 	    long insertId = database.insert(Setup.TABLE_UNIT, null,
 	        values);
 	    Cursor cursor = database.query(Setup.TABLE_UNIT,
@@ -80,7 +79,14 @@ public class UnitDataSource {
 	  
 	  public Unit getUnit(long id) {
 		   Unit unit = null;
-		   Cursor cursor = database.rawQuery("select * from " + Setup.TABLE_UNIT + " where " + Setup.COLUMN_ID + "=" + id  , null);
+		   StringBuilder tables = new StringBuilder();
+			  for(int i = 0; i < allColumns.length; i++){
+				  if(i != 0)
+					  tables.append(",");
+				  tables.append(allColumns[i]);
+				  
+			  }
+		   Cursor cursor = database.rawQuery("select "+tables.toString()+" from " + Setup.TABLE_UNIT + " where " + Setup.COLUMN_ID + "=" + id  , null);
 	        if (cursor != null) 
 	        	{
 	        		cursor.moveToFirst();
@@ -100,6 +106,7 @@ public class UnitDataSource {
 	    unit.setInitials(cursor.getString(2));
 	    LinkedHashMap<String, Double> multipliers = convertToHashMap(cursor.getString(3));
 	    unit.setMultipliers(multipliers);
+	    unit.setSyncId(cursor.getLong(4));
 	    return unit;
 	  }
 	  

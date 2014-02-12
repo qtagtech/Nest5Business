@@ -14,12 +14,12 @@ public class IngredientDataSource {
 	// Database fields
 	  private SQLiteDatabase database;
 	  private MySQLiteHelper dbHelper;
-	  private String[] allColumns = {Setup.COLUMN_ID,Setup.COLUMN_NAME,Setup.COLUMN_INGREDIENT_CATEGORY_ID,Setup.COLUMN_INGREDIENT_TAX_ID,Setup.COLUMN_INGREDIENT_UNIT,Setup.COLUMN_INGREDIENT_COST_PER_UNIT,Setup.COLUMN_INGREDIENT_PRICE_PER_UNIT,Setup.COLUMN_INGREDIENT_PRICE_MEASURE,Setup.COLUMN_INGREDIENT_QTY,Setup.COLUMN_INGREDIENT_DATE};
-	  private Context mContext;
+	  private String[] allColumns = {Setup.COLUMN_ID,Setup.COLUMN_NAME,Setup.COLUMN_INGREDIENT_CATEGORY_ID,Setup.COLUMN_INGREDIENT_TAX_ID,Setup.COLUMN_INGREDIENT_UNIT,Setup.COLUMN_INGREDIENT_COST_PER_UNIT,Setup.COLUMN_INGREDIENT_PRICE_PER_UNIT,Setup.COLUMN_INGREDIENT_PRICE_MEASURE,Setup.COLUMN_INGREDIENT_QTY,Setup.COLUMN_INGREDIENT_DATE,Setup.COLUMN_OWN_SYNC_ID};
 
-	  public IngredientDataSource(Context context) {
-	    dbHelper = new MySQLiteHelper(context);
-	    mContext = context;
+
+	  public IngredientDataSource(MySQLiteHelper _dbHelper) {
+	    dbHelper = _dbHelper;
+
 	  }
 
 	  public void open() throws SQLException {
@@ -35,7 +35,7 @@ public class IngredientDataSource {
 	    dbHelper.close();
 	  }
 
-	  public Ingredient createIngredient(String name,IngredientCategory category,Tax tax,Unit unit,double costPerUnit, double pricePerUnit,double priceMeasure,double qty,long date) {
+	  public Ingredient createIngredient(String name,IngredientCategory category,Tax tax,Unit unit,double costPerUnit, double pricePerUnit,double priceMeasure,double qty,long date,long syncId) {
 	    ContentValues values = new ContentValues();
 	    values.put(Setup.COLUMN_NAME, name.trim().toLowerCase());
 	    values.put(Setup.COLUMN_INGREDIENT_CATEGORY_ID, category.getId());
@@ -46,6 +46,7 @@ public class IngredientDataSource {
 	    values.put(Setup.COLUMN_INGREDIENT_PRICE_MEASURE,priceMeasure);
 	    values.put(Setup.COLUMN_INGREDIENT_QTY,qty);
 	    values.put(Setup.COLUMN_INGREDIENT_DATE,date);
+	    values.put(Setup.COLUMN_OWN_SYNC_ID, syncId);
 	    
 	    long insertId = database.insert(Setup.TABLE_INGREDIENTS, null,
 	        values);
@@ -60,6 +61,9 @@ public class IngredientDataSource {
 	  
 	  public Ingredient updateIngredient(long id,String name,IngredientCategory category,Tax tax,Unit unit,double costPerUnit, double pricePerUnit,double priceMeasure,double qty/*,long date*/)
 	  {
+		  IngredientDataSource ids = new IngredientDataSource(dbHelper);
+		  Ingredient oldIng =  ids.getIngredient(id);
+		  long syncId = oldIng.getSyncId();
 		  ContentValues values = new ContentValues();
 		    values.put(Setup.COLUMN_NAME, name);
 		    values.put(Setup.COLUMN_INGREDIENT_CATEGORY_ID, category.getId());
@@ -69,6 +73,7 @@ public class IngredientDataSource {
 		    values.put(Setup.COLUMN_INGREDIENT_PRICE_PER_UNIT,pricePerUnit);
 		    values.put(Setup.COLUMN_INGREDIENT_PRICE_MEASURE,priceMeasure);
 		    values.put(Setup.COLUMN_INGREDIENT_QTY,qty);
+		    values.put(Setup.COLUMN_OWN_SYNC_ID, syncId);
 		    //values.put(Setup.COLUMN_INGREDIENT_DATE,date);
 		    database.update(Setup.TABLE_INGREDIENTS, values, Setup.COLUMN_ID + " = " + id, null);
 		    Cursor cursor = database.query(Setup.TABLE_INGREDIENTS,
@@ -89,7 +94,14 @@ public class IngredientDataSource {
 	  
 	  public Ingredient getIngredient(long id) {
 		  Ingredient ingredient = null;
-		   Cursor cursor = database.rawQuery("select * from " + Setup.TABLE_INGREDIENTS + " where " + Setup.COLUMN_ID + "=" + id  , null);
+		  StringBuilder tables = new StringBuilder();
+		  for(int i = 0; i < allColumns.length; i++){
+			  if(i != 0)
+				  tables.append(",");
+			  tables.append(allColumns[i]);
+			  
+		  }
+		   Cursor cursor = database.rawQuery("select "+tables+" from " + Setup.TABLE_INGREDIENTS + " where " + Setup.COLUMN_ID + "=" + id  , null);
 	        if (cursor != null) 
 	        	{
 	        		cursor.moveToFirst();
@@ -145,27 +157,26 @@ public class IngredientDataSource {
 	    ingredient.setName(cursor.getString(1));
 	    //aqui en vez de poner en el objeto un id, poner un objeto de tipo categoryIngredient
 	    //ingredient.setCategoryId(cursor.getLong(2));
-	    IngredientCategoryDataSource ingredientCategoryDatasource = new IngredientCategoryDataSource(mContext);
+	    IngredientCategoryDataSource ingredientCategoryDatasource = new IngredientCategoryDataSource(dbHelper);
     	ingredientCategoryDatasource.open();
 	    IngredientCategory ingredientCategory = ingredientCategoryDatasource.getIngredientCategory(cursor.getLong(2));
-	    ingredientCategoryDatasource.close();
 	    ingredient.setCategory(ingredientCategory);
-	    TaxDataSource taxDatasource = new TaxDataSource(mContext);
+	    TaxDataSource taxDatasource = new TaxDataSource(dbHelper);
     	taxDatasource.open();
 	    Tax tax = taxDatasource.getTax(cursor.getLong(3));
-	    taxDatasource.close();
 	    ingredient.setTax(tax);
-	    UnitDataSource unitDatasource = new UnitDataSource(mContext);
+	    UnitDataSource unitDatasource = new UnitDataSource(dbHelper);
     	unitDatasource.open();
 	    Unit unit = unitDatasource.getUnit(cursor.getLong(4));
-	    unitDatasource.close();
 	    ingredient.setUnit(unit);
 	    ingredient.setCostPerUnit(cursor.getDouble(5));
 	    ingredient.setPricePerUnit(cursor.getDouble(6));
 	    ingredient.setPriceMeasure(cursor.getDouble(7));
 	    ingredient.setQty(cursor.getDouble(8));
 	    ingredient.setDate(cursor.getLong(9));
+	    ingredient.setSyncId(cursor.getLong(10));
 	    return ingredient;
+	    
 	  }
 
 }

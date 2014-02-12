@@ -31,11 +31,15 @@ public class Setup {
     //Common
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_NAME = "name";
+    public static final String COLUMN_OWN_SYNC_ID = "sync_id";
     public static final String COMPANY_ID = "nest5_logged_id";
     public static final String COMPANY_NAME = "nest5_company_name";
     public static final String LOGGED_IN = "is_company_logged_in_nest5";
     public static final String DEVICE_REGISTERED = "is_device_registered_in_nest5_big_data_server";
+    public static final String DEVICE_REGISTERED_ID = "id_registered_in_nest5_big_data_server";
     public static final String NEW_INSTALL = "is_new_install";
+    public static final String IS_UPDATING = "updating_database";
+
 
     
     //Ingredient Category Table
@@ -106,6 +110,10 @@ public class Setup {
     public static final String COLUMN_SALE_DATE = "date";
     public static final String COLUMN_SALE_RECEIVED = "received";
     public static final String COLUMN_SALE_METHOD = "payment_method";
+    public static final String COLUMN_SALE_ISDELIVERY = "delivery";
+    public static final String COLUMN_SALE_ISTOGO = "togo";
+    public static final String COLUMN_SALE_TIP = "tip";
+    public static final String COLUMN_SALE_DISCOUNT = "discount";
 
     
     //SaleItem  guarda las propiedades de un registrable con una cantidad en la base de datos
@@ -115,6 +123,15 @@ public class Setup {
     public static final String COLUMN_SALE_ITEM_ID = "sale_item_id";
     public static final String COLUMN_SALE_ITEM_QTY = "sale_item_qty";
     
+    
+  //SyncRow  guarda las propiedades de una fila que se debe actualizar
+    public static final String TABLE_SYNC_ROW = "sync_row"; 
+    public static final String COLUMN_DEVICE_ID = "device_id";
+    public static final String COLUMN_TABLE_NAME = "reference";
+    public static final String COLUMN_ROW_ID = "row_id";
+    public static final String COLUMN_TIME_CREATED = "time_created";
+    public static final String COLUMN_SYNC_ID = "sync_id";
+    public static final String COLUMN_FIELDS = "fields";
     
     //
     
@@ -129,8 +146,8 @@ public class Setup {
     //public static final String PROD_URL = "http://192.168.88.25:8080";
     public static final String PROD_URL = "http://nest5api.aws.af.cm/";
     public static final String STAGE_URL = "http://nest5stage.herokuapp.com";
-    public static final String PROD_BIGDATA_URL = "http://192.168.2.6:8080/Nest5BusinessData";
-    
+    //public static final String PROD_BIGDATA_URL = "http://192.168.11.103:8080/Nest5BusinessData";
+    public static final String PROD_BIGDATA_URL = "http://pruebamongo-qtagtech.rhcloud.com";
     
     public static final String DEV_URL = "http://nest5testserver.herokuapp.com";
 
@@ -142,7 +159,7 @@ public class Setup {
     
     public static final String apiKey = "zAxEE9U1691Nq0h5JiJ0X20tcayF5RTpmzIOctVGNQNBByHslznDR0VP7rWOuyW";
     
-    //�conos
+    //Íconos
     public static final int ICON_WIN_STAR = 99;
     public static final int ICON_FACE_WIN = 0;
     public static final int ICON_FACE_ONE = 1;

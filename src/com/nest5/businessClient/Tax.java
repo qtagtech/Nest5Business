@@ -5,6 +5,7 @@ public class Tax {
 	private long id;
 	private String name;
 	private double percentage;
+	private long syncId;
 	
 
 	  public long getId() {
@@ -29,6 +30,13 @@ public class Tax {
 
 		  public void setPercentage(double percentage) {
 		    this.percentage = percentage;
+		  }
+		  
+		  public Long getSyncId(){
+			  return this.syncId;
+		  }
+		  public void setSyncId(Long syncId){
+			  this.syncId = syncId;
 		  }
 
 	  // Will be used by the ArrayAdapter in the ListView

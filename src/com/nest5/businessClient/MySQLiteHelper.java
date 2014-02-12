@@ -43,32 +43,32 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 	  
 	  super(context, DATABASE_NAME, null, DATABASE_VERSION);
 	 
-		Log.i("DIRECTORIOS",Environment.getExternalStorageDirectory() + Environment.getDataDirectory().getPath()+"/databases/"+"nest5posinit.sql");
+	  Log.w(MySQLiteHelper.class.getName(),"Creando objeto MySQLHelper");
 	
 	  mContext = context;
-
-		  
-		  try{
-			  getLoadFile();
-		  }
-		  catch(Exception e){
-			  e.printStackTrace();
-		  } 
-
-	  
-	  
-	  
 
   }
 
   @Override
   public void onCreate(SQLiteDatabase database) {
 	  Log.w(MySQLiteHelper.class.getName(),"Creating database version " + DATABASE_VERSION);
-	  for(int i = 0; i < CREATE_SCRIPT.size() ; i++)
-	  {
-		  Log.w(MySQLiteHelper.class.getName(),"SQL: " + CREATE_SCRIPT.get(i));
-		  database.execSQL(CREATE_SCRIPT.get(i)); 
+	  try{
+		  getLoadFile();
+		  for(int j = 0; j < DROP_SCRIPT.size(); j++){
+			  Log.w(MySQLiteHelper.class.getName(),"SQL: " + DROP_SCRIPT.get(j));
+			  database.execSQL(DROP_SCRIPT.get(j));  
+		  }
+		  for(int i = 0; i < CREATE_SCRIPT.size() ; i++)
+		  {
+			  Log.w(MySQLiteHelper.class.getName(),"SQL: " + CREATE_SCRIPT.get(i));
+			  database.execSQL(CREATE_SCRIPT.get(i)); 
+		  }
 	  }
+	  catch(Exception e){
+		  
+	  }
+	  
+	  
     
   }
 
@@ -78,28 +78,25 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     Log.w(MySQLiteHelper.class.getName(),
         "Upgrading database from version " + oldVersion + " to "
             + newVersion);
-    
-    
+    try{
+    	getLoadFile();
+    	for(int i = 0; i < DROP_SCRIPT.size() ; i++)
 
-    for(int i = 0; i < DROP_SCRIPT.size() ; i++)
-
-	  {
-		  db.execSQL(DROP_SCRIPT.get(i)); 
-	  }
-    
-  //carga archivos de sql raw
+  	  {
+  		  db.execSQL(DROP_SCRIPT.get(i)); 
+  	  }
+    }
+    catch(Exception e){
+    	
+    }
+  
+	  File base = null;
 	  try{
-		  getLoadFile();
+		  base = new File(mContext.getExternalFilesDir(null) + Environment.getDataDirectory().getPath()+"/databases/","nest5posinit.sql");
+		  base.delete();
 	  }
-	  catch(Exception e){
-		  
-	  }
+	  catch (Exception e){}
 
-	  onCreate(db);
-
-	  
-    
-    
   }
   
   private void getLoadFile() throws IOException {
@@ -110,13 +107,14 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 	    
 	    
 		   Log.d("ACAAAAAAAAA","en nueva base de datos");
+		   Log.w(MySQLiteHelper.class.getName(),"En getLoadFile()");
 		   File base = null;
 		   BufferedReader buffreader = null;
 		   InputStream inputStream = null;
 		   
 		   try {
 			   
-			    base = new File(Environment.getExternalStorageDirectory() + Environment.getDataDirectory().getAbsolutePath()+"/data/" + "com.nest5.businessClient" + "/databases/", "nest5posinit.sql");
+			    base = new File(mContext.getExternalFilesDir(null) + Environment.getDataDirectory().getPath()+"/databases/","nest5posinit.sql");
 		         inputStream = new FileInputStream(base);//mContext.getResources().openRawResource(R.raw.mytables_dbnueva);
 		        
 		        InputStreamReader inputreader = new InputStreamReader(inputStream);
@@ -161,9 +159,13 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 		        Log.e("MySQLLiteHelper", "This Error Occured " + e.toString());
 		    }
 		   finally{
-			   base.delete();
-			   inputStream.close();
-			   buffreader.close();
+			   //if(base != null)
+				  // base.delete();
+			   if(inputStream != null){
+				   inputStream.close();
+				   buffreader.close();  
+			   }
+			   
 		   }
 	   
 	    
@@ -173,53 +175,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 	    
 	   
 	 }
-  public static String DB_FILEPATH = Environment.getDataDirectory().getAbsolutePath() +"/data/com.nest5.businessClient/databases/nest5pos.db";
 
-  /**
-   * Copies the database file at the specified location over the current
-   * internal application database.
-   * */
-  public boolean importDatabase(String dbPath) throws IOException {
-
-      // Close the SQLiteOpenHelper so it will commit the created empty
-      // database to internal storage.
-      close();
-      File newDb = new File(dbPath);
-      File oldDb = new File(DB_FILEPATH);
-      if (newDb.exists()) {
-          FileUtils.copyFile(new FileInputStream(newDb), new FileOutputStream(oldDb));
-          // Access the copied database so SQLiteHelper will cache it and mark
-          // it as created.
-          getWritableDatabase().close();
-          return true;
-      }
-      return false;
-  }
-
-  
-  public void cleanDatabase(SQLiteDatabase db){
-	  /*
-	     * Cuando se quiera limpiar la base de datos se usan los siguientes dos loops y al final se va a onCreate, primero se toma todo de los archivos para borrar temps y originiales
-	     * porque manda el parametro nuevaDB en false, en el construcor de esta clase, de resto se usa lo que hay despues de la explicacion larga que es para actualizar db, tomando
-	     * siempre  todo con nuevaDB = false
-	     * al final luego de borrar todo lo que hubiera, temps y originales, toma con nueva db true para solo usar el archivo q es para nueva db y poner lo valores iniciales
-	     * predeterminados
-	     * 
-	     * */
-	    for(int i = 0; i < DROP_SCRIPT.size() ; i++)
-		  {
-			  db.execSQL(DROP_SCRIPT.get(i)); 
-		  }
-	    
-	  //carga archivos de sql raw
-		  try{
-			  getLoadFile();
-		  }
-		  catch(Exception e){
-			  
-		  }
-		  onCreate(db);
-  }
   
 
 

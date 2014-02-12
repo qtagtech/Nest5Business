@@ -15,11 +15,11 @@ public class ComboIngredientDataSource {
 	  private SQLiteDatabase database;
 	  private MySQLiteHelper dbHelper;
 	  private String[] allColumns = {Setup.COLUMN_ID,Setup.COLUMN_COMBOINGREDIENT_COMBO_ID,Setup.COLUMN_COMBOINGREDIENT_INGREDIENT_ID,Setup.COLUMN_COMBOINGREDIENT_QUANTITY};
-	  private Context mContext;
 
-	  public ComboIngredientDataSource(Context context) {
-	    dbHelper = new MySQLiteHelper(context);
-	    mContext = context;
+
+	  public ComboIngredientDataSource(MySQLiteHelper _dbHelper) {
+	    dbHelper = _dbHelper;
+
 	  }
 
 	  public SQLiteDatabase open() throws SQLException {
@@ -112,10 +112,10 @@ public class ComboIngredientDataSource {
 	  private Ingredient cursorToIngredient(Cursor cursor) {
 		    
 		    
-		    IngredientDataSource ingredientDatasource = new IngredientDataSource(mContext);
+		    IngredientDataSource ingredientDatasource = new IngredientDataSource(dbHelper);
 	    	ingredientDatasource.open();
 		    Ingredient ingredient = ingredientDatasource.getIngredient(cursor.getLong(2));
-		    ingredientDatasource.close();
+
 		    	
 		    return ingredient;
 		  }
@@ -123,10 +123,10 @@ public class ComboIngredientDataSource {
 	  private Combo cursorToCombo(Cursor cursor) {
 		    
 		    
-		    ComboDataSource comboDatasource = new ComboDataSource(mContext);
+		    ComboDataSource comboDatasource = new ComboDataSource(dbHelper);
 	    	comboDatasource.open();
 		    Combo combo = comboDatasource.getCombo(cursor.getLong(1));
-		    comboDatasource.close();
+
 		    	
 		    return combo;
 		  }

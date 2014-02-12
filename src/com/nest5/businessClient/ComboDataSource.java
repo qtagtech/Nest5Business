@@ -14,12 +14,10 @@ public class ComboDataSource {
 	// Database fields
 	  private SQLiteDatabase database;
 	  private MySQLiteHelper dbHelper;
-	  private String[] allColumns = {Setup.COLUMN_ID,Setup.COLUMN_NAME,Setup.COLUMN_COMBO_AUTOMATIC,Setup.COLUMN_COMBO_COST,Setup.COLUMN_COMBO_PRICE,Setup.COLUMN_COMBO_TAX_ID};
-	  private Context mContext;
+	  private String[] allColumns = {Setup.COLUMN_ID,Setup.COLUMN_NAME,Setup.COLUMN_COMBO_AUTOMATIC,Setup.COLUMN_COMBO_COST,Setup.COLUMN_COMBO_PRICE,Setup.COLUMN_COMBO_TAX_ID,Setup.COLUMN_OWN_SYNC_ID };
 
-	  public ComboDataSource(Context context) {
-	    dbHelper = new MySQLiteHelper(context);
-	    mContext = context;
+	  public ComboDataSource(MySQLiteHelper _dbHelper) {
+	    dbHelper = _dbHelper;
 	  }
 
 	  public SQLiteDatabase open() throws SQLException {
@@ -36,7 +34,7 @@ public class ComboDataSource {
 	    dbHelper.close();
 	  }
 
-	  public Combo createCombo(String name,/*ProductCategory category,*/int automatic,double cost, double price,Tax tax) {
+	  public Combo createCombo(String name,/*ProductCategory category,*/int automatic,double cost, double price,Tax tax,long syncId) {
 	    ContentValues values = new ContentValues();
 	    values.put(Setup.COLUMN_NAME, name);
 	    values.put(Setup.COLUMN_COMBO_AUTOMATIC, automatic);
@@ -44,6 +42,7 @@ public class ComboDataSource {
 	    values.put(Setup.COLUMN_COMBO_PRICE, price);
 	    //values.put(Setup.COLUMN_COMBO_CATEGORY_ID, category.getId());
 	    values.put(Setup.COLUMN_COMBO_TAX_ID, tax.getId());
+	    values.put(Setup.COLUMN_OWN_SYNC_ID, syncId);
 	    long insertId = database.insert(Setup.TABLE_COMBOS, null,
 	        values);
 	    Cursor cursor = database.query(Setup.TABLE_COMBOS,
@@ -81,7 +80,14 @@ public class ComboDataSource {
 	  
 	  public Combo getCombo(long id) {
 		  Combo combo = null;
-		   Cursor cursor = database.rawQuery("select * from " + Setup.TABLE_COMBOS + " where " + Setup.COLUMN_ID + "=" + id  , null);
+		  StringBuilder tables = new StringBuilder();
+		  for(int i = 0; i < allColumns.length; i++){
+			  if(i != 0)
+				  tables.append(",");
+			  tables.append(allColumns[i]);
+			  
+		  }
+		   Cursor cursor = database.rawQuery("select "+tables+" from " + Setup.TABLE_COMBOS + " where " + Setup.COLUMN_ID + "=" + id  , null);
 	        if (cursor != null) 
 	        	{
 	        		cursor.moveToFirst();
@@ -109,21 +115,19 @@ public class ComboDataSource {
 	    //product.setCategory(productCategory);
 	    combo.setCost(cursor.getDouble(3));
 	    combo.setPrice(cursor.getDouble(4));
-	    TaxDataSource taxDatasource = new TaxDataSource(mContext);
+	    TaxDataSource taxDatasource = new TaxDataSource(dbHelper);
 	    taxDatasource.open();
 	    Tax tax = taxDatasource.getTax(cursor.getLong(5));
-	    taxDatasource.close();
 	    combo.setTax(tax);
-	    ComboIngredientDataSource comboIngredientDatasource = new ComboIngredientDataSource(mContext);
+	    ComboIngredientDataSource comboIngredientDatasource = new ComboIngredientDataSource(dbHelper);
 		comboIngredientDatasource.open();
 		List<Ingredient> allIngredients = comboIngredientDatasource.getAllIngredients(cursor.getLong(0));
-		comboIngredientDatasource.close();
 		combo.setIngredients(allIngredients);
-		ComboProductDataSource comboProductDatasource = new ComboProductDataSource(mContext);
+		ComboProductDataSource comboProductDatasource = new ComboProductDataSource(dbHelper);
 		comboProductDatasource.open();
 		List<Product> allProducts = comboProductDatasource.getAllProducts(cursor.getLong(0));
-		comboProductDatasource.close();
 		combo.setProducts(allProducts);
+		combo.setSyncId(cursor.getLong(6));
 	    		
 	    return combo;
 	  }

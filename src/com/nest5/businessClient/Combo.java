@@ -18,6 +18,7 @@ public class Combo {
 	private Tax tax;
 	private List<Product> products;
 	private List<Ingredient> ingredients;
+	private long syncId;
 
 	  public long getId() {
 	    return id;
@@ -78,12 +79,11 @@ public class Combo {
 			  }
 	  
 	  //Cambiar todo esto por combo_ingredient ademas de poner combo_product
-	  public void refreshIngredients(Context mContext)
+	  public void refreshIngredients(MySQLiteHelper dbHelper)
 	  {
-		  ComboIngredientDataSource comboIngredientDatasource = new ComboIngredientDataSource(mContext);
+		  ComboIngredientDataSource comboIngredientDatasource = new ComboIngredientDataSource(dbHelper);
 		  comboIngredientDatasource.open();
 		    List<Ingredient> allIngredients = comboIngredientDatasource.getAllIngredients(this.id);
-		    comboIngredientDatasource.close();
 		    this.ingredients = allIngredients;
 	  }
 	  
@@ -100,28 +100,26 @@ public class Combo {
 			  return new ArrayList<Ingredient>();
 	  }
 	  
-	  public void addIngredient(Context mContext,Ingredient ingredient,double qty) //esta cantidad siempre se normaliza a la unidad de medida estandar, por ejemplo gr o ml
+	  public void addIngredient(MySQLiteHelper dbHelper,Ingredient ingredient,double qty) //esta cantidad siempre se normaliza a la unidad de medida estandar, por ejemplo gr o ml
 	  {
-		  ComboIngredientDataSource comboIngredientDataSource = new ComboIngredientDataSource(mContext);
+		  ComboIngredientDataSource comboIngredientDataSource = new ComboIngredientDataSource(dbHelper);
 		  comboIngredientDataSource.open();
 		  comboIngredientDataSource.saveRelation(this.id,ingredient.getId(),qty);
-		  comboIngredientDataSource.close(); 
 	  }
 	  
-	  public void removeIngredient(Context mContext,Ingredient ingredient)
+	  public void removeIngredient(MySQLiteHelper dbHelper,Ingredient ingredient)
 	  {
-		  ComboIngredientDataSource comboIngredientDataSource = new ComboIngredientDataSource(mContext);
+		  ComboIngredientDataSource comboIngredientDataSource = new ComboIngredientDataSource(dbHelper);
 		  comboIngredientDataSource.open();
 		  comboIngredientDataSource.deleteRelation(this.id,ingredient.getId());
-		  comboIngredientDataSource.close(); 
+
 	  }
 	  
-	  public void refreshProducts(Context mContext)
+	  public void refreshProducts(MySQLiteHelper dbHelper)
 	  {
-		  ComboProductDataSource comboProductDataSource = new ComboProductDataSource(mContext);
+		  ComboProductDataSource comboProductDataSource = new ComboProductDataSource(dbHelper);
 		  comboProductDataSource.open();
 		    List<Product> allProducts = comboProductDataSource.getAllProducts(this.id);
-		    comboProductDataSource.close();
 		    this.products = allProducts;
 	  }
 	  
@@ -138,20 +136,25 @@ public class Combo {
 			  return new ArrayList<Product>();
 	  }
 	  
-	  public void addProduct(Context mContext,Product product,double qty) //esta cantidad siempre se normaliza a la unidad de medida estandar, por ejemplo gr o ml
+	  public void addProduct(MySQLiteHelper dbHelper,Product product,double qty) //esta cantidad siempre se normaliza a la unidad de medida estandar, por ejemplo gr o ml
 	  {
-		  ComboProductDataSource comboProductDataSource = new ComboProductDataSource(mContext);
+		  ComboProductDataSource comboProductDataSource = new ComboProductDataSource(dbHelper);
 		  comboProductDataSource.open();
 		  comboProductDataSource.saveRelation(this.id,product.getId(),qty);
-		  comboProductDataSource.close(); 
 	  }
 	  
-	  public void removeProduct(Context mContext,Product product)
+	  public void removeProduct(MySQLiteHelper dbHelper,Product product)
 	  {
-		  ComboProductDataSource comboProductDataSource = new ComboProductDataSource(mContext);
+		  ComboProductDataSource comboProductDataSource = new ComboProductDataSource(dbHelper);
 		  comboProductDataSource.open();
 		  comboProductDataSource.deleteRelation(this.id,product.getId());
-		  comboProductDataSource.close(); 
+	  }
+	  
+	  public Long getSyncId(){
+		  return this.syncId;
+	  }
+	  public void setSyncId(Long syncId){
+		  this.syncId = syncId;
 	  }
 	
 		  

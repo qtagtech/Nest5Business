@@ -8,17 +8,17 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.provider.SyncStateContract.Columns;
 
 public class TaxDataSource {
 	
 	// Database fields
 	  private SQLiteDatabase database;
 	  private MySQLiteHelper dbHelper;
-	  private String[] allColumns = { Setup.COLUMN_ID,
-	      Setup.COLUMN_NAME,Setup.COLUMN_TAX_PERCENTAGE };
+	  private String[] allColumns = { Setup.COLUMN_ID,Setup.COLUMN_NAME,Setup.COLUMN_TAX_PERCENTAGE,Setup.COLUMN_OWN_SYNC_ID };
 
-	  public TaxDataSource(Context context) {
-	    dbHelper = new MySQLiteHelper(context);
+	  public TaxDataSource(MySQLiteHelper _dbHelper) {
+	    dbHelper = _dbHelper;
 	  }
 
 	  public SQLiteDatabase open() throws SQLException {
@@ -34,10 +34,11 @@ public class TaxDataSource {
 	    dbHelper.close();
 	  }
 
-	  public Tax createTax(String name, double percentage) {
+	  public Tax createTax(String name, double percentage, long syncId) {
 	    ContentValues values = new ContentValues();
 	    values.put(Setup.COLUMN_NAME, name);
 	    values.put(Setup.COLUMN_TAX_PERCENTAGE, percentage);
+	    values.put(Setup.COLUMN_OWN_SYNC_ID, syncId);
 	    long insertId = database.insert(Setup.TABLE_TAX, null,
 	        values);
 	    Cursor cursor = database.query(Setup.TABLE_TAX,
@@ -58,7 +59,7 @@ public class TaxDataSource {
 
 	  public List<Tax> getAllTax() {
 	    List<Tax> taxes = new ArrayList<Tax>();
-
+	    
 	    Cursor cursor = database.query(Setup.TABLE_TAX,
 	        allColumns, null, null, null, null, null);
 
@@ -93,6 +94,7 @@ public class TaxDataSource {
 	    tax.setId(cursor.getLong(0));
 	    tax.setName(cursor.getString(1));
 	    tax.setPercentage(cursor.getDouble(2));
+	    tax.setSyncId(cursor.getLong(3));
 	    return tax;
 	  }
 

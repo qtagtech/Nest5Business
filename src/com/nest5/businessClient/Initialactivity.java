@@ -25,6 +25,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
@@ -38,6 +39,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Timer;
@@ -48,14 +50,19 @@ import org.json.JSONObject;
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.app.AlertDialog;
+import android.app.DownloadManager;
 import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -78,6 +85,7 @@ import android.net.wifi.p2p.WifiP2pManager.ChannelListener;
 import android.net.wifi.p2p.WifiP2pManager.ConnectionInfoListener;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -137,6 +145,11 @@ import com.nest5.businessClient.SalesObjectFragment.OnSalesObjectFragmentCreated
 import com.nest5.businessClient.SelectAddItem.OnAddItemSelectedListener;
 import com.nest5.businessClient.WifiDirectDialog.DeviceActionListener;
 
+
+
+
+
+
 //import com.example.android.BluetoothChat.BluetoothChat;
 
 /**
@@ -153,7 +166,9 @@ public class Initialactivity extends FragmentActivity implements
 		DeviceActionListener, ConnectionInfoListener, PeerListListener,
 		OnDailyObjectFragmentCreatedListener,
 		OnInventoryObjectFragmentCreatedListener,
-		OnNest5ReadObjectFragmentCreatedListener {
+		OnNest5ReadObjectFragmentCreatedListener,
+		ScanDevicesFragment.SelectDevice
+		{
 	/**
 	 * Tag for logging.
 	 */
@@ -240,6 +255,7 @@ public class Initialactivity extends FragmentActivity implements
 	boolean validHome = true;
 
 	private SQLiteDatabase db;
+	private MySQLiteHelper dbHelper;
 	private IngredientCategoryDataSource ingredientCategoryDatasource;
 	private ProductCategoryDataSource productCategoryDatasource;
 	private IngredientDataSource ingredientDatasource;
@@ -248,6 +264,7 @@ public class Initialactivity extends FragmentActivity implements
 	private TaxDataSource taxDataSource;
 	private UnitDataSource unitDataSource;
 	private SaleDataSource saleDataSource;
+	private SyncRowDataSource syncRowDataSource;
 	ImageAdapter gridAdapter;
 	SaleAdapter cookingAdapter;
 	LayoutInflater inflater;
@@ -275,6 +292,10 @@ public class Initialactivity extends FragmentActivity implements
 	private LinkedHashMap<String, LinkedHashMap<Registrable, Integer>> savedOrders;
 	private LinkedList<LinkedHashMap<Registrable, Integer>> cookingOrders;
 	private LinkedHashMap<LinkedHashMap<Registrable, Integer>, String> cookingOrdersMethods;
+	private LinkedHashMap<LinkedHashMap<Registrable, Integer>, Integer> cookingOrdersDelivery;
+	private LinkedHashMap<LinkedHashMap<Registrable, Integer>, Integer> cookingOrdersTogo;
+	private LinkedHashMap<LinkedHashMap<Registrable, Integer>, Integer> cookingOrdersTip;
+	private LinkedHashMap<LinkedHashMap<Registrable, Integer>, Double> cookingOrdersDiscount;
 	private LinkedHashMap<LinkedHashMap<Registrable, Integer>, Long> cookingOrdersTimes;
 	private LinkedHashMap<LinkedHashMap<Registrable, Integer>, Double> cookingOrdersReceived;
 	private String[] frases;
@@ -326,6 +347,39 @@ public class Initialactivity extends FragmentActivity implements
 	 * */
 	
 	private static String deviceID;
+	
+	
+	/***
+	 * 
+	 * 
+	 * CONEXIÓN BLUETOOTH IMPRESORAS
+	 * 
+	 * 
+	 * */
+	public static final int MESSAGE_STATE_CHANGE = 1;
+    public static final int MESSAGE_READ = 2;
+    public static final int MESSAGE_WRITE = 3;
+    public static final int MESSAGE_DEVICE_NAME = 4;
+    public static final int MESSAGE_TOAST = 5;
+  
+    public static final String DEVICE_NAME = "device_name";
+    public static final String TOAST = "toast";
+
+    
+    private static final int REQUEST_CONNECT_DEVICE = 1;
+    private static final int REQUEST_ENABLE_BT = 2;
+    
+    
+    // Array adapter for the conversation thread
+    //private ArrayAdapter<String> mConversationArrayAdapter;
+    // String buffer for outgoing messages
+    private StringBuffer mOutStringBuffer;
+    // Local Bluetooth adapter
+    private BluetoothAdapter mBluetoothAdapter = null;
+    // Member object for the chat services
+    private BluetoothChatService mChatService = null;
+    private BluetoothSerialService mSerialService = null;
+    private String mConnectedDeviceName = null;
 
 	/**
 	 * @param isWifiP2pEnabled
@@ -410,7 +464,7 @@ public class Initialactivity extends FragmentActivity implements
 		setContentView(R.layout.swipe_view);
 		checkLogin();
 		// add necessary intent values to be matched.
-
+		
 		intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
 		intentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
 		intentFilter
@@ -420,32 +474,37 @@ public class Initialactivity extends FragmentActivity implements
 
 		manager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
 		channel = manager.initialize(this, getMainLooper(), null);
-
-		ingredientCategoryDatasource = new IngredientCategoryDataSource(this);
+		mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+		dbHelper = new MySQLiteHelper(this);
+		ingredientCategoryDatasource = new IngredientCategoryDataSource(dbHelper);
 		db = ingredientCategoryDatasource.open();
 		ingredientCategories = ingredientCategoryDatasource
 				.getAllIngredientCategory();
-		
-		
-		Log.i("nada","hola");
 		// ingredientCategoryDatasource.close();
-		productCategoryDatasource = new ProductCategoryDataSource(this);
+		productCategoryDatasource = new ProductCategoryDataSource(dbHelper);
 		productCategoryDatasource.open(db);
 		productsCategories = productCategoryDatasource.getAllProductCategory();
-		ingredientDatasource = new IngredientDataSource(this);
-		ingredientDatasource.open(db);
-		ingredientes = ingredientDatasource.getAllIngredient();
-		productDatasource = new ProductDataSource(this);
-		productDatasource.open(db);
-		taxDataSource = new TaxDataSource(mContext);
+		taxDataSource = new TaxDataSource(dbHelper);
 		taxDataSource.open(db);
 		taxes = taxDataSource.getAllTax();
-		unitDataSource = new UnitDataSource(mContext);
+		unitDataSource = new UnitDataSource(dbHelper);
 		unitDataSource.open(db);
 		units = unitDataSource.getAllUnits();
-		saleDataSource = new SaleDataSource(mContext);
+		ingredientDatasource = new IngredientDataSource(dbHelper);
+		ingredientDatasource.open(db);
+		ingredientes = ingredientDatasource.getAllIngredient();
+		productDatasource = new ProductDataSource(dbHelper);
+		productDatasource.open(db);
+		productos = productDatasource.getAllProduct();
+		comboDatasource = new ComboDataSource(dbHelper);
+		comboDatasource.open(db);
+		combos = comboDatasource.getAllCombos();
+		saleDataSource = new SaleDataSource(dbHelper);
 		saleDataSource.open(db);
 		saleList = saleDataSource.getAllSales();
+		syncRowDataSource = new SyncRowDataSource(dbHelper);
+		syncRowDataSource.open(db);
+		
 		Calendar today = Calendar.getInstance();
 		Calendar tomorrow = Calendar.getInstance();
 		today.set(Calendar.HOUR, 0);
@@ -470,10 +529,6 @@ public class Initialactivity extends FragmentActivity implements
 
 		Log.d(TAG, "Diferencia entre tiempos: " + String.valueOf(end - init));
 		salesFromToday = saleDataSource.getAllSalesWithin(init, end);
-		productos = productDatasource.getAllProduct();
-		comboDatasource = new ComboDataSource(mContext);
-		comboDatasource.open(db);
-		combos = comboDatasource.getAllCombos();
 		productList = new ArrayList<Registrable>();
 		inflater = Initialactivity.this.getLayoutInflater();
 		Iterator<Product> iterator = productos.iterator();
@@ -570,6 +625,10 @@ public class Initialactivity extends FragmentActivity implements
 		savedOrders = new LinkedHashMap<String, LinkedHashMap<Registrable, Integer>>();
 		cookingOrders = new LinkedList<LinkedHashMap<Registrable, Integer>>();
 		cookingOrdersMethods = new LinkedHashMap<LinkedHashMap<Registrable, Integer>, String>();
+		cookingOrdersDelivery = new LinkedHashMap<LinkedHashMap<Registrable, Integer>, Integer>();
+		cookingOrdersTogo = new LinkedHashMap<LinkedHashMap<Registrable, Integer>, Integer>();
+		cookingOrdersTip = new LinkedHashMap<LinkedHashMap<Registrable, Integer>, Integer>();
+		cookingOrdersDiscount = new LinkedHashMap<LinkedHashMap<Registrable, Integer>, Double>();
 		cookingOrdersTimes = new LinkedHashMap<LinkedHashMap<Registrable, Integer>, Long>();
 		cookingOrdersReceived = new LinkedHashMap<LinkedHashMap<Registrable, Integer>, Double>();
 		frases = getResources().getStringArray(R.array.phrases);
@@ -679,20 +738,43 @@ public class Initialactivity extends FragmentActivity implements
 	protected void onStart() {
 		super.onStart();
 		mReader.start();
+		// If BT is not on, request that it be enabled.����� BT������������
+        // setupChat() will then be called during onActivityRe//sultsetupChat() Ȼ�󽫵����ڼ� onActivityResult
+        if (!mBluetoothAdapter.isEnabled()) {
+            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
+        // Otherwise, setup the serial session�
+        } else {
+            if (mChatService == null) setupChat();
+        	//if (mSerialService == null) setupChat();
+        }
 	}
 
 	@Override
-	public void onResume() {
+	public synchronized void onResume() {
 		super.onResume();
-		Log.i("DIRECTORIOS",Environment.getExternalStorageDirectory() + Environment.getDataDirectory().getAbsolutePath()+"/databases/"+"nest5posinit.sql");
+		
 		
 		receiver = new WiFiDirectBroadcastReceiver(manager, channel, this);
 		registerReceiver(receiver, intentFilter);
-
+		
+		registerReceiver(onSyncDownloadComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 		SharedPreferences prefs = Util.getSharedPreferences(mContext);
 		String connectionStatus = prefs.getString(Util.CONNECTION_STATUS,
 				Util.DISCONNECTED);
+		prefs.edit().putBoolean(Setup.IS_UPDATING, false);
 		mReader.start();
+		// Performing this check in onResume() covers the case in which BT was�� onResume() ��ִ�д˼����� BT ���������
+        // not enabled during onStart(), so we were paused to enable it...�� onStart() �ڼ��޷�������Ǳ���ͣ������...
+        // onResume() will be called when ACTION_REQUEST_ENABLE activity returns.ACTION_REQUEST_ENABLE �����ʱ�������� onResume()��
+        if (mChatService != null) {
+            // Only if the state is STATE_NONE, do we know that we haven't started already
+        	
+            if (mChatService.getState() == BluetoothChatService.STATE_NONE) {
+              // Start the Bluetooth chat services
+              mChatService.start();
+            }
+        }
 		/*
 		 * if (Util.DISCONNECTED.equals(connectionStatus)) {
 		 * Log.i(TAG,"Desconectado"); startActivity(new Intent(this,
@@ -719,18 +801,20 @@ public class Initialactivity extends FragmentActivity implements
 		 * 
 		 * setScreenContent(); } }
 		 */
-		File base = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"/dbestructurenest5.sql"); //delete database file if it is present
+		/*File base = new File(mContext.getExternalFilesDir(null) + Environment.getDataDirectory().getPath()+"/databases/","nest5posinit.sql"); //delete database file if it is present
 		try{
-			Log.i("BORANDO","borrando archivo de db");
-			base.delete();
+			Log.i("BORRANDO","borrando archivo de db");
+			if(base != null)
+				base.delete();
 			
 		}
 		catch(Exception e){
 			e.printStackTrace();
-		}
+		}*/
 		lay = R.layout.home;
 
 		setScreenContent();
+		//Toast.makeText(mContext, String.valueOf(productos.size()) ,Toast.LENGTH_LONG).show();
 		
 
 	}
@@ -738,6 +822,7 @@ public class Initialactivity extends FragmentActivity implements
 	@Override
 	protected void onPause() {
 		unregisterReceiver(receiver);
+		unregisterReceiver(onSyncDownloadComplete);
 		super.onPause();
 		mResetProgressDialog.dismiss();
 		mReader.stop();
@@ -751,6 +836,10 @@ public class Initialactivity extends FragmentActivity implements
 	public void onDestroy() {
 
 		super.onDestroy();
+		// Stop the Bluetooth chat servicesֹͣ�����������
+        if (mChatService != null) mChatService.stop();
+        //if (mSerialService != null) mSerialService.stop();
+        
 	}
 
 	@Override
@@ -768,6 +857,13 @@ public class Initialactivity extends FragmentActivity implements
 		setContentView(R.layout.splash);
 
 	}
+	private void setupChat() {
+        Log.d(TAG, "setupChat()");
+
+        
+        mChatService = new BluetoothChatService(this, mHandlerBlueTooth);
+        
+    }
 
 	private void setHomeScreenContent() {
 
@@ -846,6 +942,19 @@ public class Initialactivity extends FragmentActivity implements
 		case R.id.menu_load_register:
 
 			return true;
+		case R.id.menu_connect_printer:
+			mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+		       
+	        if (mBluetoothAdapter == null) {
+	            Toast.makeText(this, "Este dispositivo no tiene Bluetooth", Toast.LENGTH_LONG).show();
+	            finish();
+	            return false;
+	        }
+	        //Intent serverIntent = new Intent(this, DeviceListActivity.class);
+	        //startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+	        showScanDialog();
+			return true;
 		case R.id.menu_connect_device:
 			if (!isWifiP2pEnabled) {
 				Toast.makeText(Initialactivity.this,
@@ -860,14 +969,14 @@ public class Initialactivity extends FragmentActivity implements
 
 				@Override
 				public void onSuccess() {
-					Toast.makeText(Initialactivity.this, "BÃºsqueda Iniciada",
+					Toast.makeText(Initialactivity.this, "Búsqueda Iniciada",
 							Toast.LENGTH_SHORT).show();
 				}
 
 				@Override
 				public void onFailure(int reasonCode) {
 					Toast.makeText(Initialactivity.this,
-							"BÃºsqueda Fallida: " + reasonCode,
+							"Búsqueda Fallida: " + reasonCode,
 							Toast.LENGTH_SHORT).show();
 				}
 			});
@@ -877,6 +986,13 @@ public class Initialactivity extends FragmentActivity implements
 			return super.onOptionsItemSelected(item);
 		}
 	}
+	
+	private void showScanDialog() {
+        android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
+        
+        ScanDevicesFragment scanDialog = new ScanDevicesFragment();
+        scanDialog.show(fm, "fragment_edit_name");
+    }
 
 	private void showAddItemDialog() {
 		android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
@@ -914,12 +1030,37 @@ public class Initialactivity extends FragmentActivity implements
 		addingredientCategoryDialog.show(fm, "fragment_edit_name");
 	}
 
-	private void showCreateProductFormDialog(Product product) {
-		android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
+	private void showCreateProductFormDialog(String name, ProductCategory category, Double cost,  Double price,  Tax tax) {
+		// guardar producto
+					// Toast.makeText(mContext, category.getName(),
+					// Toast.LENGTH_LONG).show();
+					Product product = null;
+					try {
+						product = productDatasource.createProduct(name, category, 0,
+								cost, price, tax,0);
 
-		CreateProductView createProductDialog = new CreateProductView(
-				ingredientes, product);
-		createProductDialog.show(fm, "fragment_edit_name");
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					if (product != null) {
+
+						//productList.add(new Registrable(product));
+						/*Toast.makeText(mContext,
+								product.getName() + " Creado Satisfactoriamente.",
+								Toast.LENGTH_SHORT).show();*/
+						android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
+						
+						CreateProductView createProductDialog = new CreateProductView(
+								ingredientes, product);
+						createProductDialog.show(fm, "fragment_edit_name");
+						// informar de cambios a lista de ingredientes
+					} else {
+						Toast.makeText(mContext,
+								"Hubo Errores Creando el Producto '" + name + "'.",
+								Toast.LENGTH_SHORT).show();
+						// informar de cambios a lista de ingredientes
+					}
+		
 	}
 
 	private void showAddComboFormDialog() {
@@ -1057,7 +1198,7 @@ public class Initialactivity extends FragmentActivity implements
 			try {
 				ingredient = ingredientDatasource.createIngredient(name,
 						category, tax, unit, costPerUnit, pricePerUnit,
-						priceMeasure, qty, date);
+						priceMeasure, qty, date,0);
 
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -1069,6 +1210,8 @@ public class Initialactivity extends FragmentActivity implements
 						ingredient.getName() + " Creado Satisfactoriamente.",
 						Toast.LENGTH_SHORT).show();
 				// informar de cambios a lista de ingredientes
+				createSyncRow("\""+Setup.TABLE_INGREDIENTS+"\"",ingredient.getId(), ingredient.getSyncId(), "{\"name\": \""+ingredient.getName()+"\",\"_id\":"+ingredient.getId()+",\""+Setup.COLUMN_INGREDIENT_CATEGORY_ID+"\": "+category.getSyncId()+",\""+Setup.COLUMN_INGREDIENT_TAX_ID+"\": "+tax.getSyncId()+",\""+Setup.COLUMN_INGREDIENT_UNIT+"\": "+unit.getSyncId()+",\""+Setup.COLUMN_INGREDIENT_COST_PER_UNIT+"\": "+costPerUnit+",\""+Setup.COLUMN_INGREDIENT_PRICE_PER_UNIT+"\": "+pricePerUnit+",\""+Setup.COLUMN_INGREDIENT_PRICE_MEASURE+"\":"+priceMeasure+" ,\""+Setup.COLUMN_INGREDIENT_QTY+"\": "+qty+",\""+Setup.COLUMN_INGREDIENT_DATE+"\":"+date+"}");
+				
 			} else {
 				Toast.makeText(mContext,
 						"Hubo Errores Creando el Ingrediente '" + name + "'.",
@@ -1100,6 +1243,7 @@ public class Initialactivity extends FragmentActivity implements
 								+ " Actualizado Satisfactoriamente.",
 						Toast.LENGTH_SHORT).show();
 				// informar de cambios a lista de ingredientes
+				createSyncRow(Setup.TABLE_INGREDIENTS,newIngredient.getId(), newIngredient.getSyncId(), "{name: \""+newIngredient.getName()+"\",_id:"+newIngredient.getId()+","+Setup.COLUMN_INGREDIENT_CATEGORY_ID+": "+category.getSyncId()+","+Setup.COLUMN_INGREDIENT_TAX_ID+": "+tax.getSyncId()+","+Setup.COLUMN_INGREDIENT_UNIT+": "+unit.getSyncId()+","+Setup.COLUMN_INGREDIENT_COST_PER_UNIT+": "+costPerUnit+","+Setup.COLUMN_INGREDIENT_PRICE_PER_UNIT+": "+pricePerUnit+","+Setup.COLUMN_INGREDIENT_PRICE_MEASURE+":"+priceMeasure+" ,"+Setup.COLUMN_INGREDIENT_QTY+": "+qty+"}");
 			} else {
 				Toast.makeText(
 						mContext,
@@ -1117,7 +1261,8 @@ public class Initialactivity extends FragmentActivity implements
 		ProductCategory categoryProduct = null;
 		try {
 			categoryProduct = productCategoryDatasource
-					.createProductCategory(name);
+					.createProductCategory(name,0);
+			
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1128,6 +1273,8 @@ public class Initialactivity extends FragmentActivity implements
 					Toast.LENGTH_SHORT).show();
 			// informar de cambios a lista de ingredientes
 			productsCategories.add(categoryProduct);
+			//create syncRow for syncronization with main server
+			createSyncRow(Setup.TABLE_CATEGORY_PRODUCTS,categoryProduct.getId(), categoryProduct.getSyncId(), "{name: \""+categoryProduct.getName()+"\",_id:"+categoryProduct.getId()+"}");
 		} else {
 			Toast.makeText(mContext,
 					"Hubo Errores Creando el Ingrediente '" + name + "'.",
@@ -1143,7 +1290,8 @@ public class Initialactivity extends FragmentActivity implements
 		IngredientCategory ingredientProduct = null;
 		try {
 			ingredientProduct = ingredientCategoryDatasource
-					.createIngredientCategory(name);
+					.createIngredientCategory(name,0);
+			
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1155,6 +1303,8 @@ public class Initialactivity extends FragmentActivity implements
 					Toast.LENGTH_SHORT).show();
 			// informar de cambios a lista de ingredientes
 			ingredientCategories.add(ingredientProduct);
+			//create syncRow for syncronization with main server
+			createSyncRow(Setup.TABLE_CATEGORY_INGREDIENTS,ingredientProduct.getId(), ingredientProduct.getSyncId(), "{name: \""+ingredientProduct.getName()+"\",_id:"+ingredientProduct.getId()+"}");
 
 		} else {
 			Toast.makeText(mContext,
@@ -1162,6 +1312,71 @@ public class Initialactivity extends FragmentActivity implements
 					Toast.LENGTH_SHORT).show();
 			// informar de cambios a lista de ingredientes
 		}
+	}
+	//creates a SyncRow and tries to sync, if successfull deletes it, if not leaves it there for later synchronization retryal
+	private void createSyncRow(String table, long rowId,
+			long syncId, String fields) {
+			SyncRow syncRow = null;
+			try {
+				SharedPreferences prefs = Util.getSharedPreferences(mContext);
+				String deviceId = prefs.getString(Setup.DEVICE_REGISTERED_ID, "null");
+				if(deviceId.equalsIgnoreCase("null")){ //Device not properly registered in nest5 big data.
+					return ;
+				}
+				syncRowDataSource.open();
+				syncRow = syncRowDataSource.createSyncRow(deviceId, table, rowId, syncId, fields);
+	
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			if (syncRow != null) {
+				Toast.makeText(mContext,
+						syncRow.getId() + " Creado Satisfactoriamente, ahora intenataremos sincronizar con servidor Nest5.",
+						Toast.LENGTH_SHORT).show();
+				// try ti upload to sync big data server
+				//http://localhost:8080/Nest5BusinessData/rowOps/rowReceived?row={fields:{name:IVA,percentage:0.16},
+				//device_id:e235e765b7c27383-85bb2212-59bb-467d-a001-56ce5da33076,table:tax,row_id:1,time_created:1391230334000,sync_id:0}
+				StringBuilder row = new StringBuilder();
+				row.append("{\"fields\":");
+				row.append(fields);
+				row.append(",\"device_id\":");
+				row.append(prefs.getString(Setup.DEVICE_REGISTERED_ID, "null"));
+				row.append(",\"table\":");
+				row.append(table);
+				row.append(",\"row_id\":");
+				row.append(rowId);
+				row.append(",\"time_created\":");
+				row.append(syncRow.getTimeCreated());
+				row.append(",\"sync_id\":");
+				row.append(syncId);
+				row.append("}");
+				restService = new RestService(dataRowSent, mContext,
+						Setup.PROD_BIGDATA_URL + "/rowOps/rowReceived");
+				restService.addParam("row", row.toString());
+				restService.addParam("sync_row_id", String.valueOf(syncRow.getId()));//se envia para que el servidor lo regrese y se sepa que row se estaba subiedno
+				restService.setCredentials("apiadmin", Setup.apiKey);
+				try {
+					mResetProgressDialog
+					.setMessage("Actualizando...");
+					mResetProgressDialog.setCancelable(false);
+					mResetProgressDialog.setIndeterminate(true);
+
+			mResetProgressDialog.show();
+					Log.i("MISPRUEBAS", "empezando upload dataRow");
+					restService.execute(RestService.POST);
+				} catch (Exception e) {
+					e.printStackTrace();
+					
+				}
+				
+			} else {
+				Toast.makeText(mContext,
+						"Hubo Errores Creando el SyncRow '" + syncId + "'.",
+						Toast.LENGTH_SHORT).show();
+				// informar de cambios a lista de ingredientes
+			}
+		
+		
 	}
 
 	@Override
@@ -1238,7 +1453,7 @@ public class Initialactivity extends FragmentActivity implements
 
 				Sale createdSale = saleDataSource.createSale(saveDate,
 						cookingOrdersMethods.get(currentSale),
-						cookingOrdersReceived.get(currentSale));
+						cookingOrdersReceived.get(currentSale),0,cookingOrdersDelivery.get(currentSale),cookingOrdersTogo.get(currentSale),cookingOrdersTip.get(currentSale),cookingOrdersDiscount.get(currentSale));
 				if (createdSale != null) {
 					Iterator<Entry<Registrable, Integer>> it = currentSale
 							.entrySet().iterator();
@@ -1246,13 +1461,18 @@ public class Initialactivity extends FragmentActivity implements
 					while (it.hasNext()) {
 						Map.Entry<Registrable, Integer> pair = (Map.Entry<Registrable, Integer>) it
 								.next();
-						createdSale.saveItem(mContext, pair.getKey().type,
+						createdSale.saveItem(dbHelper, pair.getKey().type,
 								pair.getKey().id, pair.getValue());
-
+						
 						// Log.d("INGREDIENTES","INGREDIENTE: "+ingrediente.getKey().getName()+" "+ingrediente.getValue());
 					}
+					
 					cookingOrders.remove(currentSelectedPosition);
 					cookingOrdersMethods.remove(currentSale);
+					cookingOrdersDelivery.remove(currentSale);
+					cookingOrdersTogo.remove(currentSale);
+					cookingOrdersTip.remove(currentSale);
+					cookingOrdersDiscount.remove(currentSale);
 					cookingOrdersReceived.remove(currentSale);
 					cookingOrdersTimes.remove(currentSale);
 					currentSelectedPosition = -1;
@@ -1269,10 +1489,15 @@ public class Initialactivity extends FragmentActivity implements
 
 					// ordersList.setOnItemClickListener(orderListListener);
 					// makeTable("NA");
-					sale_name.setText("Venta Guardada con Ã‰xito");
+					sale_name.setText("Venta Guardada con Éxito");
 					sale_details
 							.setText("Selecciona otro elemento para ver detalles.");
 					updateSaleValue();
+					
+					//pdate sale object to get saved items, since the object doesn't have them
+					createdSale = saleDataSource.getSale(createdSale.getId());
+					Log.w("GUARDANDOVENTA","Cantidad de productos: "+String.valueOf(createdSale.getProducts().size()));
+					createSyncRow("\""+Setup.TABLE_SALE+"\"",createdSale.getId(), createdSale.getSyncId(), createdSale.serializedFields());
 
 				} else {
 					Toast.makeText(mContext, "Error al Guardar la venta",
@@ -1293,6 +1518,10 @@ public class Initialactivity extends FragmentActivity implements
 						.get(currentSelectedPosition);
 				cookingOrders.remove(currentSelectedPosition);
 				cookingOrdersMethods.remove(currentSale);
+				cookingOrdersDelivery.remove(currentSale);
+				cookingOrdersTogo.remove(currentSale);
+				cookingOrdersTip.remove(currentSale);
+				cookingOrdersDiscount.remove(currentSale);
 				cookingOrdersReceived.remove(currentSale);
 				cookingOrdersTimes.remove(currentSale);
 				currentSelectedPosition = -1;
@@ -1324,6 +1553,10 @@ public class Initialactivity extends FragmentActivity implements
 						.get(currentSelectedPosition);
 				cookingOrders.remove(currentSelectedPosition);
 				cookingOrdersMethods.remove(currentSale);
+				cookingOrdersDelivery.remove(currentSale);
+				cookingOrdersTogo.remove(currentSale);
+				cookingOrdersTip.remove(currentSale);
+				cookingOrdersDiscount.remove(currentSale);
 				cookingOrdersReceived.remove(currentSale);
 				cookingOrdersTimes.remove(currentSale);
 				currentSelectedPosition = -1;
@@ -1377,7 +1610,7 @@ public class Initialactivity extends FragmentActivity implements
 		List<String> nombres = new ArrayList<String>();
 		String nombreActual = "";
 		for (Ingredient current : ingres) {
-			String name = current.getName().trim().toLowerCase();
+			String name = current.getName().trim().toLowerCase(Locale.getDefault());
 			if (!nombreActual.equals(name)) {
 				nombreActual = name;
 				nombres.add(nombreActual);
@@ -1746,6 +1979,32 @@ public class Initialactivity extends FragmentActivity implements
 		tr1.setBackgroundColor(Color.CYAN);
 		dailyTable.addView(tr1);
 		dailyTable.addView(tv);
+		
+		//actualizar sales de hoy
+		Calendar today = Calendar.getInstance();
+		Calendar tomorrow = Calendar.getInstance();
+		today.set(Calendar.HOUR, 0);
+		today.set(Calendar.HOUR_OF_DAY, 0);
+		today.set(Calendar.MINUTE, 0);
+		today.set(Calendar.SECOND, 0);
+		today.set(Calendar.MILLISECOND, 0);
+		tomorrow.roll(Calendar.DATE, 1);
+		tomorrow.set(Calendar.HOUR, 0);
+		tomorrow.set(Calendar.HOUR_OF_DAY, 0);
+		tomorrow.set(Calendar.MINUTE, 0);
+		tomorrow.set(Calendar.SECOND, 0);
+		tomorrow.set(Calendar.MILLISECOND, 0);
+
+		init = today.getTimeInMillis();
+		end = tomorrow.getTimeInMillis();
+		Log.d("GUARDANDOVENTA", today.toString());
+		Log.d("GUARDANDOVENTA", tomorrow.toString());
+		Calendar now = Calendar.getInstance();
+		now.setTimeInMillis(System.currentTimeMillis());
+		Log.d(TAG, now.toString());
+
+		Log.d(TAG, "Diferencia entre tiempos: " + String.valueOf(end - init));
+		salesFromToday = saleDataSource.getAllSalesWithin(init, end);
 
 		List<Sale> usingSales = salesFromToday;
 
@@ -1765,6 +2024,7 @@ public class Initialactivity extends FragmentActivity implements
 			LinkedHashMap<Product, Double> products = currentSale.getProducts();
 			LinkedHashMap<Ingredient, Double> ingredients = currentSale
 					.getIngredients();
+			Log.w("DAYILETABLES"," "+combos.size()+" "+products.size()+" "+ingredients.size());
 			Iterator<Entry<Combo, Double>> it = combos.entrySet().iterator();
 			Calendar date = Calendar.getInstance();
 			date.setTimeInMillis(currentSale.getDate());
@@ -1986,95 +2246,110 @@ public class Initialactivity extends FragmentActivity implements
 		if ((name == null) || (category == null)) {
 			showAddProductCategoryFormDialog();
 		} else {
-			// guardar producto
-			// Toast.makeText(mContext, category.getName(),
-			// Toast.LENGTH_LONG).show();
-			Product product = null;
-			try {
-				product = productDatasource.createProduct(name, category, 0,
-						cost, price, tax);
-
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			if (product != null) {
-
-				productList.add(new Registrable(product));
-				Toast.makeText(mContext,
-						product.getName() + " Creado Satisfactoriamente.",
-						Toast.LENGTH_SHORT).show();
-				showCreateProductFormDialog(product);
-				// informar de cambios a lista de ingredientes
-			} else {
-				Toast.makeText(mContext,
-						"Hubo Errores Creando el Producto '" + name + "'.",
-						Toast.LENGTH_SHORT).show();
-				// informar de cambios a lista de ingredientes
-			}
+			showCreateProductFormDialog(name, category,cost,price,tax);
 		}
 
 	}
 
 	@Override
-	public void OnProductCreated(LinkedHashMap<Ingredient, Double> ingredents,
+	public void OnProductCreated(Boolean status,LinkedHashMap<Ingredient, Double> ingredents,
 			Product product) {
-		// TODO Auto-generated method stub
+		if(status){
+			Iterator<Entry<Ingredient, Double>> it = ingredents.entrySet()
+					.iterator();
+			StringBuilder ingredientes = new StringBuilder();
+			ingredientes.append("[");
+			int i = 0;
+			while (it.hasNext()) {
+				Map.Entry<Ingredient, Double> ingredientPair = (Map.Entry<Ingredient, Double>) it
+						.next();
+				product.addIngredient(dbHelper, ingredientPair.getKey(),
+						ingredientPair.getValue());
+				Toast.makeText(mContext, "Imgrediente: "+ingredientPair.getKey()+" Cantidad: "+ingredientPair.getValue(), Toast.LENGTH_LONG).show();
 
-		/*
-		 * for(Ingredient ingrediente : ingredents) {
-		 * product.addIngredient(mContext, ingrediente, 100.0);
-		 * product.refreshIngredients(mContext); productos.add(product); }
-		 */
-		Iterator<Entry<Ingredient, Double>> it = ingredents.entrySet()
-				.iterator();
+				// Log.d("INGREDIENTES","INGREDIENTE: "+ingrediente.getKey().getName()+" "+ingrediente.getValue());
+				if(i != 0){
+					ingredientes.append(",");
+				}
+				ingredientes.append("{\"sync_id\": "+ingredientPair.getKey().getSyncId()+",\"qty\": "+ingredientPair.getValue()+"}");
+				i++;
+			}
+			product.refreshIngredients(dbHelper);
+			productos.add(product);
+			//crear syncrow
+			productList.add(new Registrable(product));
+			
+			
+			ingredientes.append("]");
+			createSyncRow("\""+Setup.TABLE_PRODUCTS+"\"",product.getId(),product.getSyncId(), "{\""+Setup.COLUMN_NAME+"\": \""+product.getName()+"\",\""+Setup.COLUMN_PRODUCT_AUTOMATIC+"\":"+product.isAutomaticCost()+",\"_id\":"+product.getId()+",\""+Setup.COLUMN_PRODUCT_CATEGORY_ID+"\": "+product.getCategory().getSyncId()+",\""+Setup.COLUMN_PRODUCT_TAX_ID+"\": "+product.getTax().getSyncId()+",\""+Setup.COLUMN_PRODUCT_COST+"\": "+product.getCost()+",\""+Setup.COLUMN_PRODUCT_PRICE+"\": "+product.getPrice()+",\"ingredients\": "+ingredientes.toString()+"}"); //hacer la forma que cuando se reciba esto, se creen los ingredientes (la base de datos debe exportar la forma)
 
-		while (it.hasNext()) {
-			Map.Entry<Ingredient, Double> ingredientPair = (Map.Entry<Ingredient, Double>) it
-					.next();
-			product.addIngredient(mContext, ingredientPair.getKey(),
-					ingredientPair.getValue());
-
-			// Log.d("INGREDIENTES","INGREDIENTE: "+ingrediente.getKey().getName()+" "+ingrediente.getValue());
+		}else{
+			productDatasource.deleteProduct(product);
+			
 		}
-		product.refreshIngredients(mContext);
-		productos.add(product);
-
+		
 	}
 
 	@Override
-	public void OnComboCreated(LinkedHashMap<Ingredient, Double> ingredents,
+	public void OnComboCreated(Boolean status,LinkedHashMap<Ingredient, Double> ingredents,
 			LinkedHashMap<Product, Double> products, String name, Double cost,
 			Double price, Tax tax) {
-		Combo combo = comboDatasource.createCombo(name, 0, cost, price, tax);
-		Iterator<Entry<Ingredient, Double>> it = ingredents.entrySet()
-				.iterator();
+		if(status){
+			Combo combo = comboDatasource.createCombo(name, 0, cost, price, tax,0);
+			Iterator<Entry<Ingredient, Double>> it = ingredents.entrySet()
+					.iterator();
+			StringBuilder ingredientes = new StringBuilder();
+			ingredientes.append("[");
+			StringBuilder productos = new StringBuilder();
+			productos.append("[");
+			int i = 0;
+			while (it.hasNext()) {
+				Map.Entry<Ingredient, Double> ingredientPair = (Map.Entry<Ingredient, Double>) it
+						.next();
+				combo.addIngredient(dbHelper, ingredientPair.getKey(),
+						ingredientPair.getValue());
+				
+				if(i != 0){
+					ingredientes.append(",");
+				}
+				ingredientes.append("{\"sync_id\": "+ingredientPair.getKey().getSyncId()+",\"qty\": "+ingredientPair.getValue()+"}");
+				i++;
 
-		while (it.hasNext()) {
-			Map.Entry<Ingredient, Double> ingredientPair = (Map.Entry<Ingredient, Double>) it
-					.next();
-			combo.addIngredient(mContext, ingredientPair.getKey(),
-					ingredientPair.getValue());
+				// Log.d("INGREDIENTES","INGREDIENTE: "+ingrediente.getKey().getName()+" "+ingrediente.getValue());
+			}
+			ingredientes.append("]");
+			Iterator<Entry<Product, Double>> pt = products.entrySet().iterator();
+			int j = 0;
+			while (pt.hasNext()) {
+				Map.Entry<Product, Double> productPair = (Map.Entry<Product, Double>) pt
+						.next();
+				combo.addProduct(dbHelper, productPair.getKey(),
+						productPair.getValue());
+				
+				
+				if(j != 0){
+					productos.append(",");
+				}
+				productos.append("{\"sync_id\": "+productPair.getKey().getSyncId()+",\"qty\": "+productPair.getValue()+"}");
+				j++;
 
-			// Log.d("INGREDIENTES","INGREDIENTE: "+ingrediente.getKey().getName()+" "+ingrediente.getValue());
+			}
+			productos.append("]");
+			createSyncRow("\""+Setup.TABLE_COMBOS+"\"",combo.getId(), combo.getSyncId(), "{\"name\": \""+combo.getName()+"\",\""+Setup.COLUMN_COMBO_AUTOMATIC+"\":"+combo.isAutomaticCost()+",\"_id\":"+combo.getId()+",\""+Setup.COLUMN_COMBO_TAX_ID+"\": "+combo.getTax().getSyncId()+",\""+Setup.COLUMN_COMBO_COST+"\": "+combo.getCost()+",\""+Setup.COLUMN_COMBO_PRICE+"\": "+combo.getPrice()+",\"ingredients\": "+ingredientes.toString()+",\"products\": "+productos.toString()+"}");
+
+			combo.refreshIngredients(dbHelper);
+			combo.refreshProducts(dbHelper);
+			combos.add(combo);
+			comboList.add(new Registrable(combo));
+		}else{
+			
 		}
-		Iterator<Entry<Product, Double>> pt = products.entrySet().iterator();
-
-		while (pt.hasNext()) {
-			Map.Entry<Product, Double> productPair = (Map.Entry<Product, Double>) pt
-					.next();
-			combo.addProduct(mContext, productPair.getKey(),
-					productPair.getValue());
-
-		}
-		combo.refreshIngredients(mContext);
-		combo.refreshProducts(mContext);
-		combos.add(combo);
-		comboList.add(new Registrable(combo));
+		
 
 	}
 
 	@Override
-	public void OnPayClicked(String method, double value) {
+	public void OnPayClicked(String method,int isDelivery,int isTogo, double value,int tip, double discount) {
 
 		// al guardar lo que hace es que guarda un objeto Sale con fecha, metodo
 		// de pago y valor recibido.
@@ -2188,6 +2463,10 @@ public class Initialactivity extends FragmentActivity implements
 
 		// cookingOrders.add(currentOrder);
 		cookingOrdersMethods.put(currentObjects, method);
+		cookingOrdersDelivery.put(currentObjects, isDelivery);
+		cookingOrdersTogo.put(currentObjects, isTogo);
+		cookingOrdersTip.put(currentObjects, tip);
+		cookingOrdersDiscount.put(currentObjects, discount);
 		cookingOrdersTimes.put(currentObjects, startTime);
 		cookingOrdersReceived.put(currentObjects, value);
 
@@ -2212,7 +2491,7 @@ public class Initialactivity extends FragmentActivity implements
 		lines++;
 		factura.append("Ingresa a www.mrpastor.com\r\n");
 		lines++;
-		factura.append("SÃ­guenos en\r\n");
+		factura.append("Síguenos en\r\n");
 		lines++;
 		factura.append("facebook/misterpastor\r\n");
 		lines++;
@@ -2252,9 +2531,59 @@ public class Initialactivity extends FragmentActivity implements
 		 * factura.append("\r\n\r\n Gracias Por Comprar en Mr. Pastor.\r\n");
 		 * factura.append("Ingresa http://www.mrpastor.com\r\n");
 		 * factura.append(
-		 * "O SÃ­guenos en facebook/misterpastor - Twiiter.com/comidasmrpastor"
+		 * "O Síguenos en facebook/misterpastor - Twiiter.com/comidasmrpastor"
 		 * );
 		 */
+		//imprimir en bluetooth
+		// TODO Auto-generated method stub
+				//this.mSettingsConfig.resetSettings();
+				//String str = this.mSettingsConfig.getTest_string();
+				int[] arrayOfInt = new int[2];
+				arrayOfInt[0] = 27;
+				arrayOfInt[1] = 64;
+				String test = "Linea 1\r\n\t\t\tOtra Linea";
+				int[] array2 = new int[3];
+				array2[0] = 27;
+				array2[1] = 74;
+				array2[2] = 2;
+				StringBuilder builder1 = new StringBuilder();
+				for(int h= 0; h<2; h++)
+		        {
+					builder1.append(Character.toChars(arrayOfInt[h]));
+		        }
+				StringBuilder builder2 = new StringBuilder();
+				
+				builder2.append(Character.toChars(10));
+		        
+		        
+		            
+		        StringBuilder complete = new StringBuilder(String.valueOf(builder1.toString())).append(String.valueOf(builder2.toString()));
+		        String enviar = complete.toString(); 
+		       
+		        Log.d(TAG,"Cadena a enviar: "+enviar);
+		        if(mChatService.getState() == mChatService.STATE_CONNECTED)
+				{
+					try {
+						mChatService.write(factura.toString().getBytes("x-UnicodeBig"));
+					} catch (UnsupportedEncodingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					/*try {
+						
+				                   
+				        byte[] sendData = decodeText("HOLA", "x-UnicodeBig");
+				        mChatService.write(sendData);
+				        
+				    } catch (IOException e) {
+				        e.printStackTrace();
+				        Log.i("emi", "Send data error: " + e);
+				    }*/
+				}
+				else
+				{
+					Toast.makeText(mContext, "No esta conectado", Toast.LENGTH_LONG).show();
+				}
 
 	}
 
@@ -2410,7 +2739,7 @@ public class Initialactivity extends FragmentActivity implements
 			@Override
 			public void onFailure(int reason) {
 				Toast.makeText(Initialactivity.this,
-						"La conexiÃ³n fallÃ³. ReintÃ©ntalo de nuevo.",
+						"La conexión falló. Reinténtalo de nuevo.",
 						Toast.LENGTH_SHORT).show();
 			}
 		});
@@ -2423,7 +2752,7 @@ public class Initialactivity extends FragmentActivity implements
 
 			@Override
 			public void onFailure(int reasonCode) {
-				Log.d(TAG, "La desconexiÃ³n fallÃ³, la razÃ³n es:" + reasonCode);
+				Log.d(TAG, "La desconexiÃ³n fallÃ³, la razón es:" + reasonCode);
 
 			}
 
@@ -2471,7 +2800,7 @@ public class Initialactivity extends FragmentActivity implements
 		if (manager != null && !retryChannel) {
 			Toast.makeText(
 					this,
-					"Se perdiÃ³ la conexiÃ³n con el canal, intÃ©ntalo de nuevo.",
+					"Se perdió la conexión con el canal, inténtalo de nuevo.",
 					Toast.LENGTH_LONG).show();
 			// resetData();
 			retryChannel = true;
@@ -2479,7 +2808,7 @@ public class Initialactivity extends FragmentActivity implements
 		} else {
 			Toast.makeText(
 					this,
-					"Â¡Error grave!. Se perdiÃ³ por completo la conexiÃ³n con dispositivos. Reintenta Desactivando/Activando WifiDirect otra vez.",
+					"¡Error grave!. Se perdió por completo la conexión con dispositivos. Reintenta Desactivando/Activando WifiDirect otra vez.",
 					Toast.LENGTH_LONG).show();
 		}
 	}
@@ -2559,6 +2888,28 @@ public class Initialactivity extends FragmentActivity implements
 			}
 		}, 0, 60000);
 	}
+	
+	/*BLUETOOTH*/
+	@Override
+	public void onDeviceSelected(String address) {
+		// TODO Auto-generated method stub
+		Toast.makeText(this, "address--->"+address, Toast.LENGTH_SHORT).show();
+        // Get the BLuetoothDevice object
+        BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+        UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
+        try {
+			device.createRfcommSocketToServiceRecord(uuid);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+        // Attempt to connect to the device
+        mChatService.connect(device); 
+        //mSerialService.connect(device);
+	}
+	
+	
 
 	public Handler mHandler = new Handler() {
 
@@ -2617,7 +2968,7 @@ public class Initialactivity extends FragmentActivity implements
 			}
 			DecimalFormat dec = new DecimalFormat("$###,###,###");
 
-			saleValue.setText("Ventas del DÃ­a: " + dec.format(total));
+			saleValue.setText("Ventas del Día: " + dec.format(total));
 
 		}
 	}
@@ -2723,7 +3074,7 @@ public class Initialactivity extends FragmentActivity implements
 	private void backUpDb() {
 
 		mResetProgressDialog = new ProgressDialog(mContext);
-		mResetProgressDialog.setMessage("Protegiendo Base de Datos");
+		mResetProgressDialog.setMessage("Sincronizando Base de Datos, esto puede tardar unos minutos...");
 		mResetProgressDialog.setCancelable(false);
 		mResetProgressDialog.setIndeterminate(true);
 		mResetProgressDialog.show();
@@ -2736,7 +3087,7 @@ public class Initialactivity extends FragmentActivity implements
 	// a usar para el archivo y sube a s3
 
 	private void saveFileRecord() {
-		SharedPreferences prefs = Util.getSharedPreferences(mContext);
+		/*SharedPreferences prefs = Util.getSharedPreferences(mContext);
 
 		restService = new RestService(fileSavedHandler, mContext,
 				Setup.PROD_URL + "/company/saveDB");
@@ -2747,22 +3098,37 @@ public class Initialactivity extends FragmentActivity implements
 		} catch (Exception e) {
 			e.printStackTrace();
 			Log.i("MISPRUEBAS", "Error empezando request");
+		}*/ //old code. This uploaded the whole database file in sqlite format to amazon S3.
+		
+		//new code checks if there is any row for uploading, then the servers does it's job updating, and sends back a file with the sql to apply to the whole database.
+		
+		//download sql script file code
+		String url = Setup.PROD_BIGDATA_URL+"/databaseOps/importDatabase?payload={\"company\":"+prefs.getString(Setup.COMPANY_ID, "0")+"}";
+		DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+		
+		// in order for this if to run, you must use the android 3.2 to compile your app
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+		    request.allowScanningByMediaScanner();
+		    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
 		}
+
+
+		SQLiteDatabase db = dbHelper.getWritableDatabase();
+    	dbHelper.onUpgrade(db, 0, 1);
+		request.setDestinationInExternalFilesDir(mContext, Environment.getDataDirectory() + "/databases/", "nest5posinit.sql");
+		request.setVisibleInDownloadsUi(false);
+		// get download service and enqueue file
+		DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+		manager.enqueue(request);
 	}
 
-	private final Handler fileSavedHandler = new Handler() {
+	/*private final Handler fileSavedHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
 			// mResetProgressDialog.dismiss();
 
 			// temporal abre actividad loggeado
-			/*
-			 * prefs.edit().putBoolean(Setup.LOGGED_IN,
-			 * true).putString(Setup.COMPANY_ID,
-			 * "12212").putString(Setup.COMPANY_NAME,
-			 * "Nest5 Test Company").commit(); Intent intenter= new
-			 * Intent(mContext, Initialactivity.class); startActivity(intenter);
-			 */
+			
 			JSONObject respuesta = null;
 			Log.i("MISPRUEBAS", "LLEGUE");
 			try {
@@ -2821,7 +3187,7 @@ public class Initialactivity extends FragmentActivity implements
 			}
 
 		}
-	};
+	};*/
 
 	/**
 	 * Represents an asynchronous login/registration task used to authenticate
@@ -3216,6 +3582,282 @@ public class Initialactivity extends FragmentActivity implements
 		}
 
 	};
+	
+	
+	//handle upload row to big data server
+	private final Handler dataRowSent = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			 
+			mResetProgressDialog.dismiss();
+			JSONObject respuesta = null;
+				Log.i("MISPRUEBAS","LLEGUE DE subir fila");
+			try {
+				respuesta = new JSONObject((String) msg.obj);
+			} catch (Exception e) {
+				Log.i("MISPRUEBAS","ERROR JSON en subir row");
+				e.printStackTrace();
+				//no se hace nada, la fila no se pudo subir y se debe subir de nuevo luego
+			}
+
+			if (respuesta != null) {
+				Log.i("MISPRUEBAS","CON RESPUESTA de subir row");
+				int status = 0;
+				int responsecode = 0;
+				String message = "";
+				Long sync_id = 0L;
+				Long sync_row = 0L;
+				try {
+					status = respuesta.getInt("status");
+					responsecode = respuesta.getInt("code");
+					message = respuesta.getString("message");
+					Log.w("MISPRUEBAS","Mesnaje del Servidor: "+message);
+					Log.w("MISPRUEBAS","Objeto respuesta: "+respuesta.toString());
+
+				} catch (Exception e) {
+					Log.i("MISPRUEBAS","ERROR COGER DATOS al subir row");
+					e.printStackTrace();
+				}
+				// quitar loading
+				
+				
+				if (status == 201) { //se creo un objeto nuevo exitosamente, se debe actualizar el sync_id con el payload 
+					//ok! status received, but still we have to check for code 555 that says everything done in Nest5 as expected.
+					if(responsecode == 555 ){
+						try {
+							sync_id = respuesta.getLong("syncId");
+							sync_row = respuesta.getLong("syncRow");
+							Log.i("MISPRUEBAS","valores sync_id y sync_row: "+String.valueOf(sync_id)+" --- "+String.valueOf(sync_row));
+
+						} catch (Exception e) {
+							Log.i("MISPRUEBAS","ERROR cogiendo el syncId o el syncRow enviado por el servidor");
+							e.printStackTrace();
+						}
+						if((sync_id != 0L) && (sync_row != 0L)){//se debe actualizar el valor en el objeto local porque fue creado como nuevo con éxito en el servidor
+							SyncRow sync = syncRowDataSource.getSyncRow(sync_row);
+							String table = null;
+							Long id = null;
+							
+							try{
+								table = sync.getTable();
+								id = sync.getRowId();
+								Log.i("MISPRUEBAS","valores table y id: "+table+" --- "+String.valueOf(id));
+								updateSyncIdInRow(table,id,Setup.COLUMN_SYNC_ID,sync_id);
+								deleteSyncRow(sync_row);
+							}
+							catch(Exception e){
+								Log.e("MISPRUEBAS",e.toString());
+							}
+						}
+					}
+					else{//se presentó un error desconocido
+						
+					}
+					
+					
+					
+				} else {
+					if(status == 200){ //se actualizó una fila, 
+						//ok! status received, but still we have to check for code 555 that says everything done in Nest5 as expected.
+						if(responsecode == 555 ){
+							try {
+								sync_row = respuesta.getLong("syncRow");
+
+							} catch (Exception e) {
+								Log.i("MISPRUEBAS","ERROR cogiendo el syncId o el syncRow enviado por el servidor");
+								e.printStackTrace();
+							}
+							if((sync_row != 0L)){//se debe actualizar el valor en el objeto local porque fue creado como nuevo con éxito en el servidor
+								try{
+									deleteSyncRow(sync_row);
+								}
+								catch(Exception e){
+									Log.e("ERRORES",e.toString());
+								}
+							}
+						}
+						else{//error desconocido
+							
+						}
+					}
+					else{
+						if(status == 406){//se hizo overlap con otra fila enviada desde otro dispositivo
+							if(responsecode == 55513){ //confirmar que el http 406 si haya sido enviado porque el error era de overlap, el código 13 dice que si
+								//se debe pedir que manden una actualización de la fila, para tomar el valor que puso otro dispositivo que no permitió que este se guardara por obverlap
+								try {
+									sync_row = respuesta.getLong("syncRow");
+
+								} catch (Exception e) {
+									Log.i("MISPRUEBAS","ERROR cogiendo el syncId o el syncRow enviado por el servidor");
+									e.printStackTrace();
+								}
+								if((sync_row != 0L)){//se debe actualizar el valor en el objeto local porque fue creado como nuevo con éxito en el servidor
+									try{
+										deleteSyncRow(sync_row);
+									}
+									catch(Exception e){
+										Log.e("ERRORES",e.toString());
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			else{
+				//no hubo respuesta del servidor
+			}
+
+		}
+
+		
+	};
+	private void updateSyncIdInRow(String table, Long id,
+			String field, Long value) {
+		ContentValues values = new ContentValues();
+		values.put(field, value);
+		db.update(table, values, Setup.COLUMN_ID + " = " + id, null);
+		
+		//actualizar las listas de acuerdo a las cosas que se hayan hecho
+	}
+	private void deleteSyncRow(Long id) {
+		db.delete(Setup.TABLE_CATEGORY_INGREDIENTS, Setup.COLUMN_ID
+		        + " = " + id, null);
+		
+		//actualizar las listas de acuerdo a las cosas que se hayan hecho
+	}
+	
+	
+	
+	//handle downlaod database
+	
+	
+	private BroadcastReceiver onSyncDownloadComplete = new BroadcastReceiver() {
+	    public void onReceive(Context ctxt, Intent intent) {
+	        // Do Something
+	    	//showProgress(false);
+	    	//update database (delete it?)
+	    	//prefs.edit().putBoolean(Setup.IS_UPDATING, true).commit();
+	    	Log.e("GUARDANDOVENTA","LLEGO AL RECEIVER!!!");
+	    	SQLiteDatabase db = dbHelper.getWritableDatabase();
+	    	dbHelper.onCreate(db);
+	    	
+	    	//mContext.deleteDatabase("nest5pos.db");
+	    	
+	    	//cargar en las listas todo otra vez
+	    	
+	    	//reload all info on app
+	    	ingredientCategoryDatasource = new IngredientCategoryDataSource(dbHelper);
+			ingredientCategories = ingredientCategoryDatasource
+					.getAllIngredientCategory(db);
+	    	productCategoryDatasource = new ProductCategoryDataSource(dbHelper); //here it should open the app and create the databse since it doesn't exist
+			productCategoryDatasource.open(db);
+			productsCategories = productCategoryDatasource.getAllProductCategory();
+			ingredientDatasource = new IngredientDataSource(dbHelper);
+			ingredientDatasource.open(db);
+			ingredientes = ingredientDatasource.getAllIngredient();
+			productDatasource = new ProductDataSource(dbHelper);
+			productDatasource.open(db);
+			taxDataSource = new TaxDataSource(dbHelper);
+			taxDataSource.open(db);
+			taxes = taxDataSource.getAllTax();
+			unitDataSource = new UnitDataSource(dbHelper);
+			unitDataSource.open(db);
+			units = unitDataSource.getAllUnits();
+			saleDataSource = new SaleDataSource(dbHelper);
+			saleDataSource.open();
+			saleList = saleDataSource.getAllSales();
+			mResetProgressDialog.dismiss();
+			
+	    	
+	    }
+	    
+	};
+	
+// The Handler that gets information back from the BluetoothChatService
+    
+    private final Handler mHandlerBlueTooth = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+            case MESSAGE_STATE_CHANGE:
+                                switch (msg.arg1) {
+                case BluetoothChatService.STATE_CONNECTED:
+                    //mTitle.setText(R.string.title_connected_to);
+                    //mTitle.append(mConnectedDeviceName);
+                    //mConversationArrayAdapter.clear();
+                    
+                    /*int lv = lv7.length();
+                    String []s=new String[lv];
+            		setPrinter(4,0);//�ַ���ת	
+            		setPrinter(10, 1);
+                    setPrinter(4);
+            		for(int i=1;i<lv;i++){
+            			s[i]=lv7.substring(i-1,i);			
+            			if(s[i].equals("n")){
+            				setPrinter(3);
+            			
+            			}
+            			s[i] = RepString(s[i], "n", "");
+            			printContent(s[i]);		
+            			}*/
+            		
+                    break;
+                case BluetoothChatService.STATE_CONNECTING:
+                    //mTitle.setText(R.string.title_connecting);
+                    break;
+                case BluetoothChatService.STATE_LISTEN:
+                case BluetoothChatService.STATE_NONE:
+                    //mTitle.setText(R.string.title_not_connected);
+                    BluetoothAdapter cwjBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+                    
+                    if(cwjBluetoothAdapter == null){
+                    	Toast.makeText(
+        		    			Initialactivity.this,"No hay adaptador disponible",
+        		    			Toast.LENGTH_SHORT)
+        		    			.show();
+                    }
+                    if (!cwjBluetoothAdapter.isEnabled()) {
+
+                    	Intent TurnOnBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+
+                    	startActivityForResult(TurnOnBtIntent, REQUEST_ENABLE_BT);
+
+                    	}
+
+
+                    break;
+                }
+                break;
+            case MESSAGE_WRITE:
+                byte[] writeBuf = (byte[]) msg.obj;
+                // construct a string from the buffer����һ���������е��ַ�
+                String writeMessage = new String(writeBuf);
+                Log.d("Escribio al socekt: ",writeMessage);
+                //mConversationArrayAdapter.add("Me:  " + writeMessage);
+                break;
+            case MESSAGE_READ:
+                byte[] readBuf = (byte[]) msg.obj;
+                // construct a string from the valid bytes in the buffer����һ������Ч�ֽڻ������е��ַ�
+                String readMessage = new String(readBuf, 0, msg.arg1);
+                Log.d(TAG,"Leido: "+ readMessage);
+                //mConversationArrayAdapter.add(mConnectedDeviceName+":  " + readMessage);
+                break;
+            case MESSAGE_DEVICE_NAME:
+                // save the connected device's name ���������豸���
+                mConnectedDeviceName = msg.getData().getString(DEVICE_NAME);
+                Toast.makeText(getApplicationContext(), "Connected to "
+                               + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
+                break;
+            case MESSAGE_TOAST:
+                Toast.makeText(getApplicationContext(), msg.getData().getString(TOAST),
+                               Toast.LENGTH_SHORT).show();
+                break;
+            }
+        }
+    };
+	
+	
 
 	// Load image from url
 	private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {

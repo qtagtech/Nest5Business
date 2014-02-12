@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import android.app.Activity;
 import android.app.ActionBar.LayoutParams;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
@@ -37,7 +38,7 @@ public class PaymentForm extends DialogFragment {
 	
 	
 	public interface OnPayListener {
-        public void OnPayClicked(String method, double value);
+        public void OnPayClicked(String method,int isDelivery, int isTogo, double value,int tip,double discount);
         
     }
 	
@@ -45,6 +46,10 @@ private Context mContext;
 private LinkedHashMap<Registrable, Integer> items;
 private Button cashBtn;
 private Button cardBtn;
+private Button deliveryBtn;
+private Button togoBtn;
+private Button tipBtn;
+private EditText discountTxt;
 private Button payBtn;
 private Button cancelBtn;
 private EditText valueTxt;
@@ -54,6 +59,9 @@ private String method = "cash";
 private OnPayListener onPayListener;
 private PaymentForm frag;
 private Double priceVal;
+private Integer isDelivery = 0;
+private Integer isToGo = 0;
+private Integer tip = 0;
 
 
 
@@ -80,6 +88,12 @@ public void onAttach(Activity activity){
      this.items = items;
  }
  
+ @Override
+ public void onCreate(Bundle savedInstanceState) {
+     super.onCreate(savedInstanceState);
+     setStyle(STYLE_NO_FRAME, android.R.style.Theme_Holo_Light);
+ }
+ 
 
 
  @Override
@@ -92,11 +106,17 @@ public void onAttach(Activity activity){
     payBtn = (Button) view.findViewById(R.id.payment_form_pay_button);
     cancelBtn = (Button) view.findViewById(R.id.payment_form_cancel_button);
     cardBtn = (Button) view.findViewById(R.id.payment_option_card);
+    deliveryBtn = (Button) view.findViewById(R.id.is_delivery);
+    togoBtn = (Button) view.findViewById(R.id.is_togo);
+    tipBtn = (Button) view.findViewById(R.id.tip_btn);
     valueTxt = (EditText) view.findViewById(R.id.payment_form_text);
     changeTxt = (TextView) view.findViewById(R.id.payment_form_change);
+    discountTxt = (EditText) view.findViewById(R.id.payment_form_discount);
+    cashBtn.setBackgroundColor(Color.GRAY);
+    cashBtn.setEnabled(false);
     frag = this;
     
-    valueTxt.setOnFocusChangeListener(new OnFocusChangeListener() {
+    /*valueTxt.setOnFocusChangeListener(new OnFocusChangeListener() {
 		
 		@Override
 		public void onFocusChange(View v, boolean hasFocus) {
@@ -128,29 +148,84 @@ public void onAttach(Activity activity){
 			}
 			
 		}
-	});
+	});*/
     
     cashBtn.setOnClickListener(new OnClickListener() {
 		
 		@Override
 		public void onClick(View v) {
-			valueTxt.setEnabled(true);
-			valueTxt.findFocus();
-			method = "cash";
+			
+				v.setBackgroundColor(Color.GRAY);
+				valueTxt.setEnabled(true);
+				valueTxt.setText(String.valueOf(price));
+				method = "cash";
+				v.setEnabled(false);
+				cardBtn.setEnabled(true);
+				cardBtn.setBackgroundDrawable(getResources().getDrawable(R.drawable.blue_button));
+			
 		}
 	});
     cardBtn.setOnClickListener(new OnClickListener() {
 		
 		@Override
 		public void onClick(View v) {
-			valueTxt.setEnabled(false);
-			valueTxt.setText(String.valueOf(price));
-			method = "card";
+			
+			
+				v.setBackgroundColor(Color.GRAY);
+				valueTxt.setEnabled(false);
+				valueTxt.setText(String.valueOf(price));
+				method = "card";
+				v.setEnabled(false);
+				cashBtn.setEnabled(true);
+				cashBtn.setBackgroundDrawable(getResources().getDrawable(R.drawable.blue_button));
+			
 			
 		}
 		
 		
 	});
+deliveryBtn.setOnClickListener(new OnClickListener() {
+		
+		@Override
+		public void onClick(View v) {
+			if(isDelivery == 1){
+				v.setBackgroundDrawable(getResources().getDrawable(R.drawable.blue_button));
+				isDelivery = 0;
+			}
+			else{
+				v.setBackgroundColor(Color.GRAY);
+				isDelivery = 1;
+			}
+		}
+	});
+togoBtn.setOnClickListener(new OnClickListener() {
+	
+	@Override
+	public void onClick(View v) {
+		if(isToGo == 1){
+			v.setBackgroundDrawable(getResources().getDrawable(R.drawable.blue_button));
+			isToGo = 0;
+		}
+		else{
+			v.setBackgroundColor(Color.GRAY);
+			isToGo = 1;
+		}
+	}
+});
+tipBtn.setOnClickListener(new OnClickListener() {
+	
+	@Override
+	public void onClick(View v) {
+		if(tip == 1){
+			v.setBackgroundDrawable(getResources().getDrawable(R.drawable.blue_button));
+			tip = 0;
+		}
+		else{
+			v.setBackgroundColor(Color.GRAY);
+			tip = 1;
+		}
+	}
+});
     
     payBtn.setOnClickListener(new OnClickListener() {
 		
@@ -163,7 +238,15 @@ public void onAttach(Activity activity){
 				val = Double.valueOf(valueTxt.getText().toString());
 				
 			}
-			onPayListener.OnPayClicked(method, val);
+			String disc = discountTxt.getText().toString();
+			double discount = 0.0;
+			if(!disc.isEmpty() && disc != null)
+			{
+				val = Double.valueOf(discountTxt.getText().toString());
+				
+			}
+			
+			onPayListener.OnPayClicked(method,isDelivery,isToGo, val,tip,discount);
 			Toast.makeText(mContext, "Cambio: "+String.valueOf(val - price), Toast.LENGTH_LONG).show();
 			frag.dismiss();
 			

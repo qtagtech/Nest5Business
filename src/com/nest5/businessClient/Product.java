@@ -16,6 +16,7 @@ public class Product {
 	private double price;
 	private Tax tax;
 	private List<Ingredient> ingredients;
+	private long syncId;
 
 	  public long getId() {
 	    return id;
@@ -76,12 +77,11 @@ public class Product {
 			  }
 	  
 	  
-	  public void refreshIngredients(Context mContext)
+	  public void refreshIngredients(MySQLiteHelper dbHelper)
 	  {
-		  ProductIngredientDataSource productIngredientDatasource = new ProductIngredientDataSource(mContext);
+		  ProductIngredientDataSource productIngredientDatasource = new ProductIngredientDataSource(dbHelper);
 		  productIngredientDatasource.open();
 		    List<Ingredient> allIngredients = productIngredientDatasource.getAllIngredients(this.id);
-		    productIngredientDatasource.close();
 		    this.ingredients = allIngredients;
 	  }
 	  
@@ -98,20 +98,26 @@ public class Product {
 			  return new ArrayList<Ingredient>();
 	  }
 	  
-	  public void addIngredient(Context mContext,Ingredient ingredient,double qty) //esta cantidad siempre se normaliza a la unidad de medida estandar, por ejemplo gr o ml
+	  public void addIngredient(MySQLiteHelper dbHelper,Ingredient ingredient,double qty) //esta cantidad siempre se normaliza a la unidad de medida estandar, por ejemplo gr o ml
 	  {
-		  ProductIngredientDataSource productIngredientDatasource = new ProductIngredientDataSource(mContext);
+		  ProductIngredientDataSource productIngredientDatasource = new ProductIngredientDataSource(dbHelper);
 		  productIngredientDatasource.open();
 		  productIngredientDatasource.saveRelation(this.id,ingredient.getId(),qty);
-		  productIngredientDatasource.close(); 
 	  }
 	  
-	  public void removeIngredient(Context mContext,Ingredient ingredient)
+	  public void removeIngredient(MySQLiteHelper dbHelper,Ingredient ingredient)
 	  {
-		  ProductIngredientDataSource productIngredientDatasource = new ProductIngredientDataSource(mContext);
+		  ProductIngredientDataSource productIngredientDatasource = new ProductIngredientDataSource(dbHelper);
 		  productIngredientDatasource.open();
 		  productIngredientDatasource.deleteRelation(this.id,ingredient.getId());
-		  productIngredientDatasource.close(); 
+
+	  }
+	  
+	  public Long getSyncId(){
+		  return this.syncId;
+	  }
+	  public void setSyncId(Long syncId){
+		  this.syncId = syncId;
 	  }
 	
 		  

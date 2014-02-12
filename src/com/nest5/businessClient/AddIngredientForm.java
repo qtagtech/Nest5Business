@@ -257,7 +257,12 @@ public void onAttach(Activity activity){
 					priceVal = priceVal / (1 + tax.getPercentage());
 				}
 				priceQtyVal = Double.valueOf(priceQty);
-				pricePerUnit = priceVal  / ( priceQtyVal * priceMultiplier );
+				if(priceQtyVal == 0){
+					pricePerUnit = 0;
+				}else{
+					pricePerUnit = priceVal  / ( priceQtyVal * priceMultiplier );
+				}
+				
 				
 				
 

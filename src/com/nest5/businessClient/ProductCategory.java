@@ -4,6 +4,7 @@ public class ProductCategory {
 	
 	private long id;
 	private String name;
+	private Long syncId;
 
 	  public long getId() {
 	    return id;
@@ -19,6 +20,12 @@ public class ProductCategory {
 
 	  public void setName(String name) {
 	    this.name = name;
+	  }
+	  public Long getSyncId(){
+		  return this.syncId;
+	  }
+	  public void setSyncId(Long syncId){
+		  this.syncId = syncId;
 	  }
 
 	  // Will be used by the ArrayAdapter in the ListView

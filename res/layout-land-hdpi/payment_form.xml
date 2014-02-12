@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/add_ingredient"
-    android:layout_width="700dip" 
+    android:id="@+id/payment_form"
+    android:layout_width="match_parent" 
     android:layout_height="wrap_content"
     android:layout_gravity="center" 
     android:orientation="vertical"
@@ -9,7 +9,7 @@
       <ScrollView 
           android:id="@+id/payment_form_scroll"
           android:layout_width="fill_parent"
-          android:layout_height="500dip"
+          android:layout_height="match_parent"
           android:padding="20dip"
           >
           <LinearLayout 
@@ -40,9 +40,44 @@
 				        android:background="@drawable/blue_button" 
 			        	style="@style/ButtonText"				       
 				        android:text="Tarjeta"/>
+				    <Button 
+				        android:id="@+id/is_delivery"
+				        android:layout_width="0dip"
+				        android:layout_weight="0.3"
+				        android:layout_gravity="center_horizontal|center_vertical"
+				        android:background="@drawable/blue_button" 
+			        	style="@style/ButtonText"				       
+				        android:text="Domicilio"/>
 				    
 				     
 			    </LinearLayout>
+			    <LinearLayout 
+			    android:id="@+id/delivery_options"
+			    android:layout_width="fill_parent"
+			    android:layout_height="wrap_content"
+			    android:weightSum="1">
+			        
+			       
+				    <Button 
+				        android:id="@+id/is_togo"
+				        android:layout_width="0dip"
+				        android:layout_weight="0.3"
+				        android:layout_gravity="center_horizontal|center_vertical"
+				        android:background="@drawable/blue_button" 
+			        	style="@style/ButtonText"				       
+				        android:text="Llevar"/>
+				    <Button 
+				        android:id="@+id/tip_btn"
+				        android:layout_width="0dip"
+				        android:layout_weight="0.3"
+				        android:layout_gravity="center_horizontal|center_vertical"
+				        android:background="@drawable/blue_button" 
+			        	style="@style/ButtonText"				       
+				        android:text="Propina"/>
+				    
+				     
+			    </LinearLayout>
+			    
 			    
 			    <EditText 
 			        android:id="@+id/payment_form_text"
@@ -50,6 +85,15 @@
 			        android:layout_height="50dip"
 			        android:inputType="text"
 			        android:hint="Valor Entregado"
+			        android:imeOptions="actionNext"
+			        
+			        />
+			    <EditText 
+			        android:id="@+id/payment_form_discount"
+			        android:layout_width="fill_parent"
+			        android:layout_height="50dip"
+			        android:inputType="text"
+			        android:hint="Descuento (%)"
 			        android:imeOptions="actionNext"
 			        
 			        />

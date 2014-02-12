@@ -14,12 +14,11 @@ public class ProductDataSource {
 	// Database fields
 	  private SQLiteDatabase database;
 	  private MySQLiteHelper dbHelper;
-	  private String[] allColumns = {Setup.COLUMN_ID,Setup.COLUMN_NAME,Setup.COLUMN_PRODUCT_CATEGORY_ID,Setup.COLUMN_PRODUCT_AUTOMATIC,Setup.COLUMN_PRODUCT_COST,Setup.COLUMN_PRODUCT_PRICE,Setup.COLUMN_PRODUCT_TAX_ID};
-	  private Context mContext;
+	  private String[] allColumns = {Setup.COLUMN_ID,Setup.COLUMN_NAME,Setup.COLUMN_PRODUCT_CATEGORY_ID,Setup.COLUMN_PRODUCT_AUTOMATIC,Setup.COLUMN_PRODUCT_COST,Setup.COLUMN_PRODUCT_PRICE,Setup.COLUMN_PRODUCT_TAX_ID,Setup.COLUMN_OWN_SYNC_ID};
 
-	  public ProductDataSource(Context context) {
-	    dbHelper = new MySQLiteHelper(context);
-	    mContext = context;
+
+	  public ProductDataSource(MySQLiteHelper _dbHelper) {
+	    dbHelper = _dbHelper;
 	  }
 
 	  public SQLiteDatabase open() throws SQLException {
@@ -36,7 +35,7 @@ public class ProductDataSource {
 	    dbHelper.close();
 	  }
 
-	  public Product createProduct(String name,ProductCategory category,int automatic,double cost, double price,Tax tax) {
+	  public Product createProduct(String name,ProductCategory category,int automatic,double cost, double price,Tax tax, long syncId) {
 	    ContentValues values = new ContentValues();
 	    values.put(Setup.COLUMN_NAME, name);
 	    values.put(Setup.COLUMN_PRODUCT_AUTOMATIC, automatic);
@@ -44,6 +43,7 @@ public class ProductDataSource {
 	    values.put(Setup.COLUMN_PRODUCT_PRICE, price);
 	    values.put(Setup.COLUMN_PRODUCT_CATEGORY_ID, category.getId());
 	    values.put(Setup.COLUMN_PRODUCT_TAX_ID, tax.getId());
+	    values.put(Setup.COLUMN_OWN_SYNC_ID, syncId);
 	    long insertId = database.insert(Setup.TABLE_PRODUCTS, null,
 	        values);
 	    Cursor cursor = database.query(Setup.TABLE_PRODUCTS,
@@ -81,7 +81,14 @@ public class ProductDataSource {
 	  
 	  public Product getProduct(long id) {
 		  Product product = null;
-		   Cursor cursor = database.rawQuery("select * from " + Setup.TABLE_PRODUCTS + " where " + Setup.COLUMN_ID + "=" + id  , null);
+		  StringBuilder tables = new StringBuilder();
+		  for(int i = 0; i < allColumns.length; i++){
+			  if(i != 0)
+				  tables.append(",");
+			  tables.append(allColumns[i]);
+			  
+		  }
+		   Cursor cursor = database.rawQuery("select "+tables+" from " + Setup.TABLE_PRODUCTS + " where " + Setup.COLUMN_ID + "=" + id  , null);
 	        if (cursor != null) 
 	        	{
 	        		cursor.moveToFirst();
@@ -102,24 +109,21 @@ public class ProductDataSource {
 	    product.setName(cursor.getString(1));
 	    //aqui en vez de poner en el objeto un id, poner un objeto de tipo categoryIngredient
 	    //ingredient.setCategoryId(cursor.getLong(2));
-	    ProductCategoryDataSource productCategoryDatasource = new ProductCategoryDataSource(mContext);
+	    ProductCategoryDataSource productCategoryDatasource = new ProductCategoryDataSource(dbHelper);
 	    productCategoryDatasource.open();
 	    ProductCategory productCategory = productCategoryDatasource.getProductCategory(cursor.getLong(2));
-	    productCategoryDatasource.close();
 	    product.setCategory(productCategory);
 	    product.setCost(cursor.getDouble(4));
 	    product.setPrice(cursor.getDouble(5));
-	    TaxDataSource taxDatasource = new TaxDataSource(mContext);
+	    TaxDataSource taxDatasource = new TaxDataSource(dbHelper);
 	    taxDatasource.open();
 	    Tax tax = taxDatasource.getTax(cursor.getLong(6));
-	    taxDatasource.close();
 	    product.setTax(tax);
-	    ProductIngredientDataSource productIngredientDatasource = new ProductIngredientDataSource(mContext);
+	    ProductIngredientDataSource productIngredientDatasource = new ProductIngredientDataSource(dbHelper);
 		productIngredientDatasource.open();
 		List<Ingredient> allIngredients = productIngredientDatasource.getAllIngredients(cursor.getLong(0));
-		productIngredientDatasource.close();
 		product.setIngredients(allIngredients);
-	    		
+	    product.setSyncId(cursor.getLong(7));		
 	    return product;
 	  }
 

@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import android.content.Context;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View.OnClickListener;
 import android.database.DataSetObserver;
@@ -31,13 +33,12 @@ public class ProductAdapter extends BaseAdapter {
     private Context mContext;
     private List<Product> items;
     private LayoutInflater inflater;
-    private ImageView imageView;
     private TextView titleView;
     private EditText qtyView;
-    //private Spinner unitView;
-    private HashMap<Product,EditText> valuesTxt;
-    private HashMap<Product,Spinner> unitSpinners;
-    private HashMap<String,Double> multipliers;
+    private HashMap<String, Product> productos;
+    private HashMap<String, String> productRecord;
+
+
     
     private Typeface varela;
     
@@ -57,12 +58,11 @@ public class ProductAdapter extends BaseAdapter {
         //this.cListener = cListener;
         //this.tListener = touchListener;
         varela = Typeface.createFromAsset(mContext.getAssets(), "fonts/Varela-Regular.otf");
+        productos = new HashMap<String, Product>();
+        productRecord = new HashMap<String, String>();
         
-        
-        
-        valuesTxt = new HashMap<Product, EditText>();
-        unitSpinners = new HashMap<Product, Spinner>();
-        multipliers = new HashMap<String, Double>();
+
+
         
     }
 
@@ -83,7 +83,7 @@ public class ProductAdapter extends BaseAdapter {
         //ImageView imageView;
        
         Product item = getItem(position);
-        
+        productos.put(item.getName(), item);
      // Inflate the views from XML
         
         View rowView = convertView;
@@ -97,7 +97,6 @@ public class ProductAdapter extends BaseAdapter {
         } else {
             viewCache = (ViewCacheProductAdd) rowView.getTag();
         }
-
         //imageView.setImageResource(mThumbIds[position]);
        // return imageView;
         titleView = viewCache.getTitleView();
@@ -105,74 +104,28 @@ public class ProductAdapter extends BaseAdapter {
         titleView.setTypeface(varela);
         qtyView = viewCache.getQtyView();
         qtyView.setTypeface(varela);
+        qtyView.setText(productRecord.get(item.getName()));
         qtyView.setId(position);
-        //qtyView.setOnFocusChangeListener(onFocusChangeLlistener);
-       
-     
-        valuesTxt.put(item, qtyView);
-	
-		
-	     
-	     //createValue();
-        return rowView;
+        qtyView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+                if (!hasFocus) {
+                    final int position = view.getId();
+                    final EditText edit = (EditText) view;
+                    if (edit.getText() != null && !edit.getText().toString().isEmpty())
+                        if (position < getCount())
+                            productRecord.put(getItem(position).getName(), edit.getText().toString());
+                }
+            }
+        });
         
+        return rowView;
     }
 
     
-    
-    
-    
-    /*private  OnFocusChangeListener onFocusChangeLlistener = new OnFocusChangeListener() {
-		
-		@Override
-		public void onFocusChange(View v, boolean hasFocus) {
-			if(hasFocus)
-			{
-				//quantities.add(v.getId(), 0.0);
-			}
-			else
-			{
-				
-				EditText txt = (EditText) v;
-				String value = txt.getText().toString();
-				double val = 0.0;
-				if(value != null && !value.isEmpty())
-				{
-					val = Double.valueOf(value);
-				}
-				
-				quantities.add(v.getId(), val);
-			}	
-		}
-	};*/
-	
-	public LinkedHashMap<Product,Double> createValue()
-	{
-		//coger cada uno de los que se haya metido y cada una de las cantidades, luego pasar por cada uno de los spinner y ver el multiplicador, hacer la conversion y guardar ing,cant
-		
-		LinkedHashMap<Product,Double> receta = new LinkedHashMap<Product,Double>();
-		Iterator<Entry<Product, EditText>> it = valuesTxt.entrySet().iterator();
-	    
-	    
-	     while(it.hasNext())
-	     {
-	    	 Map.Entry<Product,EditText> ingredientQtyPair = (Map.Entry<Product,EditText>)it.next();
-	    	 //Spinner ingredientUnit = unitSpinners.get(ingredientQtyPair.getKey());
-	    	 //Log.d("UNIDADES", (String) ingredientUnit.getAdapter().getItem(ingredientUnit.getSelectedItemPosition())); //debo poner la posicion
-	    	 //double multiplier = multipliers.get((String) ingredientUnit.getAdapter().getItem(ingredientUnit.getSelectedItemPosition()));
-	    	 String qtyValue = ingredientQtyPair.getValue().getText().toString();
-	    	 double qtyVal = 0.0;
-	    	 if(!qtyValue.isEmpty() && qtyValue != null)
-	    	 {
-	    		 qtyVal = Double.valueOf(qtyValue);
-	    	 }
-	    	 
-	    	 double quantity = qtyVal;
-	    	 
-	    	 receta.put(ingredientQtyPair.getKey(), quantity);
 
-	     	
-	     }
-		return receta;
+	
+	public HashMap<String, Product> getProducts(){
+		return productos;
 	}
 }

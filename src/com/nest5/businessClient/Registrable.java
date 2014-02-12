@@ -24,7 +24,7 @@ public class Registrable {
 		this.id = 0;
 	}
 	
-	public Registrable(int type, long id) //se usa cuando desde sale se traen los salItems y se crea este objeto para hallar el producto, ingrediente o combo correspondiente
+	public Registrable(int type, long id) //se usa cuando desde sale se traen los saleItems y se crea este objeto para hallar el producto, ingrediente o combo correspondiente
 	{
 		this.id = id;
 		this.type = type;

@@ -8,6 +8,7 @@ public class Unit {
 	private String name;
 	private String initials;
 	private LinkedHashMap<String,Double> multipliers;
+	private long syncId;
 
 	  public long getId() {
 	    return id;
@@ -41,7 +42,12 @@ public class Unit {
 	  public LinkedHashMap<String, Double> getMultipliers() {
 		    return multipliers;
 		  }
-		  
+	  public Long getSyncId(){
+		  return this.syncId;
+	  }
+	  public void setSyncId(Long syncId){
+		  this.syncId = syncId;
+	  }  
 
 	  // Will be used by the ArrayAdapter in the ListView
 	  @Override

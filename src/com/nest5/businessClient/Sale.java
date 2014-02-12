@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 
 import android.R.bool;
 import android.content.Context;
+import android.util.Log;
 
 
 public class Sale {
@@ -25,6 +26,11 @@ public class Sale {
 	private LinkedHashMap<Product,Double> products;
 	private LinkedHashMap<Ingredient,Double> ingredients;
 	private LinkedHashMap<Combo,Double> combos;
+	private long syncId;
+	private int isDelivery;
+	private int isTogo;
+	private int tip;
+	private double discount;
 	//private LinkedHashMap<Registrable, Double> items;
 	//private SalesMan salesMan;
 
@@ -67,14 +73,42 @@ public class Sale {
 		    this.payment_method = pay_meth;
 	  }
 	  
-	  public void saveItem(Context mContext,int type, long item_id, double qty) //se hace para cada registrable en initialactvity currentOrde. El type lo coge de Registrable.
+	  public void setIsdelivery(int delivery)
+	  {
+		  this.isDelivery = delivery; 
+	  }
+	  public int getIsdelivery(){
+		  return this.isDelivery;
+	  }
+	  public void setIstogo(int togo)
+	  {
+		  this.isTogo = togo; 
+	  }
+	  public int getIstogo(){
+		  return this.isTogo;
+	  }
+	  public void setTip(int tip)
+	  {
+		  this.tip = tip; 
+	  }
+	  public int getTip(){
+		  return this.tip;
+	  }
+	  public void setDiscount(double disc)
+	  {
+		  this.discount = disc; 
+	  }
+	  public double getDiscount(){
+		  return this.discount;
+	  }
+	  
+	  public void saveItem(MySQLiteHelper dbHelper,int type, long item_id, double qty) //se hace para cada registrable en initialactvity currentOrde. El type lo coge de Registrable.
 	  {
 		  //guarda cada registrable como un SaleItem
 		  
-		  SaleItemDataSource saleItemDataSource = new SaleItemDataSource(mContext);
+		  SaleItemDataSource saleItemDataSource = new SaleItemDataSource(dbHelper);
 		  saleItemDataSource.open();
 		  saleItemDataSource.saveRelation(this.id,type,item_id,qty);
-		  saleItemDataSource.close();
 	  }
 	  
 	  
@@ -142,7 +176,71 @@ public class Sale {
 	  
 	  
 	 
-	
+	  public Long getSyncId(){
+		  return this.syncId;
+	  }
+	  public void setSyncId(Long syncId){
+		  this.syncId = syncId;
+	  }
+	  
+	  public String ingredientFields(){
+		  StringBuilder cadena = new StringBuilder();
+		  cadena.append("[");
+		  int i = 0;
+		  Iterator<Entry<Ingredient, Double>> it = this.ingredients.entrySet().iterator();
+
+			while (it.hasNext()) {
+				Map.Entry<Ingredient, Double> pair = (Map.Entry<Ingredient, Double>) it
+						.next();
+				if(i!=0){
+					cadena.append(",");
+				}
+				cadena.append("{\"sync_id\": "+pair.getKey().getSyncId()+",\""+Setup.COLUMN_INGREDIENT_QTY+"\": "+pair.getValue()+"}");
+				i++;
+			}
+		  cadena.append("]");
+		  return cadena.toString();
+	  }
+	  public String productFields(){
+		  StringBuilder cadena = new StringBuilder();
+		  cadena.append("[");
+		  int i = 0;
+		  Iterator<Entry<Product, Double>> it = this.products.entrySet().iterator();
+
+			while (it.hasNext()) {
+				Map.Entry<Product, Double> pair = (Map.Entry<Product, Double>) it
+						.next();
+				if(i!=0){
+					cadena.append(",");
+				}
+				cadena.append("{\"sync_id\": "+pair.getKey().getSyncId()+",\""+Setup.COLUMN_INGREDIENT_QTY+"\": "+pair.getValue()+"}");
+				i++;
+			}
+		  cadena.append("]");
+		  return cadena.toString();
+	  }
+	  public String comboFields(){
+		  StringBuilder cadena = new StringBuilder();
+		  cadena.append("[");
+		  int i = 0;
+		  Iterator<Entry<Combo, Double>> it = this.combos.entrySet().iterator();
+
+			while (it.hasNext()) {
+				Map.Entry<Combo, Double> pair = (Map.Entry<Combo, Double>) it
+						.next();
+				if(i!=0){
+					cadena.append(",");
+				}
+				cadena.append("{\"sync_id\": "+pair.getKey().getSyncId()+",\""+Setup.COLUMN_INGREDIENT_QTY+"\": "+pair.getValue()+"}");
+			i++;
+			}
+		  cadena.append("]");
+		  return cadena.toString();
+	  }
+	  
+	  public String serializedFields(){
+		  return "{\"_id\": "+this.id+",\""+Setup.COLUMN_SALE_DATE+"\": "+this.date+",\""+Setup.COLUMN_SALE_ISDELIVERY+"\": "+this.isDelivery+",\""+Setup.COLUMN_SALE_METHOD+"\": \""+this.payment_method+"\",\""+Setup.COLUMN_SALE_ISTOGO+"\": "+this.isTogo+",\""+Setup.COLUMN_SALE_TIP+"\": "+this.tip+",\""+Setup.COLUMN_SALE_DISCOUNT+"\": "+this.discount+",\""+Setup.COLUMN_SALE_RECEIVED+"\":"+this.value_received+",\"ingredients\": "+this.ingredientFields()+",\"products\": "+this.productFields()+",\"combos\": "+this.comboFields()+"}";
+	  }
 		  
 	
 

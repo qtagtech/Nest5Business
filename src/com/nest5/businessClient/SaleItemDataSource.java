@@ -9,6 +9,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 public class SaleItemDataSource {
 	
@@ -16,11 +17,11 @@ public class SaleItemDataSource {
 	  private SQLiteDatabase database;
 	  private MySQLiteHelper dbHelper;
 	  private String[] allColumns = {Setup.COLUMN_ID,Setup.COLUMN_SALE_ID,Setup.COLUMN_SALE_ITEM_TYPE,Setup.COLUMN_SALE_ITEM_ID,Setup.COLUMN_SALE_ITEM_QTY};
-	  private Context mContext;
 
-	  public SaleItemDataSource(Context context) {
-	    dbHelper = new MySQLiteHelper(context);
-	    mContext = context;
+
+	  public SaleItemDataSource(MySQLiteHelper _dbHelper) {
+	    dbHelper = _dbHelper;
+
 	  }
 
 	  public SQLiteDatabase open() throws SQLException {
@@ -62,13 +63,15 @@ public class SaleItemDataSource {
 	  
 	  public LinkedHashMap<Registrable,Double> getAllItems(long sale)
 	  {
-		
+		  Log.e("GUARDANDOVENTA"," el valor del id de sale en salitemdatasource es :"+sale);
 		  LinkedHashMap<Registrable,Double> items = new LinkedHashMap<Registrable,Double>();
 
 		    Cursor cursor = database.query(Setup.TABLE_SALE_ITEM,
 		        allColumns, Setup.COLUMN_SALE_ID+" = "+String.valueOf(sale), null, null, null, null);
 
 		    cursor.moveToFirst();
+		    Log.e("GUARDANDOVENTA","antes de recorrer el cursor al llamar getAllItems con sale: "+sale+" en saleitemdatasource es: "+cursor.getCount());
+		    
 		    while (!cursor.isAfterLast()) {
 		      Registrable item = cursorToItem(cursor);
 		      Double qty = cursor.getDouble(4);
@@ -77,6 +80,7 @@ public class SaleItemDataSource {
 		    }
 		    // Make sure to close the cursor
 		    cursor.close();
+		    Log.e("GUARDANDOVENTA","la cantidad de filas que hay al llamar getAllItems con sale: "+sale+" en saleitemdatasource es: "+items.size());
 		    return items; 
 	  }
 	  

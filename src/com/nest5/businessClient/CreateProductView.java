@@ -2,6 +2,7 @@ package com.nest5.businessClient;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -27,6 +28,7 @@ import android.view.View.OnClickListener;
 import android.view.View.OnDragListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -47,7 +49,7 @@ import android.widget.Toast;
 public class CreateProductView extends DialogFragment {
 	
 	public interface OnCreateProductListener {
-        public void OnProductCreated(LinkedHashMap<Ingredient,Double> ingredents,Product product);
+        public void OnProductCreated(Boolean status,LinkedHashMap<Ingredient,Double> ingredents,Product product);
         
     }
 	
@@ -117,8 +119,9 @@ public void onAttach(Activity activity){
 	selectedIngredients = new ArrayList<Ingredient>();
 	curPosition = 0;
 	shelves.setOnDragListener(dragListener);
-	
-	listAdapter = new IngredientAdapter(mContext, selectedIngredients, inflater);
+	Activity activity = getActivity();
+	Log.d("UNIDADES",activity.getClass().toString());
+	listAdapter = new IngredientAdapter(mContext, selectedIngredients, inflater,activity);
 	ingredientsList.setAdapter(listAdapter);
 	qties = new LinkedHashMap<Ingredient,Double>();
 	//Log.d("ACAAAAAAA"," "+ingredients.size());
@@ -131,6 +134,7 @@ public void onAttach(Activity activity){
 		@Override
 		public void onClick(View v) {
 			// TODO Auto-generated method stub
+			onCreateProductListener.OnProductCreated(false, null, product);
 			frag.dismiss();
 			
 		}
@@ -140,8 +144,46 @@ saveBtn.setOnClickListener(new OnClickListener() {
 		
 		@Override
 		public void onClick(View v) {
-			
-			onCreateProductListener.OnProductCreated(listAdapter.createValue(),product);
+			HashMap<String, Double> multipliers = listAdapter.getMultipliers();
+			HashMap<String, Ingredient> ingredients = listAdapter.getIngredients();
+			LinkedHashMap<Ingredient,Double> values = new LinkedHashMap<Ingredient, Double>();
+			for(int i = 0; i < ingredientsList.getChildCount(); i++){
+				ViewGroup view = (ViewGroup) ingredientsList.getChildAt(i);
+				TextView title = null;
+		    	EditText quan = null;
+		    	Spinner units = null;
+		        try{
+		        	int count =  view.getChildCount();
+		        	for (int j = 0; j < count; j++) {
+		        	    View vi = view.getChildAt(j);
+		        	    
+		        	    if(vi instanceof Spinner){
+		        	    	units = (Spinner) vi;
+		        	    	
+		        	    }else{
+		        	    	if(vi instanceof EditText)
+		        	    		{
+		        	    			quan = (EditText) vi;
+		        	    		}else{
+		        	    			title = (TextView) vi;
+		        	    		}
+		        	    	}
+		        	    }
+		        	
+		        	Double unidad = multipliers.get(units.getSelectedItem().toString());
+		        	Double total = Double.parseDouble(quan.getText().toString()) * unidad;
+		        	if(total != 0){
+		        		values.put(ingredients.get(title.getText().toString()),total);
+		        	}
+		        	//Log.d("UNIDADES","Se pusieron "+total+" de "+title.getText().toString());
+
+		        }catch(Exception e){
+		        	e.printStackTrace();
+		        }
+
+				
+			}
+			onCreateProductListener.OnProductCreated(true,values,product);
 			
 			/*Iterator<Entry<Ingredient, Double>> it = qties.entrySet().iterator();
 		    

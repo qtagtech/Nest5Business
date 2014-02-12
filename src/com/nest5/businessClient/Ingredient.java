@@ -12,6 +12,7 @@ public class Ingredient {
 	private double pricePerUnit;
 	private double priceMeasure;
 	private long date;
+	private long syncId;
 
 	  public long getId() {
 	    return id;
@@ -109,6 +110,13 @@ public class Ingredient {
 	  public void setQty(double _qty) {
 		    qty = _qty;
 		  }
+	  
+	  public Long getSyncId(){
+		  return this.syncId;
+	  }
+	  public void setSyncId(Long syncId){
+		  this.syncId = syncId;
+	  }
 
 
 	  // Will be used by the ArrayAdapter in the ListView

@@ -4,7 +4,7 @@
 			           
 
            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-               android:id="@+id/deal_row_descriptions"
+               android:id="@+id/add_ingredient_rows"
               
                android:orientation="horizontal"
                android:layout_width="match_parent"

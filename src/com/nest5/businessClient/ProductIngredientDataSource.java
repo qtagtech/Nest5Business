@@ -8,6 +8,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 public class ProductIngredientDataSource {
 	
@@ -15,11 +16,11 @@ public class ProductIngredientDataSource {
 	  private SQLiteDatabase database;
 	  private MySQLiteHelper dbHelper;
 	  private String[] allColumns = {Setup.COLUMN_ID,Setup.COLUMN_PRODUCTINGREDIENT_PRODUCT_ID,Setup.COLUMN_PRODUCTINGREDIENT_INGREDIENT_ID,Setup.COLUMN_PRODUCTINGREDIENT_QUANTITY};
-	  private Context mContext;
 
-	  public ProductIngredientDataSource(Context context) {
-	    dbHelper = new MySQLiteHelper(context);
-	    mContext = context;
+
+	  public ProductIngredientDataSource(MySQLiteHelper _dbHelper) {
+	    dbHelper = _dbHelper;
+
 	  }
 
 	  public SQLiteDatabase open() throws SQLException {
@@ -65,6 +66,7 @@ public class ProductIngredientDataSource {
 
 		    Cursor cursor = database.query(Setup.TABLE_PRODUCTINGREDIENT,
 		        allColumns, Setup.COLUMN_PRODUCTINGREDIENT_PRODUCT_ID+" = "+String.valueOf(product), null, null, null, null);
+		    Log.d("UNIDADES",String.valueOf(product));
 
 		    cursor.moveToFirst();
 		    while (!cursor.isAfterLast()) {
@@ -112,10 +114,9 @@ public class ProductIngredientDataSource {
 	  private Ingredient cursorToIngredient(Cursor cursor) {
 		    
 		    
-		    IngredientDataSource ingredientDatasource = new IngredientDataSource(mContext);
+		    IngredientDataSource ingredientDatasource = new IngredientDataSource(dbHelper);
 	    	ingredientDatasource.open();
 		    Ingredient ingredient = ingredientDatasource.getIngredient(cursor.getLong(2));
-		    ingredientDatasource.close();
 		    	
 		    return ingredient;
 		  }
@@ -123,10 +124,9 @@ public class ProductIngredientDataSource {
 	  private Product cursorToProduct(Cursor cursor) {
 		    
 		    
-		    ProductDataSource productDatasource = new ProductDataSource(mContext);
+		    ProductDataSource productDatasource = new ProductDataSource(dbHelper);
 	    	productDatasource.open();
 		    Product product = productDatasource.getProduct(cursor.getLong(1));
-		    productDatasource.close();
 		    	
 		    return product;
 		  }

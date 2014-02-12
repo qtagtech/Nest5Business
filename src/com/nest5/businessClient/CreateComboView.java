@@ -2,6 +2,7 @@ package com.nest5.businessClient;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -47,7 +48,7 @@ import android.widget.Toast;
 public class CreateComboView extends DialogFragment {
 	
 	public interface OnCreateComboListener {
-        public void OnComboCreated(LinkedHashMap<Ingredient,Double> ingredents,LinkedHashMap<Product,Double> products,String name,Double cost,Double price,Tax tax); //manda datos de combo para crearlo
+        public void OnComboCreated(Boolean status,LinkedHashMap<Ingredient,Double> ingredents,LinkedHashMap<Product,Double> products,String name,Double cost,Double price,Tax tax); //manda datos de combo para crearlo
         
     }
 	
@@ -164,8 +165,8 @@ public void onAttach(Activity activity){
 	listAdapterProducts = new ProductAdapter(mContext, selectedProducts, inflater);
 	productsList.setAdapter(listAdapterProducts);
 	product_qties = new LinkedHashMap<Product,Double>();
-	
-	listAdapterIngredients = new IngredientAdapter(mContext, selectedIngredients, inflater);
+	Activity activity = getActivity();
+	listAdapterIngredients = new IngredientAdapter(mContext, selectedIngredients, inflater,activity);
 	ingredientsList.setAdapter(listAdapterIngredients);
 	ingredient_qties = new LinkedHashMap<Ingredient,Double>();
 	//Log.d("ACAAAAAAA"," "+ingredients.size());
@@ -241,8 +242,84 @@ saveBtn.setOnClickListener(new OnClickListener() {
 				comboCost.findFocus();
 				return;
 			}
+			HashMap<String, Double> multipliers = listAdapterIngredients.getMultipliers();
+			HashMap<String, Ingredient> ingredients = listAdapterIngredients.getIngredients();
+			LinkedHashMap<Ingredient,Double> values = new LinkedHashMap<Ingredient, Double>();
+			for(int i = 0; i < ingredientsList.getChildCount(); i++){
+				ViewGroup view = (ViewGroup) ingredientsList.getChildAt(i);
+				TextView title = null;
+		    	EditText quan = null;
+		    	Spinner units = null;
+		        try{
+		        	int count =  view.getChildCount();
+		        	for (int j = 0; j < count; j++) {
+		        	    View vi = view.getChildAt(j);
+		        	    
+		        	    if(vi instanceof Spinner){
+		        	    	units = (Spinner) vi;
+		        	    	
+		        	    }else{
+		        	    	if(vi instanceof EditText)
+		        	    		{
+		        	    			quan = (EditText) vi;
+		        	    		}else{
+		        	    			title = (TextView) vi;
+		        	    		}
+		        	    	}
+		        	    }
+		        	
+		        	Double unidad = multipliers.get(units.getSelectedItem().toString());
+		        	Double total = Double.parseDouble(quan.getText().toString()) * unidad;
+		        	if(total != 0){
+		        		values.put(ingredients.get(title.getText().toString()),total);
+		        	}
+		        	//Log.d("UNIDADES","Se pusieron "+total+" de "+title.getText().toString());
+
+		        }catch(Exception e){
+		        	e.printStackTrace();
+		        }
+
+				
+			}
+			Boolean success = true;
+			HashMap<String, Product> productos = listAdapterProducts.getProducts();
+			LinkedHashMap<Product,Double> values_product = new LinkedHashMap<Product, Double>();
+			for(int i = 0; i < productsList.getChildCount(); i++){
+				ViewGroup view = (ViewGroup) productsList.getChildAt(i);
+				//Log.d("UNIDADES","productos; "+view.getClass().toString());
+				TextView title = null;
+		    	EditText quan = null;
+		    	
+		        try{
+		        	int count =  view.getChildCount();
+		        	for (int j = 0; j < count; j++) {
+		        	    View vi = view.getChildAt(j);
+		        	    
+		        	    if(vi instanceof EditText){
+		        	    	quan = (EditText) vi;
+		        	    	
+		        	    }else{
+		        	    	title = (TextView) vi;
+		        	    }
+		        	}
+		        	//title =  (TextView) view.findViewById(R.id.product_row_title);
+		        	//quan = (EditText) view.findViewById(R.id.product_qty_text);
+		        	Double total = Double.parseDouble(quan.getText().toString());
+		        	
+		        	if(total != 0){
+		        		values_product.put(productos.get(title.getText().toString()),total);
+		        	}
+		        	Log.d("UNIDADES","Se pusieron "+total+" de "+title.getText().toString());
+
+		        }catch(Exception e){
+		        	success = false;
+		        	e.printStackTrace();
+		        }
+
+				
+			}
 			
-			onCreateComboListener.OnComboCreated(listAdapterIngredients.createValue(),listAdapterProducts.createValue(),name,costVal,priceVal,tax);
+			onCreateComboListener.OnComboCreated(success,values,values_product,name,costVal,priceVal,tax);
 			
 			/*Iterator<Entry<Ingredient, Double>> it = qties.entrySet().iterator();
 		    

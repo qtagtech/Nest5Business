@@ -15,10 +15,10 @@ public class ProductCategoryDataSource {
 	  private SQLiteDatabase database;
 	  private MySQLiteHelper dbHelper;
 	  private String[] allColumns = { Setup.COLUMN_ID,
-	      Setup.COLUMN_NAME };
+	      Setup.COLUMN_NAME, Setup.COLUMN_OWN_SYNC_ID };
 
-	  public ProductCategoryDataSource(Context context) {
-	    dbHelper = new MySQLiteHelper(context);
+	  public ProductCategoryDataSource(MySQLiteHelper _dbHelper) {
+	    dbHelper = _dbHelper;
 	  }
 
 	  public SQLiteDatabase open() throws SQLException {
@@ -34,9 +34,10 @@ public class ProductCategoryDataSource {
 	    dbHelper.close();
 	  }
 
-	  public ProductCategory createProductCategory(String name) {
+	  public ProductCategory createProductCategory(String name, long syncId) {
 	    ContentValues values = new ContentValues();
 	    values.put(Setup.COLUMN_NAME, name);
+	    values.put(Setup.COLUMN_OWN_SYNC_ID, syncId);
 	    long insertId = database.insert(Setup.TABLE_CATEGORY_PRODUCTS, null,
 	        values);
 	    Cursor cursor = database.query(Setup.TABLE_CATEGORY_PRODUCTS,
@@ -47,6 +48,8 @@ public class ProductCategoryDataSource {
 	    cursor.close();
 	    return newProductCategory;
 	  }
+	  
+	  
 
 	  public void deleteProductCategory(ProductCategory productCategory) {
 	    long id = productCategory.getId();
@@ -74,7 +77,14 @@ public class ProductCategoryDataSource {
 	  
 	  public ProductCategory getProductCategory(long id) {
 		   ProductCategory productCategory = null;
-		   Cursor cursor = database.rawQuery("select * from " + Setup.TABLE_CATEGORY_PRODUCTS + " where " + Setup.COLUMN_ID + "=" + id  , null);
+		   StringBuilder tables = new StringBuilder();
+			  for(int i = 0; i < allColumns.length; i++){
+				  if(i != 0)
+					  tables.append(",");
+				  tables.append(allColumns[i]);
+				  
+			  }
+		   Cursor cursor = database.rawQuery("select "+tables+" from " + Setup.TABLE_CATEGORY_PRODUCTS + " where " + Setup.COLUMN_ID + "=" + id  , null);
 	        if (cursor != null) 
 	        	{
 	        		cursor.moveToFirst();
@@ -91,6 +101,7 @@ public class ProductCategoryDataSource {
 	    ProductCategory productCategory = new ProductCategory();
 	    productCategory.setId(cursor.getLong(0));
 	    productCategory.setName(cursor.getString(1));
+	    productCategory.setSyncId(cursor.getLong(2));
 	    return productCategory;
 	  }
 
