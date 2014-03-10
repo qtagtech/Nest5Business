@@ -2265,7 +2265,7 @@ public class Initialactivity extends FragmentActivity implements
 						.next();
 				product.addIngredient(dbHelper, ingredientPair.getKey(),
 						ingredientPair.getValue());
-				Toast.makeText(mContext, "Imgrediente: "+ingredientPair.getKey()+" Cantidad: "+ingredientPair.getValue(), Toast.LENGTH_LONG).show();
+				Toast.makeText(mContext, "Ingrediente: "+ingredientPair.getKey()+" Cantidad: "+ingredientPair.getValue(), Toast.LENGTH_LONG).show();
 
 				// Log.d("INGREDIENTES","INGREDIENTE: "+ingrediente.getKey().getName()+" "+ingrediente.getValue());
 				if(i != 0){

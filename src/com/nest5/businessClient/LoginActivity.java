@@ -392,6 +392,7 @@ public class LoginActivity extends Activity {
 						}
 						else{
 							SharedPreferences prefs = Util.getSharedPreferences(mContext);
+							prefs.edit().putBoolean(Setup.DEVICE_REGISTERED, false).commit();
 							prefs.edit().putString(Setup.DEVICE_REGISTERED_ID, "null").commit();
 							mEmailView.setError(message);
 						}
@@ -401,6 +402,7 @@ public class LoginActivity extends Activity {
 					
 				} else {
 					SharedPreferences prefs = Util.getSharedPreferences(mContext);
+					prefs.edit().putBoolean(Setup.DEVICE_REGISTERED, false).commit();
 					prefs.edit().putString(Setup.DEVICE_REGISTERED_ID, "null").commit();
 					mEmailView.setError(getString(R.string.device_error));
 					
@@ -409,6 +411,7 @@ public class LoginActivity extends Activity {
 
 			}
 			else{
+				prefs.edit().putBoolean(Setup.DEVICE_REGISTERED, false).commit();
 				mEmailView.setError(getString(R.string.device_error));
 			}
 
