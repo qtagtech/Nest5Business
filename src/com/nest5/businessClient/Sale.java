@@ -31,6 +31,7 @@ public class Sale {
 	private int isTogo;
 	private int tip;
 	private double discount;
+	private int saleNumber;
 	//private LinkedHashMap<Registrable, Double> items;
 	//private SalesMan salesMan;
 
@@ -93,6 +94,13 @@ public class Sale {
 	  }
 	  public int getTip(){
 		  return this.tip;
+	  }
+	  public void setSaleNumber(int saleNumber)
+	  {
+		  this.saleNumber = saleNumber; 
+	  }
+	  public int getSaleNumber(){
+		  return this.saleNumber;
 	  }
 	  public void setDiscount(double disc)
 	  {
@@ -239,7 +247,7 @@ public class Sale {
 	  }
 	  
 	  public String serializedFields(){
-		  return "{\"_id\": "+this.id+",\""+Setup.COLUMN_SALE_DATE+"\": "+this.date+",\""+Setup.COLUMN_SALE_ISDELIVERY+"\": "+this.isDelivery+",\""+Setup.COLUMN_SALE_METHOD+"\": \""+this.payment_method+"\",\""+Setup.COLUMN_SALE_ISTOGO+"\": "+this.isTogo+",\""+Setup.COLUMN_SALE_TIP+"\": "+this.tip+",\""+Setup.COLUMN_SALE_DISCOUNT+"\": "+this.discount+",\""+Setup.COLUMN_SALE_RECEIVED+"\":"+this.value_received+",\"ingredients\": "+this.ingredientFields()+",\"products\": "+this.productFields()+",\"combos\": "+this.comboFields()+"}";
+		  return "{\"_id\": "+this.id+",\""+Setup.COLUMN_SALE_DATE+"\": "+this.date+",\""+Setup.COLUMN_SALE_ISDELIVERY+"\": "+this.isDelivery+",\""+Setup.COLUMN_SALE_METHOD+"\": \""+this.payment_method+"\",\""+Setup.COLUMN_SALE_ISTOGO+"\": "+this.isTogo+",\""+Setup.COLUMN_SALE_TIP+"\": "+this.tip+",\""+Setup.COLUMN_SALE_DISCOUNT+"\": "+this.discount+",\""+Setup.COLUMN_SALE_NUMBER+"\": "+this.saleNumber+",\""+Setup.COLUMN_SALE_RECEIVED+"\":"+this.value_received+",\"ingredients\": "+this.ingredientFields()+",\"products\": "+this.productFields()+",\"combos\": "+this.comboFields()+"}";
 	  }
 		  
 	

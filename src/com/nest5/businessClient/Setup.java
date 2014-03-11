@@ -39,6 +39,19 @@ public class Setup {
     public static final String DEVICE_REGISTERED_ID = "id_registered_in_nest5_big_data_server";
     public static final String NEW_INSTALL = "is_new_install";
     public static final String IS_UPDATING = "updating_database";
+    public static final String MIN_SALE = "min_sale";
+    public static final String MAX_SALE = "max_sale";
+    public static final String CURRENT_SALE = "current_sale";
+    public static final String INVOICE_PREFIX = "invoice_prefix";
+    public static final String COMPANY_NIT = "company_message";
+    public static final String COMPANY_TEL = "company_message";
+    public static final String COMPANY_ADDRESS = "company_message";
+    public static final String COMPANY_EMAIL = "company_message";
+    public static final String COMPANY_URL = "company_message";
+    public static final String COMPANY_MESSAGE = "company_message";
+    
+    
+    
 
 
     
@@ -114,6 +127,7 @@ public class Setup {
     public static final String COLUMN_SALE_ISTOGO = "togo";
     public static final String COLUMN_SALE_TIP = "tip";
     public static final String COLUMN_SALE_DISCOUNT = "discount";
+    public static final String COLUMN_SALE_NUMBER = "sale_number";
 
     
     //SaleItem  guarda las propiedades de un registrable con una cantidad en la base de datos
@@ -142,9 +156,9 @@ public class Setup {
      * The URL of the production service.
      */
    // public static final String PROD_URL = "http://www.nest5.com";
-    public static final String PROD_URL = "http://192.168.11.103:8092";
+    public static final String PROD_URL = "http://192.168.11.100:8092";
     //public static final String PROD_URL = "http://api.nest5.com/";
-    public static final String PROD_BIGDATA_URL = "http://192.168.11.103:8090/Nest5BusinessData";
+    public static final String PROD_BIGDATA_URL = "http://192.168.11.100:8090/Nest5BusinessData";
     //public static final String PROD_BIGDATA_URL = "http://bigdata.nest5.com";
     
 

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/payment_form"
+    android:layout_width="match_parent" 
+    android:layout_height="wrap_content"
+    android:layout_gravity="center" 
+    android:orientation="vertical"
+      >
+      <ScrollView 
+          android:id="@+id/payment_form_scroll"
+          android:layout_width="fill_parent"
+          android:layout_height="match_parent"
+          android:padding="20dip"
+          >
+          <LinearLayout 
+              android:id="@+id/payment_form_inner"
+			    android:layout_width="fill_parent"
+			    android:layout_height="wrap_content"
+			    
+			    android:orientation="vertical">
+			    <LinearLayout 
+			    android:id="@+id/payment_form_options"
+			    android:layout_width="fill_parent"
+			    android:layout_height="wrap_content"
+			    android:weightSum="1">
+			        
+			       
+				    
+				     
+			    </LinearLayout>
+			    
+			    
+			    
+			    <EditText 
+			        android:id="@+id/payment_form_text"
+			        android:layout_width="fill_parent"
+			        android:layout_height="50dip"
+			        android:inputType="text"
+			        android:hint="Valor Entregado"
+			        android:imeOptions="actionNext"
+			        
+			        />
+			    <EditText 
+			        android:id="@+id/payment_form_discount"
+			        android:layout_width="fill_parent"
+			        android:layout_height="50dip"
+			        android:inputType="text"
+			        android:hint="Descuento (%)"
+			        android:imeOptions="actionNext"
+			        
+			        />
+			    <LinearLayout 
+			        android:orientation="horizontal"
+			        android:layout_width="fill_parent"
+			        android:layout_height="wrap_content"
+			        android:gravity="center_vertical|center_horizontal"
+			        android:padding="10dip">
+			        
+			         <Button 
+				        android:id="@+id/payment_form_pay_button"
+				        android:layout_width="200dip"
+				        android:layout_gravity="center_horizontal|center_vertical"
+				        android:background="@drawable/blue_button" 
+			        	style="@style/ButtonText"				       
+				        android:text="Ordenar"/>
+				    <Button 
+				        android:id="@+id/payment_form_cancel_button"
+				        android:layout_width="200dip"
+				        android:layout_gravity="center_horizontal|center_vertical"
+				        android:background="@drawable/red_button" 
+			        	style="@style/ButtonText"
+				        android:text="Cancelar"/>
+			        
+			    </LinearLayout>
+			    
+			    <TextView 
+			        android:id="@+id/payment_form_change_lbl"
+			        android:layout_width="fill_parent"
+			        android:layout_height="50dip"
+			        android:textSize="20dp"
+			        android:textStyle="bold"
+			        android:background="#cccccc"/>
+			    <TextView 
+			        android:id="@+id/payment_form_change"
+			        android:layout_width="fill_parent"
+			        android:layout_height="20dip"
+			        android:background="#cccccc"/>
+			    
+
+              
+          </LinearLayout>
+      </ScrollView>
+	
+    
+</LinearLayout>
+
+
+
+
+
+

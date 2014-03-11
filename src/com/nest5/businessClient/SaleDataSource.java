@@ -20,7 +20,7 @@ public class SaleDataSource {
 	// Database fields
 	  private SQLiteDatabase database;
 	  private MySQLiteHelper dbHelper;
-	  private String[] allColumns = {Setup.COLUMN_ID,Setup.COLUMN_SALE_DATE,Setup.COLUMN_SALE_METHOD,Setup.COLUMN_SALE_RECEIVED,Setup.COLUMN_OWN_SYNC_ID,Setup.COLUMN_SALE_ISDELIVERY,Setup.COLUMN_SALE_ISTOGO,Setup.COLUMN_SALE_TIP,Setup.COLUMN_SALE_DISCOUNT};
+	  private String[] allColumns = {Setup.COLUMN_ID,Setup.COLUMN_SALE_DATE,Setup.COLUMN_SALE_METHOD,Setup.COLUMN_SALE_RECEIVED,Setup.COLUMN_OWN_SYNC_ID,Setup.COLUMN_SALE_ISDELIVERY,Setup.COLUMN_SALE_ISTOGO,Setup.COLUMN_SALE_TIP,Setup.COLUMN_SALE_DISCOUNT,Setup.COLUMN_SALE_NUMBER};
 
 
 	  public SaleDataSource(MySQLiteHelper _dbHelper) {
@@ -42,7 +42,7 @@ public class SaleDataSource {
 	    dbHelper.close();
 	  }
 
-	  public Sale createSale(long date,String method,double received,long syncId,int delivery, int togo,int tip, double discount) { //se llama desde initialActivity a guardar
+	  public Sale createSale(long date,String method,double received,long syncId,int delivery, int togo,int tip, double discount, int number) { //se llama desde initialActivity a guardar
 	    ContentValues values = new ContentValues();
 	    values.put(Setup.COLUMN_SALE_DATE, date);
 	    values.put(Setup.COLUMN_SALE_METHOD, method);
@@ -52,6 +52,7 @@ public class SaleDataSource {
 	    values.put(Setup.COLUMN_SALE_ISTOGO, delivery);
 	    values.put(Setup.COLUMN_SALE_TIP, tip);
 	    values.put(Setup.COLUMN_SALE_DISCOUNT, discount);
+	    values.put(Setup.COLUMN_SALE_NUMBER, number);
 	    
 	    
 	    long insertId = database.insert(Setup.TABLE_SALE, null,
@@ -198,6 +199,7 @@ public class SaleDataSource {
 	     sale.setIstogo(cursor.getInt(6));
 	     sale.setTip(cursor.getInt(7));
 	     sale.setDiscount(cursor.getInt(8));
+	     sale.setSaleNumber(cursor.getInt(9));
 	    		
 	    return sale;
 	  }

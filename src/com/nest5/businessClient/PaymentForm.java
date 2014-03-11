@@ -38,7 +38,7 @@ public class PaymentForm extends DialogFragment {
 	
 	
 	public interface OnPayListener {
-        public void OnPayClicked(String method,int isDelivery, int isTogo, double value,int tip,double discount);
+        public void OnPayClicked(String method,double value,double discount);
         
     }
 	
@@ -46,9 +46,6 @@ private Context mContext;
 private LinkedHashMap<Registrable, Integer> items;
 private Button cashBtn;
 private Button cardBtn;
-private Button deliveryBtn;
-private Button togoBtn;
-private Button tipBtn;
 private EditText discountTxt;
 private Button payBtn;
 private Button cancelBtn;
@@ -106,9 +103,6 @@ public void onAttach(Activity activity){
     payBtn = (Button) view.findViewById(R.id.payment_form_pay_button);
     cancelBtn = (Button) view.findViewById(R.id.payment_form_cancel_button);
     cardBtn = (Button) view.findViewById(R.id.payment_option_card);
-    deliveryBtn = (Button) view.findViewById(R.id.is_delivery);
-    togoBtn = (Button) view.findViewById(R.id.is_togo);
-    tipBtn = (Button) view.findViewById(R.id.tip_btn);
     valueTxt = (EditText) view.findViewById(R.id.payment_form_text);
     changeTxt = (TextView) view.findViewById(R.id.payment_form_change);
     discountTxt = (EditText) view.findViewById(R.id.payment_form_discount);
@@ -184,48 +178,6 @@ public void onAttach(Activity activity){
 		
 		
 	});
-deliveryBtn.setOnClickListener(new OnClickListener() {
-		
-		@Override
-		public void onClick(View v) {
-			if(isDelivery == 1){
-				v.setBackgroundDrawable(getResources().getDrawable(R.drawable.blue_button));
-				isDelivery = 0;
-			}
-			else{
-				v.setBackgroundColor(Color.GRAY);
-				isDelivery = 1;
-			}
-		}
-	});
-togoBtn.setOnClickListener(new OnClickListener() {
-	
-	@Override
-	public void onClick(View v) {
-		if(isToGo == 1){
-			v.setBackgroundDrawable(getResources().getDrawable(R.drawable.blue_button));
-			isToGo = 0;
-		}
-		else{
-			v.setBackgroundColor(Color.GRAY);
-			isToGo = 1;
-		}
-	}
-});
-tipBtn.setOnClickListener(new OnClickListener() {
-	
-	@Override
-	public void onClick(View v) {
-		if(tip == 1){
-			v.setBackgroundDrawable(getResources().getDrawable(R.drawable.blue_button));
-			tip = 0;
-		}
-		else{
-			v.setBackgroundColor(Color.GRAY);
-			tip = 1;
-		}
-	}
-});
     
     payBtn.setOnClickListener(new OnClickListener() {
 		
@@ -246,7 +198,7 @@ tipBtn.setOnClickListener(new OnClickListener() {
 				
 			}
 			
-			onPayListener.OnPayClicked(method,isDelivery,isToGo, val,tip,discount);
+			onPayListener.OnPayClicked(method,val,discount);
 			Toast.makeText(mContext, "Cambio: "+String.valueOf(val - price), Toast.LENGTH_LONG).show();
 			frag.dismiss();
 			

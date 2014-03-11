@@ -313,7 +313,7 @@ public class LoginActivity extends Activity {
 		@Override
 		public void handleMessage(Message msg) {
 			showProgress(false); 
-		
+			prefs = Util.getSharedPreferences(mContext);
 			JSONObject respuesta = null;
 				Log.i("MISPRUEBAS","LLEGUE DE REGISTRAR DEVICEID");
 			try {
@@ -343,7 +343,7 @@ public class LoginActivity extends Activity {
 				
 				if (status == 200) {
 					//ok! status received, but still we have to check for code 555 that says everything done in Nest5 as expected.
-					if(responsecode == 555){
+					if(responsecode == 555){ //new register
 				    	mLoginStatusMessageView.setText("Sincronizando Base de Datos");
 						showProgress(true);
 						prefs.edit().putBoolean(Setup.DEVICE_REGISTERED, true).commit();
@@ -368,7 +368,7 @@ public class LoginActivity extends Activity {
 						//startActivity(inten);
 					}
 					else{
-						if(responsecode == 55511){
+						if(responsecode == 55511){ //registered already
 					    	mLoginStatusMessageView.setText("Sincronizando Base de Datos");
 							showProgress(true);
 							Log.i("MISPRUEBAS",message);
@@ -391,17 +391,61 @@ public class LoginActivity extends Activity {
 							//startActivity(inten);
 						}
 						else{
-							SharedPreferences prefs = Util.getSharedPreferences(mContext);
+							
 							prefs.edit().putBoolean(Setup.DEVICE_REGISTERED, false).commit();
 							prefs.edit().putString(Setup.DEVICE_REGISTERED_ID, "null").commit();
 							mEmailView.setError(message);
 						}
 						
 					}
+					//if registered, it doesn't matter if new are re-register, take minsale, maxsale and current sale for keeping them in the database.
+					/*
+					 * public static final String COMPANY_NIT = "company_message";
+    					public static final String COMPANY_TEL = "company_message";
+    					public static final String COMPANY_ADDRESS = "company_message";
+    					public static final String COMPANY_EMAIL = "company_message";
+    					public static final String COMPANY_URL = "company_message";
+    					public static final String COMPANY_MESSAGE = "company_message";
+    					
+    					*/
+
+					int maxSale = 0;
+					int currentSale = 0;
+					String prefix = "";
+					String nit = "";
+					String tel = "";
+					String address = "";
+					String email = "";
+					String url = "";
+					String invoiceMessage = "";
+					try {
+						maxSale = respuesta.getInt("maxSale");
+						currentSale = respuesta.getInt("currentSale");
+						prefix = respuesta.getString("prefix");
+						nit = respuesta.getString("nit");
+						tel = respuesta.getString("tel");
+						address = respuesta.getString("address");
+						email = respuesta.getString("email");
+						url = respuesta.getString("url");
+						invoiceMessage = respuesta.getString("invoiceMessage");
+					} catch (Exception e) {
+						Log.i("MISPRUEBAS","ERROR COGER DATOS de sales");
+						e.printStackTrace();
+					}
 					
-					
+					prefs.edit()
+					.putInt(Setup.MAX_SALE, maxSale)
+					.putInt(Setup.CURRENT_SALE, currentSale)
+					.putString(Setup.INVOICE_PREFIX, prefix)
+					.putString(Setup.COMPANY_ADDRESS, address)
+					.putString(Setup.COMPANY_EMAIL, email)
+					.putString(Setup.COMPANY_MESSAGE, invoiceMessage)
+					.putString(Setup.COMPANY_NIT, nit)
+					.putString(Setup.COMPANY_TEL, tel)
+					.putString(Setup.COMPANY_URL, url)
+					.commit();
 				} else {
-					SharedPreferences prefs = Util.getSharedPreferences(mContext);
+					
 					prefs.edit().putBoolean(Setup.DEVICE_REGISTERED, false).commit();
 					prefs.edit().putString(Setup.DEVICE_REGISTERED_ID, "null").commit();
 					mEmailView.setError(getString(R.string.device_error));

@@ -40,43 +40,10 @@
 				        android:background="@drawable/blue_button" 
 			        	style="@style/ButtonText"				       
 				        android:text="Tarjeta"/>
-				    <Button 
-				        android:id="@+id/is_delivery"
-				        android:layout_width="0dip"
-				        android:layout_weight="0.3"
-				        android:layout_gravity="center_horizontal|center_vertical"
-				        android:background="@drawable/blue_button" 
-			        	style="@style/ButtonText"				       
-				        android:text="Domicilio"/>
 				    
 				     
 			    </LinearLayout>
-			    <LinearLayout 
-			    android:id="@+id/delivery_options"
-			    android:layout_width="fill_parent"
-			    android:layout_height="wrap_content"
-			    android:weightSum="1">
-			        
-			       
-				    <Button 
-				        android:id="@+id/is_togo"
-				        android:layout_width="0dip"
-				        android:layout_weight="0.3"
-				        android:layout_gravity="center_horizontal|center_vertical"
-				        android:background="@drawable/blue_button" 
-			        	style="@style/ButtonText"				       
-				        android:text="Llevar"/>
-				    <Button 
-				        android:id="@+id/tip_btn"
-				        android:layout_width="0dip"
-				        android:layout_weight="0.3"
-				        android:layout_gravity="center_horizontal|center_vertical"
-				        android:background="@drawable/blue_button" 
-			        	style="@style/ButtonText"				       
-				        android:text="Propina"/>
-				    
-				     
-			    </LinearLayout>
+			    
 			    
 			    
 			    <EditText 
