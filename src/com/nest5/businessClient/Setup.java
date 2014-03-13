@@ -156,10 +156,17 @@ public class Setup {
      * The URL of the production service.
      */
    // public static final String PROD_URL = "http://www.nest5.com";
+<<<<<<< HEAD
     public static final String PROD_URL = "http://192.168.11.101:8092";
     //public static final String PROD_URL = "http://api.nest5.com/";
     public static final String PROD_BIGDATA_URL = "http://192.168.11.101:8090/Nest5BusinessData";
     //public static final String PROD_BIGDATA_URL = "http://bigdata.nest5.com";
+=======
+    //public static final String PROD_URL = "http://192.168.11.100:8092";
+    public static final String PROD_URL = "http://api.nest5.com/";
+    //public static final String PROD_BIGDATA_URL = "http://192.168.11.100:8090/Nest5BusinessData";
+    public static final String PROD_BIGDATA_URL = "http://bigdata.nest5.com";
+>>>>>>> 8789d25f7ed7f49f3f99d3961abb776fed2459a5
     
 
     /**
