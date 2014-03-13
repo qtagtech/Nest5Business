@@ -44,6 +44,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.prefs.Preferences;
 
 import org.json.JSONObject;
 
@@ -2402,9 +2403,8 @@ public class Initialactivity extends FragmentActivity implements
 		int tip = cookingOrdersTip.get(currentOrder);
 		int togo = cookingOrdersTogo.get(currentOrder);
 		int delivery = cookingOrdersDelivery.get(currentOrder);
-		
 		saveSale(method,value,discount,delivery,togo,tip);
-		Date date = new Date();
+		/*Date date = new Date();
 		String fecha = DateFormat.getDateFormat(Initialactivity.this).format(
 				date);
 		int lines = 0;
@@ -2496,46 +2496,118 @@ public class Initialactivity extends FragmentActivity implements
 			comanda.append(name);
 			comanda.append("\n");
 
-		}
-		//long startTime = System.currentTimeMillis();
-
-		//cookingOrders.add(currentObjects);
-		Log.d(TAG, currentOrder.toString());
-
-		
+		}*/
 
 		//currentOrder.clear();
-		makeTable("NA");
+		//makeTable("NA");
+		Date date = new Date();
+		String fecha = DateFormat.getDateFormat(Initialactivity.this).format(
+				date);
 
-		lines++;
-		lines++;
+		// imprimir, conectar por wifi y enviar el texto arregladito a la app de
+		// puente
 
-		factura.append("Gracias Por Comprar en\r\nMr. Pastor.\r\n");
+		int lines = 0;
+		StringBuilder factura = new StringBuilder();
+		//factura.append("MR. PASTOR COMIDA\r\nRÁPIDA MEXICANA" + "\r\n");
+		SharedPreferences pref = Util.getSharedPreferences(mContext);
+		String empresa  = prefs.getString(Setup.COMPANY_NAME, "Nombre de Empresa");
+		String nit  = prefs.getString(Setup.COMPANY_NIT, "000000000-0");
+		String email  = prefs.getString(Setup.COMPANY_EMAIL, "email@empresa.com");
+		String pagina  = prefs.getString(Setup.COMPANY_URL, "http://www.empresa.com");
+		String direccion  = prefs.getString(Setup.COMPANY_ADDRESS, "Dirección Física Empresa");
+		String telefono  = prefs.getString(Setup.COMPANY_TEL, "555-55-55");
+		String mensaje  = prefs.getString(Setup.COMPANY_MESSAGE, "No hay ningún mensaje configurado aún. En el mensaje es recomendable mencionar tus redes sociales, benficios y promociones que tengas, además de información de interés paratus clientes. ");
+		empresa = empresa != "" ? empresa : "Nombre de Empresa";
+		nit = nit != "" ? nit : "000000000-0";
+		email = email != "" ? email : "email@empresa.com";
+		pagina = pagina != "" ? pagina : "http://www.empresa.com";
+		direccion = direccion != "" ? direccion : "Dirección Física Empresa";
+		telefono = telefono != "" ? telefono : "555-55-55";
+		mensaje = mensaje != "" ? mensaje : "No hay ningún mensaje configurado aún. En el mensaje es recomendable mencionar tus redes sociales, benficios y promociones que tengas, además de información de interés paratus clientes. ";
+		factura.append(empresa + "\r\n");
+		factura.append(nit + "\r\n");
 		lines++;
-		factura.append("Ingresa a www.NEST5.com\r\n");
+		factura.append("\r\n");
+		factura.append("\r\n");
+		factura.append(fecha);
 		lines++;
-		factura.append("Síguenos en\r\n");
 		lines++;
-		factura.append("facebook/NEST5OFICIAL\r\n");
 		lines++;
-		factura.append("twitter.com/NEST5_OFICIAL\r\n");
+		factura.append("\r\n");
+		factura.append("    Item       Cantidad   Precio\r\n");
 		lines++;
-		factura.append("Danos tus sugerencias y\r\n");
+		int j = 0;
+		Iterator<Entry<Registrable, Integer>> it = currentOrder.entrySet()
+				.iterator();
+		// Log.d(TAG,String.valueOf(currentOrder.size()));
+		LinkedHashMap<Registrable, Integer> currentObjects = new LinkedHashMap<Registrable, Integer>();
+		float base = 0;
+		float iva = 0;
+		float total = 0;
+		while (it.hasNext()) {
+
+			LinkedHashMap.Entry<Registrable, Integer> pairs = (LinkedHashMap.Entry<Registrable, Integer>) it
+					.next();
+
+			currentObjects.put(pairs.getKey(), pairs.getValue());
+
+			String name = pairs.getKey().name;
+
+			int longName = name.length();
+			int subLength = 14 - longName;
+			if (subLength < 0)
+				name = name.substring(0, 14);
+			int espacios1 = 4;
+			int espacios2 = 12;
+			if (name.length() < 14)
+			{
+				espacios1 += 14 - name.length();
+			}
+			factura.append(name);
+			int qtyL = String.valueOf(pairs.getValue()).length();
+			float precioiva = (float)Math.round(pairs.getKey().price + pairs.getKey().price
+					* pairs.getKey().tax );
+			 base += (float)Math.round(pairs.getKey().price);
+			 iva += (float)Math.round(pairs.getKey().price * pairs.getKey().tax );
+			 total += precioiva;
+			int priceL = String.valueOf(precioiva).length();
+			espacios1 = espacios1 - qtyL < 1 ? espacios1 = 1 : espacios1 - qtyL;
+			espacios2 = espacios2 - priceL < 1 ? espacios2 = 1 : espacios2 - priceL;
+			espacios2 = espacios2 - qtyL < 1 ? espacios2 = 1 : espacios2 - qtyL;
+			for (int k = 0; k < espacios1; k++) {
+				factura.append(" ");
+			}
+			factura.append(pairs.getValue());
+			for (int k = 0; k < espacios2; k++) {
+				factura.append(" ");
+			}
+			factura.append("$");
+			factura.append(precioiva);
+			factura.append("\r\n");
+			lines++;
+		}
 		lines++;
-		factura.append("opiniones y recibe beneficios.\r\n");
 		lines++;
+		factura.append("\r\n");
+		factura.append("<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>\r\n");
+		factura.append("BASE:      $"+base+"\r\n");
+		factura.append("Imp.:      $"+iva+"\r\n");
+		factura.append("TOTAL:      $"+total+"\r\n");
+		factura.append("\r\n");
+		factura.append("<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>\r\n");
+		factura.append("\r\n");
+		lines++;
+		factura.append(mensaje);
 		String send = factura.toString();
-		String finalString = String.valueOf(lines) + "\r\n" + send;
-		Log.d(TAG, finalString);
 
 		// Enviar un string diferente que lleva la orden actual.
-		new WiFiSend().execute(comanda.toString());// enviar el mensaje de
+	//	new WiFiSend().execute(comanda.toString());// enviar el mensaje de
 													// verdad
 		
 				int[] arrayOfInt = new int[2];
 				arrayOfInt[0] = 27;
 				arrayOfInt[1] = 64;
-				String test = "Linea 1\r\n\t\t\tOtra Linea";
 				int[] array2 = new int[3];
 				array2[0] = 27;
 				array2[1] = 74;
@@ -2563,16 +2635,6 @@ public class Initialactivity extends FragmentActivity implements
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					/*try {
-						
-				                   
-				        byte[] sendData = decodeText("HOLA", "x-UnicodeBig");
-				        mChatService.write(sendData);
-				        
-				    } catch (IOException e) {
-				        e.printStackTrace();
-				        Log.i("emi", "Send data error: " + e);
-				    }*/
 				}
 				else
 				{
@@ -4078,26 +4140,18 @@ public class Initialactivity extends FragmentActivity implements
 				int lines = 0;
 				StringBuilder factura = new StringBuilder();
 				//factura.append("MR. PASTOR COMIDA\r\nRÁPIDA MEXICANA" + "\r\n");
-				factura.append("NOMBRE DE EMPRESA" + "\r\n");
-				lines++;
-				lines++;
+				factura.append("-----COMANDA----COMANDA-----" + "\r\n");
 				lines++;
 				factura.append(fecha);
 				lines++;
 				lines++;
 				lines++;
 				factura.append("\r\n");
-				factura.append("    Item       Cantidad   Precio\r\n");
+				factura.append("    Item              Cantidad\r\n");
 				lines++;
-				String names[] = { "Taco Al Pastor Con Cebolla", "Chimchanga",
-						"Combo 1 con Chimmichanga" };
-				String qties[] = { "1", "5", "15" };
-				String prices[] = { "13900", "600", "4500" };
 				int j = 0;
 				Iterator<Entry<Registrable, Integer>> it = currentOrder.entrySet()
 						.iterator();
-				int i = 0;
-				StringBuilder comanda = new StringBuilder();
 				// Log.d(TAG,String.valueOf(currentOrder.size()));
 				LinkedHashMap<Registrable, Integer> currentObjects = new LinkedHashMap<Registrable, Integer>();
 
@@ -4111,66 +4165,42 @@ public class Initialactivity extends FragmentActivity implements
 					String name = pairs.getKey().name;
 
 					int longName = name.length();
-					// Log.d("NUMEROS",String.valueOf(longName));
 					int subLength = 14 - longName;
-					// Log.d("NUMEROS",String.valueOf(subLength));
-
 					if (subLength < 0)
 						name = name.substring(0, 14);
 					int espacios1 = 4;
 					int espacios2 = 12;
 					if (name.length() < 14)
-						;
 					{
 						espacios1 += 14 - name.length();
 					}
-
 					factura.append(name);
-
 					int qtyL = String.valueOf(pairs.getValue()).length();
-					int priceL = String.valueOf(
-							pairs.getKey().price + pairs.getKey().price
-									* pairs.getKey().tax).length();
+					//float precioiva = (float)Math.round(pairs.getKey().price + pairs.getKey().price
+						//	* pairs.getKey().tax * 10) / 10;
+					//int priceL = String.valueOf(precioiva).length();
 					espacios1 = espacios1 - qtyL < 1 ? espacios1 = 1 : espacios1 - qtyL;
-					espacios2 = espacios2 - priceL < 1 ? espacios2 = 1 : espacios2
-							- priceL;
-
+					//espacios2 = espacios2 - priceL < 1 ? espacios2 = 1 : espacios2 - priceL;
+					espacios2 = espacios2 - qtyL < 1 ? espacios2 = 1 : espacios2 - qtyL;
 					for (int k = 0; k < espacios1; k++) {
 						factura.append(" ");
 					}
 					factura.append(pairs.getValue());
-
 					for (int k = 0; k < espacios2; k++) {
 						factura.append(" ");
-						//
 					}
-
-					factura.append("$");
-					factura.append(pairs.getKey().price + pairs.getKey().price
-							* pairs.getKey().tax);
+					//factura.append("$");
+					//factura.append(precioiva);
 					factura.append("\r\n");
-
 					// solo en pruebas
 					j++;
 					if (j == 3)
 						j = 0;
-					// factura.append("Taco al pastor   3      $112600\r\n");
 					lines++;
-
-					// Crear comanda para sistema de comandas
-					// comanda.append("N5AT-1::Hola como estas\n"); //prueba de Comando
-					// apra sacar un toast con lo que diga el comando
-					comanda.append(pairs.getValue());
-					comanda.append(" -----> ");
-					comanda.append(name);
-					comanda.append("\n");
-
 				}
 				long startTime = System.currentTimeMillis();
-
 				cookingOrders.add(currentObjects);
 				Log.d(TAG, currentOrder.toString());
-
 				// cookingOrders.add(currentOrder);
 				//cookingOrdersMethods.put(currentObjects, method);
 				cookingOrdersDelivery.put(currentObjects, isDelivery);
@@ -4179,12 +4209,10 @@ public class Initialactivity extends FragmentActivity implements
 				cookingOrdersDiscount.put(currentObjects, discount);
 				cookingOrdersTimes.put(currentObjects, startTime);
 				cookingOrdersReceived.put(currentObjects, value);
-
 				List<Long> items = new ArrayList<Long>();
 				for (LinkedHashMap<Registrable, Integer> current : cookingOrders) {
 					items.add(cookingOrdersTimes.get(current));
 				}
-
 				cookingAdapter = new SaleAdapter(mContext, items, inflater);
 				ordersList.setAdapter(cookingAdapter);
 				ordersList.setOnItemClickListener(orderListListener);
@@ -4193,11 +4221,9 @@ public class Initialactivity extends FragmentActivity implements
 				}
 				currentOrder.clear();
 				makeTable("NA");
-
 				lines++;
 				lines++;
-
-				factura.append("Gracias Por Comprar en\r\nMr. Pastor.\r\n");
+				/*factura.append("Gracias Por Comprar en\r\nMr. Pastor.\r\n");
 				lines++;
 				factura.append("Ingresa a WWW.NEST5.COM\r\n");
 				lines++;
@@ -4210,48 +4236,11 @@ public class Initialactivity extends FragmentActivity implements
 				factura.append("Danos tus sugerencias y\r\n");
 				lines++;
 				factura.append("opiniones y recibe beneficios.\r\n");
-				lines++;
+				lines++;*/
 				String send = factura.toString();
-				String finalString = String.valueOf(lines) + "\r\n" + send;
-				Log.d(TAG, finalString);
-
-				// Enviar un string diferente que lleva la orden actual.
-				new WiFiSend().execute(comanda.toString());// enviar el mensaje de
-															// verdad
-				// new WiFiSend().execute(factura.toString());
-				/*
-				 * StringBuilder factura = new StringBuilder();
-				 * factura.append("MR. PASTOR COMIDA RÁPIDA MEXICANA"+"\r\n\r\n\r\n");
-				 * Date date = new Date(); String fecha =
-				 * DateFormat.getDateFormat(mContext).format(date);
-				 * 
-				 * factura.append(fecha); factura.append("\r\n");
-				 * factura.append("    Item       Cantidad      Precio\r\n");
-				 * factura.append("Taco al pastor    3            $12.600\r\n");
-				 * factura.append("Taco al pastor    3            $12.600\r\n");
-				 * factura.append("Taco al pastor    3            $12.600\r\n");
-				 * factura.append("Taco al pastor    3            $12.600\r\n");
-				 * factura.append("Taco al pastor    3            $12.600\r\n");
-				 * factura.append("Taco al pastor    3            $12.600\r\n");
-				 * factura.append("Taco al pastor    3            $12.600\r\n");
-				 * factura.append("Taco al pastor    3            $12.600\r\n");
-				 * factura.append("Taco al pastor    3            $12.600\r\n");
-				 * factura.append("Taco al pastor    3            $12.600\r\n");
-				 * factura.append("Taco al pastor    3            $12.600\r\n");
-				 * factura.append("\r\n\r\n Gracias Por Comprar en Mr. Pastor.\r\n");
-				 * factura.append("Ingresa http://www.mrpastor.com\r\n");
-				 * factura.append(
-				 * "O Síguenos en facebook/misterpastor - Twiiter.com/comidasmrpastor"
-				 * );
-				 */
-				//imprimir en bluetooth
-				// TODO Auto-generated method stub
-						//this.mSettingsConfig.resetSettings();
-						//String str = this.mSettingsConfig.getTest_string();
 						int[] arrayOfInt = new int[2];
 						arrayOfInt[0] = 27;
 						arrayOfInt[1] = 64;
-						String test = "Linea 1\r\n\t\t\tOtra Linea";
 						int[] array2 = new int[3];
 						array2[0] = 27;
 						array2[1] = 74;
@@ -4263,13 +4252,9 @@ public class Initialactivity extends FragmentActivity implements
 				        }
 						StringBuilder builder2 = new StringBuilder();
 						
-						builder2.append(Character.toChars(10));
-				        
-				        
-				            
+						builder2.append(Character.toChars(10)); 
 				        StringBuilder complete = new StringBuilder(String.valueOf(builder1.toString())).append(String.valueOf(builder2.toString()));
 				        String enviar = complete.toString(); 
-				       
 				        Log.d(TAG,"Cadena a enviar: "+enviar);
 				        if(mChatService.getState() == mChatService.STATE_CONNECTED)
 						{
@@ -4279,16 +4264,6 @@ public class Initialactivity extends FragmentActivity implements
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
-							/*try {
-								
-						                   
-						        byte[] sendData = decodeText("HOLA", "x-UnicodeBig");
-						        mChatService.write(sendData);
-						        
-						    } catch (IOException e) {
-						        e.printStackTrace();
-						        Log.i("emi", "Send data error: " + e);
-						    }*/
 						}
 						else
 						{

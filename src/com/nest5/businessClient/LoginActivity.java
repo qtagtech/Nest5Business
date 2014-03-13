@@ -295,7 +295,7 @@ public class LoginActivity extends Activity {
 					 Log.i("MISPRUEBAS","Error empezando request de deviceid");}
 				} else {
 					mEmailView.setError(getString(R.string.login_error));
-					
+					showProgress(false); 
 					//Abrir Nueva Activity porque esta registrado
 					/*prefs.edit().putBoolean(Setup.LOGGED_IN, false).putString(Setup.COMPANY_ID, "0").putString(Setup.COMPANY_NAME, "N/A").commit();
 					Intent inten = new Intent(mContext, Initialactivity.class);
@@ -304,6 +304,7 @@ public class LoginActivity extends Activity {
 
 			}
 			else{
+				showProgress(false); 
 				mEmailView.setError(getString(R.string.login_error));
 			}
 
