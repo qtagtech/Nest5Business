@@ -419,16 +419,28 @@ public class LoginActivity extends Activity {
 					String email = "";
 					String url = "";
 					String invoiceMessage = "";
+					String tipMessage = "";
 					try {
 						maxSale = respuesta.getInt("maxSale");
+						Log.i("DATOSINFO","maxSale: "+String.valueOf(maxSale));
 						currentSale = respuesta.getInt("currentSale");
+						Log.i("DATOSINFO","currentSale: "+String.valueOf(currentSale));
 						prefix = respuesta.getString("prefix");
+						Log.i("DATOSINFO","prefix: "+prefix);
 						nit = respuesta.getString("nit");
+						Log.i("DATOSINFO","nit: "+nit);
 						tel = respuesta.getString("tel");
+						Log.i("DATOSINFO","tel: "+tel);
 						address = respuesta.getString("address");
+						Log.i("DATOSINFO","address: "+address);
 						email = respuesta.getString("email");
+						Log.i("DATOSINFO","email: "+email);
 						url = respuesta.getString("url");
+						Log.i("DATOSINFO","url: "+url);
 						invoiceMessage = respuesta.getString("invoiceMessage");
+						Log.i("DATOSINFO","invoiceMessage: "+invoiceMessage);
+						tipMessage = respuesta.getString("tipMessage");
+						Log.i("DATOSINFO","tipMessage: "+tipMessage);
 					} catch (Exception e) {
 						Log.i("MISPRUEBAS","ERROR COGER DATOS de sales");
 						e.printStackTrace();
@@ -444,6 +456,7 @@ public class LoginActivity extends Activity {
 					.putString(Setup.COMPANY_NIT, nit)
 					.putString(Setup.COMPANY_TEL, tel)
 					.putString(Setup.COMPANY_URL, url)
+					.putString(Setup.TIP_MESSAGE, tipMessage)
 					.commit();
 				} else {
 					

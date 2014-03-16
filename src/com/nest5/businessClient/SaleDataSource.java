@@ -80,9 +80,15 @@ public class SaleDataSource {
 	        allColumns, null, null, null, null, null);
 
 	    cursor.moveToFirst();
+	    Sale sale = null;
 	    while (!cursor.isAfterLast()) {
-	      Sale sale = cursorToSale(cursor);
-	      sales.add(sale);
+	    	try{
+	    		sale = cursorToSale(cursor);
+	    	}catch(Exception e){
+	    		e.printStackTrace();
+	    	}
+	      if (sale != null)
+	    	  sales.add(sale);
 	      cursor.moveToNext();
 	    }
 	    // Make sure to close the cursor

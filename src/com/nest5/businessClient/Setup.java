@@ -43,12 +43,13 @@ public class Setup {
     public static final String MAX_SALE = "max_sale";
     public static final String CURRENT_SALE = "current_sale";
     public static final String INVOICE_PREFIX = "invoice_prefix";
-    public static final String COMPANY_NIT = "company_message";
-    public static final String COMPANY_TEL = "company_message";
-    public static final String COMPANY_ADDRESS = "company_message";
-    public static final String COMPANY_EMAIL = "company_message";
-    public static final String COMPANY_URL = "company_message";
+    public static final String COMPANY_NIT = "company_nit";
+    public static final String COMPANY_TEL = "company_tel";
+    public static final String COMPANY_ADDRESS = "company_address";
+    public static final String COMPANY_EMAIL = "company_email";
+    public static final String COMPANY_URL = "company_url";
     public static final String COMPANY_MESSAGE = "company_message";
+    public static final String TIP_MESSAGE = "tip_message";
     
     
     
@@ -156,17 +157,12 @@ public class Setup {
      * The URL of the production service.
      */
    // public static final String PROD_URL = "http://www.nest5.com";
-<<<<<<< HEAD
-    public static final String PROD_URL = "http://192.168.11.101:8092";
-    //public static final String PROD_URL = "http://api.nest5.com/";
-    public static final String PROD_BIGDATA_URL = "http://192.168.11.101:8090/Nest5BusinessData";
-    //public static final String PROD_BIGDATA_URL = "http://bigdata.nest5.com";
-=======
-    //public static final String PROD_URL = "http://192.168.11.100:8092";
+
+    //public static final String PROD_URL = "http://192.168.11.101:8092";
     public static final String PROD_URL = "http://api.nest5.com/";
-    //public static final String PROD_BIGDATA_URL = "http://192.168.11.100:8090/Nest5BusinessData";
+    //public static final String PROD_BIGDATA_URL = "http://192.168.11.101:8090/Nest5BusinessData";
     public static final String PROD_BIGDATA_URL = "http://bigdata.nest5.com";
->>>>>>> 8789d25f7ed7f49f3f99d3961abb776fed2459a5
+
     
 
     /**

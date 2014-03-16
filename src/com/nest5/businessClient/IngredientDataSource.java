@@ -8,6 +8,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 public class IngredientDataSource {
 	
@@ -101,7 +102,34 @@ public class IngredientDataSource {
 			  tables.append(allColumns[i]);
 			  
 		  }
+		  Log.i("INGREDIENTES","select "+tables+" from " + Setup.TABLE_INGREDIENTS + " where " + Setup.COLUMN_ID + "=" + id);
 		   Cursor cursor = database.rawQuery("select "+tables+" from " + Setup.TABLE_INGREDIENTS + " where " + Setup.COLUMN_ID + "=" + id  , null);
+	        if (cursor != null) 
+	        	{
+	        		cursor.moveToFirst();
+	        		try{
+	        			 ingredient = cursorToIngredient(cursor);
+	        		}catch(Exception e){
+	        			e.printStackTrace();
+	        		}
+	      		     
+	      		      
+	      		    // Make sure to close the cursor
+	      		    cursor.close();
+	        	}
+	        return ingredient;
+		  }
+	  public Ingredient getIngredientBySyncId(long id) {
+		  Ingredient ingredient = null;
+		  StringBuilder tables = new StringBuilder();
+		  for(int i = 0; i < allColumns.length; i++){
+			  if(i != 0)
+				  tables.append(",");
+			  tables.append(allColumns[i]);
+			  
+		  }
+		  Log.i("INGREDIENTES","select "+tables+" from " + Setup.TABLE_INGREDIENTS + " where " + Setup.COLUMN_SYNC_ID + "=" + id);
+		   Cursor cursor = database.rawQuery("select "+tables+" from " + Setup.TABLE_INGREDIENTS + " where " + Setup.COLUMN_SYNC_ID + "=" + id  , null);
 	        if (cursor != null) 
 	        	{
 	        		cursor.moveToFirst();

@@ -612,16 +612,16 @@ public class Initialactivity extends FragmentActivity implements
 				.setTabListener(tabListener);
 		Tab ordersTab = actionBar.newTab().setText("Órdenes")
 				.setTabListener(tabListener);
-		Tab dailyTab = actionBar.newTab().setText("Registros")
+		/*Tab dailyTab = actionBar.newTab().setText("Registros")
 				.setTabListener(tabListener);
 		Tab inventoryTab = actionBar.newTab().setText("Inventarios")
-				.setTabListener(tabListener);
+				.setTabListener(tabListener);*/
 		Tab nest5ReadTab = actionBar.newTab().setText("Nest5")
 				.setTabListener(tabListener);
 		actionBar.addTab(homeTab, true);
 		actionBar.addTab(ordersTab, false);
-		actionBar.addTab(dailyTab, false);
-		actionBar.addTab(inventoryTab, false);
+		//actionBar.addTab(dailyTab, false);
+		//actionBar.addTab(inventoryTab, false);
 		actionBar.addTab(nest5ReadTab, false);
 
 		// Register a receiver to provide register/unregister notifications
@@ -2403,243 +2403,157 @@ public class Initialactivity extends FragmentActivity implements
 		int tip = cookingOrdersTip.get(currentOrder);
 		int togo = cookingOrdersTogo.get(currentOrder);
 		int delivery = cookingOrdersDelivery.get(currentOrder);
-		saveSale(method,value,discount,delivery,togo,tip);
-		/*Date date = new Date();
-		String fecha = DateFormat.getDateFormat(Initialactivity.this).format(
-				date);
-		int lines = 0;
-		StringBuilder factura = new StringBuilder();
-		factura.append("NOMBRE\r\nEMPRESA" + "\r\n");
-		lines++;
-		lines++;
-		lines++;
-		factura.append(fecha);
-		lines++;
-		lines++;
-		lines++;
-		factura.append("\r\n");
-		factura.append("    Item       Cantidad   Precio\r\n");
-		lines++;
-		String names[] = { "Taco Al Pastor Con Cebolla", "Chimchanga",
-				"Combo 1 con Chimmichanga" };
-		String qties[] = { "1", "5", "15" };
-		String prices[] = { "13900", "600", "4500" };
-		int j = 0;
-		Iterator<Entry<Registrable, Integer>> it = currentOrder.entrySet()
-				.iterator();
-		int i = 0;
-		StringBuilder comanda = new StringBuilder();
-		// Log.d(TAG,String.valueOf(currentOrder.size()));
-		LinkedHashMap<Registrable, Integer> currentObjects = new LinkedHashMap<Registrable, Integer>();
+		int number = checkSaleNumber(); //si falla se resta un numero de las ventas actuales mas adelante,.
+		if(number > 0){
+			saveSale(method,value,discount,delivery,togo,tip);
+			Date date = new Date();
+			String fecha = DateFormat.getDateFormat(Initialactivity.this).format(
+					date);
 
-		while (it.hasNext()) {
+			// imprimir, conectar por wifi y enviar el texto arregladito a la app de
+			// puente
 
-			LinkedHashMap.Entry<Registrable, Integer> pairs = (LinkedHashMap.Entry<Registrable, Integer>) it
-					.next();
-
-			currentObjects.put(pairs.getKey(), pairs.getValue());
-
-			String name = pairs.getKey().name;
-
-			int longName = name.length();
-			// Log.d("NUMEROS",String.valueOf(longName));
-			int subLength = 14 - longName;
-			// Log.d("NUMEROS",String.valueOf(subLength));
-
-			if (subLength < 0)
-				name = name.substring(0, 14);
-			int espacios1 = 4;
-			int espacios2 = 12;
-			if (name.length() < 14)
-				;
-			{
-				espacios1 += 14 - name.length();
-			}
-
-			factura.append(name);
-
-			int qtyL = String.valueOf(pairs.getValue()).length();
-			int priceL = String.valueOf(
-					pairs.getKey().price + pairs.getKey().price
-							* pairs.getKey().tax).length();
-			espacios1 = espacios1 - qtyL < 1 ? espacios1 = 1 : espacios1 - qtyL;
-			espacios2 = espacios2 - priceL < 1 ? espacios2 = 1 : espacios2
-					- priceL;
-
-			for (int k = 0; k < espacios1; k++) {
-				factura.append(" ");
-			}
-			factura.append(pairs.getValue());
-
-			for (int k = 0; k < espacios2; k++) {
-				factura.append(" ");
-				//
-			}
-
-			factura.append("$");
-			factura.append(pairs.getKey().price + pairs.getKey().price
-					* pairs.getKey().tax);
-			factura.append("\r\n");
-
-			// solo en pruebas
-			j++;
-			if (j == 3)
-				j = 0;
-			// factura.append("Taco al pastor   3      $112600\r\n");
+			int lines = 0;
+			StringBuilder factura = new StringBuilder();
+			//factura.append("MR. PASTOR COMIDA\r\nRÁPIDA MEXICANA" + "\r\n");
+			SharedPreferences prefs = Util.getSharedPreferences(mContext);
+			String empresa  = prefs.getString(Setup.COMPANY_NAME, "Nombre de Empresa");
+			String nit  = prefs.getString(Setup.COMPANY_NIT, "000000000-0");
+			String email  = prefs.getString(Setup.COMPANY_EMAIL, "email@empresa.com");
+			String pagina  = prefs.getString(Setup.COMPANY_URL, "http://www.empresa.com");
+			String direccion  = prefs.getString(Setup.COMPANY_ADDRESS, "Dirección Física Empresa");
+			String telefono  = prefs.getString(Setup.COMPANY_TEL, "555-55-55");
+			String mensaje  = prefs.getString(Setup.COMPANY_MESSAGE, "No hay ningún mensaje configurado aún. En el mensaje es recomendable mencionar tus redes sociales, benficios y promociones que tengas, además de información de interés paratus clientes. ");
+			String propina  = prefs.getString(Setup.TIP_MESSAGE, "No hay ningún mensaje de propina configurado aún. ");
+			int currentSale = prefs.getInt(Setup.CURRENT_SALE, 0);
+			factura.append(empresa + "\r\n");
+			factura.append(nit + "\r\n");
+			factura.append(direccion + "\r\n");
+			factura.append(telefono + "\r\n");
+			factura.append(email + "\r\n");
+			factura.append(pagina + "\r\n");
+			factura.append("Factura de Venta No. "+String.valueOf(currentSale)+"\r\n");
 			lines++;
-
-			// Crear comanda para sistema de comandas
-			// comanda.append("N5AT-1::Hola como estas\n"); //prueba de Comando
-			// apra sacar un toast con lo que diga el comando
-			comanda.append(pairs.getValue());
-			comanda.append(" -----> ");
-			comanda.append(name);
-			comanda.append("\n");
-
-		}*/
-
-		//currentOrder.clear();
-		//makeTable("NA");
-		Date date = new Date();
-		String fecha = DateFormat.getDateFormat(Initialactivity.this).format(
-				date);
-
-		// imprimir, conectar por wifi y enviar el texto arregladito a la app de
-		// puente
-
-		int lines = 0;
-		StringBuilder factura = new StringBuilder();
-		//factura.append("MR. PASTOR COMIDA\r\nRÁPIDA MEXICANA" + "\r\n");
-		SharedPreferences pref = Util.getSharedPreferences(mContext);
-		String empresa  = prefs.getString(Setup.COMPANY_NAME, "Nombre de Empresa");
-		String nit  = prefs.getString(Setup.COMPANY_NIT, "000000000-0");
-		String email  = prefs.getString(Setup.COMPANY_EMAIL, "email@empresa.com");
-		String pagina  = prefs.getString(Setup.COMPANY_URL, "http://www.empresa.com");
-		String direccion  = prefs.getString(Setup.COMPANY_ADDRESS, "Dirección Física Empresa");
-		String telefono  = prefs.getString(Setup.COMPANY_TEL, "555-55-55");
-		String mensaje  = prefs.getString(Setup.COMPANY_MESSAGE, "No hay ningún mensaje configurado aún. En el mensaje es recomendable mencionar tus redes sociales, benficios y promociones que tengas, además de información de interés paratus clientes. ");
-		empresa = empresa != "" ? empresa : "Nombre de Empresa";
-		nit = nit != "" ? nit : "000000000-0";
-		email = email != "" ? email : "email@empresa.com";
-		pagina = pagina != "" ? pagina : "http://www.empresa.com";
-		direccion = direccion != "" ? direccion : "Dirección Física Empresa";
-		telefono = telefono != "" ? telefono : "555-55-55";
-		mensaje = mensaje != "" ? mensaje : "No hay ningún mensaje configurado aún. En el mensaje es recomendable mencionar tus redes sociales, benficios y promociones que tengas, además de información de interés paratus clientes. ";
-		factura.append(empresa + "\r\n");
-		factura.append(nit + "\r\n");
-		lines++;
-		factura.append("\r\n");
-		factura.append("\r\n");
-		factura.append(fecha);
-		lines++;
-		lines++;
-		lines++;
-		factura.append("\r\n");
-		factura.append("    Item       Cantidad   Precio\r\n");
-		lines++;
-		int j = 0;
-		Iterator<Entry<Registrable, Integer>> it = currentOrder.entrySet()
-				.iterator();
-		// Log.d(TAG,String.valueOf(currentOrder.size()));
-		LinkedHashMap<Registrable, Integer> currentObjects = new LinkedHashMap<Registrable, Integer>();
-		float base = 0;
-		float iva = 0;
-		float total = 0;
-		while (it.hasNext()) {
-
-			LinkedHashMap.Entry<Registrable, Integer> pairs = (LinkedHashMap.Entry<Registrable, Integer>) it
-					.next();
-
-			currentObjects.put(pairs.getKey(), pairs.getValue());
-
-			String name = pairs.getKey().name;
-
-			int longName = name.length();
-			int subLength = 14 - longName;
-			if (subLength < 0)
-				name = name.substring(0, 14);
-			int espacios1 = 4;
-			int espacios2 = 12;
-			if (name.length() < 14)
-			{
-				espacios1 += 14 - name.length();
-			}
-			factura.append(name);
-			int qtyL = String.valueOf(pairs.getValue()).length();
-			float precioiva = (float)Math.round(pairs.getKey().price + pairs.getKey().price
-					* pairs.getKey().tax );
-			 base += (float)Math.round(pairs.getKey().price);
-			 iva += (float)Math.round(pairs.getKey().price * pairs.getKey().tax );
-			 total += precioiva;
-			int priceL = String.valueOf(precioiva).length();
-			espacios1 = espacios1 - qtyL < 1 ? espacios1 = 1 : espacios1 - qtyL;
-			espacios2 = espacios2 - priceL < 1 ? espacios2 = 1 : espacios2 - priceL;
-			espacios2 = espacios2 - qtyL < 1 ? espacios2 = 1 : espacios2 - qtyL;
-			for (int k = 0; k < espacios1; k++) {
-				factura.append(" ");
-			}
-			factura.append(pairs.getValue());
-			for (int k = 0; k < espacios2; k++) {
-				factura.append(" ");
-			}
-			factura.append("$");
-			factura.append(precioiva);
 			factura.append("\r\n");
+			factura.append(fecha);
 			lines++;
-		}
-		lines++;
-		lines++;
-		factura.append("\r\n");
-		factura.append("<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>\r\n");
-		factura.append("BASE:      $"+base+"\r\n");
-		factura.append("Imp.:      $"+iva+"\r\n");
-		factura.append("TOTAL:      $"+total+"\r\n");
-		factura.append("\r\n");
-		factura.append("<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>\r\n");
-		factura.append("\r\n");
-		lines++;
-		factura.append(mensaje);
-		String send = factura.toString();
+			lines++;
+			lines++;
+			factura.append("\r\n");
+			factura.append("    Item       Cantidad   Precio\r\n");
+			lines++;
+			int j = 0;
+			Iterator<Entry<Registrable, Integer>> it = currentOrder.entrySet()
+					.iterator();
+			// Log.d(TAG,String.valueOf(currentOrder.size()));
+			LinkedHashMap<Registrable, Integer> currentObjects = new LinkedHashMap<Registrable, Integer>();
+			float base = 0;
+			float iva = 0;
+			float total = 0;
+			while (it.hasNext()) {
 
-		// Enviar un string diferente que lleva la orden actual.
-	//	new WiFiSend().execute(comanda.toString());// enviar el mensaje de
-													// verdad
-		
-				int[] arrayOfInt = new int[2];
-				arrayOfInt[0] = 27;
-				arrayOfInt[1] = 64;
-				int[] array2 = new int[3];
-				array2[0] = 27;
-				array2[1] = 74;
-				array2[2] = 2;
-				StringBuilder builder1 = new StringBuilder();
-				for(int h= 0; h<2; h++)
-		        {
-					builder1.append(Character.toChars(arrayOfInt[h]));
-		        }
-				StringBuilder builder2 = new StringBuilder();
-				
-				builder2.append(Character.toChars(10));
-		        
-		        
-		            
-		        StringBuilder complete = new StringBuilder(String.valueOf(builder1.toString())).append(String.valueOf(builder2.toString()));
-		        String enviar = complete.toString(); 
-		       
-		        Log.d(TAG,"Cadena a enviar: "+enviar);
-		        if(mChatService.getState() == mChatService.STATE_CONNECTED)
+				LinkedHashMap.Entry<Registrable, Integer> pairs = (LinkedHashMap.Entry<Registrable, Integer>) it
+						.next();
+
+				currentObjects.put(pairs.getKey(), pairs.getValue());
+
+				String name = pairs.getKey().name;
+
+				int longName = name.length();
+				int subLength = 14 - longName;
+				if (subLength < 0)
+					name = name.substring(0, 14);
+				int espacios1 = 4;
+				int espacios2 = 12;
+				if (name.length() < 14)
 				{
-					try {
-						mChatService.write(factura.toString().getBytes("x-UnicodeBig"));
-					} catch (UnsupportedEncodingException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+					espacios1 += 14 - name.length();
+				}
+				factura.append(name);
+				int qtyL = String.valueOf(pairs.getValue()).length();
+				float precioiva = (float)Math.round(pairs.getKey().price + pairs.getKey().price
+						* pairs.getKey().tax );
+				 base += (float)Math.round(pairs.getKey().price);
+				 iva += (float)Math.round(pairs.getKey().price * pairs.getKey().tax );
+				 total += precioiva;
+				int priceL = String.valueOf(precioiva).length();
+				espacios1 = espacios1 - qtyL < 1 ? espacios1 = 1 : espacios1 - qtyL;
+				espacios2 = espacios2 - priceL < 1 ? espacios2 = 1 : espacios2 - priceL;
+				espacios2 = espacios2 - qtyL < 1 ? espacios2 = 1 : espacios2 - qtyL;
+				for (int k = 0; k < espacios1; k++) {
+					factura.append(" ");
+				}
+				factura.append(pairs.getValue());
+				for (int k = 0; k < espacios2; k++) {
+					factura.append(" ");
+				}
+				factura.append("$");
+				factura.append(precioiva);
+				factura.append("\r\n");
+				lines++;
+			}
+			lines++;
+			lines++;
+			factura.append("\r\n");
+			factura.append("<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>\r\n");
+			factura.append("BASE:      $"+base+"\r\n");
+			factura.append("Imp.:      $"+iva+"\r\n");
+			factura.append("TOTAL:     $"+total+"\r\n");
+			factura.append("\r\n");
+			factura.append("<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>\r\n");
+			factura.append("\r\n");
+			lines++;
+			factura.append(propina + "\r\n");
+			factura.append(mensaje);
+			String send = factura.toString();
+
+			// Enviar un string diferente que lleva la orden actual.
+		//	new WiFiSend().execute(comanda.toString());// enviar el mensaje de
+														// verdad
+			
+					int[] arrayOfInt = new int[2];
+					arrayOfInt[0] = 27;
+					arrayOfInt[1] = 64;
+					int[] array2 = new int[3];
+					array2[0] = 27;
+					array2[1] = 74;
+					array2[2] = 2;
+					StringBuilder builder1 = new StringBuilder();
+					for(int h= 0; h<2; h++)
+			        {
+						builder1.append(Character.toChars(arrayOfInt[h]));
+			        }
+					StringBuilder builder2 = new StringBuilder();
+					
+					builder2.append(Character.toChars(10));
+			        
+			        
+			            
+			        StringBuilder complete = new StringBuilder(String.valueOf(builder1.toString())).append(String.valueOf(builder2.toString()));
+			        String enviar = complete.toString(); 
+			       
+			        Log.d(TAG,"Cadena a enviar: "+enviar);
+			        if(mChatService.getState() == mChatService.STATE_CONNECTED)
+					{
+						try {
+							mChatService.write(factura.toString().getBytes("x-UnicodeBig"));
+						} catch (UnsupportedEncodingException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
-				}
-				else
-				{
-					Toast.makeText(mContext, "No hay impresora conectada.", Toast.LENGTH_LONG).show();
-				}
+					else
+					{
+						Toast.makeText(mContext, "No hay impresora conectada.", Toast.LENGTH_LONG).show();
+					}
+			
+		}
+		else{
+			alertbox("!ATENCIÓN!", "Esta venta no se puede facturar. Este dispositivo no tiene más facturas autorizadas. Consulta el administrador, o si tu lo eres, ve a tu panel de control Nest5 y autoriza más facturas. Para más información: http://soporte.nest5.com");
+		}
+		
+		
+		
 
 	}
 
@@ -3018,7 +2932,8 @@ public class Initialactivity extends FragmentActivity implements
 			while (it3.hasNext()) {
 				Map.Entry<Ingredient, Double> pair = (Map.Entry<Ingredient, Double>) it3
 						.next();
-				total += (pair.getValue() * pair.getKey().getPrice());
+				if(pair.getKey() != null)
+					total += (pair.getValue() * pair.getKey().getPrice());
 
 				// Log.d("INGREDIENTES","INGREDIENTE: "+ingrediente.getKey().getName()+" "+ingrediente.getValue());
 			}
@@ -3830,6 +3745,8 @@ public class Initialactivity extends FragmentActivity implements
 					Log.i("MISPRUEBAS","ERROR COGER DATOS updateMaxHandler");
 					e.printStackTrace();
 				}
+				
+				Log.i("MISPRUEBAS","ojo: "+String.valueOf(status)+" "+message);
 
 				if (status == 200) {
 					
@@ -3845,6 +3762,7 @@ public class Initialactivity extends FragmentActivity implements
 						String email = "";
 						String url = "";
 						String invoiceMessage = "";
+						String tipMessage = "";
 						try {
 							maxSale = respuesta.getInt("maxSale");
 							currentSale = respuesta.getInt("currentSale");
@@ -3855,6 +3773,7 @@ public class Initialactivity extends FragmentActivity implements
 							email = respuesta.getString("email");
 							url = respuesta.getString("url");
 							invoiceMessage = respuesta.getString("invoiceMessage");
+							tipMessage = respuesta.getString("tipMessage");
 						} catch (Exception e) {
 							Log.i("MISPRUEBAS","ERROR COGER DATOS de sales");
 							e.printStackTrace();
@@ -3867,12 +3786,32 @@ public class Initialactivity extends FragmentActivity implements
 						.putString(Setup.COMPANY_ADDRESS, address)
 						.putString(Setup.COMPANY_EMAIL, email)
 						.putString(Setup.COMPANY_MESSAGE, invoiceMessage)
+						.putString(Setup.TIP_MESSAGE, tipMessage)
 						.putString(Setup.COMPANY_NIT, nit)
 						.putString(Setup.COMPANY_TEL, tel)
 						.putString(Setup.COMPANY_URL, url)
 						.commit();
 						Log.i("UPDATESALE","CurrentSale sin modificar: "+String.valueOf(prefs.getInt(Setup.CURRENT_SALE, currentSale)));
 			    		Log.i("UPDATESALE","maxSale sin modificar: "+String.valueOf(prefs.getInt(Setup.MAX_SALE, currentSale)));
+			    		Log.i("DATOSINFO","maxSale: "+String.valueOf(maxSale));
+
+						Log.i("DATOSINFO","currentSale: "+String.valueOf(currentSale));
+
+						Log.i("DATOSINFO","prefix: "+prefix);
+
+						Log.i("DATOSINFO","nit: "+nit);
+
+						Log.i("DATOSINFO","tel: "+tel);
+
+						Log.i("DATOSINFO","address: "+address);
+
+						Log.i("DATOSINFO","email: "+email);
+						
+						Log.i("DATOSINFO","url: "+url);
+						
+						Log.i("DATOSINFO","invoiceMessage: "+invoiceMessage);
+						
+						Log.i("DATOSINFO","tipMessage: "+tipMessage);
 					}
 					else{
 						
