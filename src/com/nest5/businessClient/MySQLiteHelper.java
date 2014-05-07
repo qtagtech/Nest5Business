@@ -15,6 +15,7 @@ import android.content.SharedPreferences;
 
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
 
@@ -67,13 +68,11 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 	  catch(Exception e){
 		  
 	  }
-	  
-	  
-    
   }
 
   @Override
   public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+	  
 	  
     Log.w(MySQLiteHelper.class.getName(),
         "Upgrading database from version " + oldVersion + " to "
@@ -89,13 +88,16 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     catch(Exception e){
     	
     }
-  
-	  File base = null;
+    File base = null;
 	  try{
-		  base = new File(mContext.getExternalFilesDir(null) + Environment.getDataDirectory().getPath()+"/databases/","nest5posinit.sql");
+		  
+		   base = new File(Environment.getExternalStoragePublicDirectory("/nest5_files"),"initpos.ne5");
+		  //base = new File(Uri.fromFile(new File(mContext.getExternalFilesDir(null) + Environment.getDataDirectory().getPath()+"/databases/","nest5posinit.sql")).getPath());
+		  //Log.i("PRUEBAS",String.valueOf(Uri.fromFile(new File(mContext.getExternalFilesDir(null) + Environment.getDataDirectory().getPath()+"/databases/","nest5posinit.sql"))));
 		  base.delete();
 	  }
 	  catch (Exception e){}
+	
 
   }
   
@@ -113,8 +115,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 		   InputStream inputStream = null;
 		   
 		   try {
-			   
-			    base = new File(mContext.getExternalFilesDir(null) + Environment.getDataDirectory().getPath()+"/databases/","nest5posinit.sql");
+			   base = new File(Environment.getExternalStoragePublicDirectory("/nest5_files"),"initpos.ne5");
 		         inputStream = new FileInputStream(base);//mContext.getResources().openRawResource(R.raw.mytables_dbnueva);
 		        
 		        InputStreamReader inputreader = new InputStreamReader(inputStream);

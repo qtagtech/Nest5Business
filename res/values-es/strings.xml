@@ -95,5 +95,7 @@
     
     <!-- Company -->
     <string name="withNest5">Con Nest5, obtén:</string>
+    <string name="print_invoice">Factura</string>
+    <string name="print_order">Orden</string>
 
 </resources>

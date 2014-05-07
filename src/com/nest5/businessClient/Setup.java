@@ -50,6 +50,11 @@ public class Setup {
     public static final String COMPANY_URL = "company_url";
     public static final String COMPANY_MESSAGE = "company_message";
     public static final String TIP_MESSAGE = "tip_message";
+    public static final String RESOLUTION_MESSAGE = "resolution_message";
+    public static final String COOKING_ORDERS = "saved_cooking_orders";
+    public static final String COOKING_ORDERS_DELIVERIES = "saved_cooking_orders_deliveries";
+    public static final String COOKING_ORDERS_TOGOS = "saved_cooking_orders_togos";
+    public static final String COOKING_ORDERS_TIMES = "saved_cooking_orders_times";
     
     
     
@@ -158,9 +163,9 @@ public class Setup {
      */
    // public static final String PROD_URL = "http://www.nest5.com";
 
-    //public static final String PROD_URL = "http://192.168.11.101:8092";
-    public static final String PROD_URL = "http://api.nest5.com/";
-    //public static final String PROD_BIGDATA_URL = "http://192.168.11.101:8090/Nest5BusinessData";
+    //public static final String PROD_URL = "http://192.168.1.189:8092";
+    public static final String PROD_URL = "http://api.nest5.com";
+    //public static final String PROD_BIGDATA_URL = "http://192.168.1.189:8090/Nest5BusinessData";
     public static final String PROD_BIGDATA_URL = "http://bigdata.nest5.com";
 
     

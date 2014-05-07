@@ -3,21 +3,31 @@ package com.nest5.businessClient;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gson.annotations.SerializedName;
+
 import android.content.Context;
 
 
 public class Combo {
-	
+	@SerializedName("id")
 	private long id;
+	@SerializedName("name")
 	private String name;
 	//private ProductCategory category;
+	@SerializedName("automaticCost")
 	private int automaticCost;
 	//private PriceStrategy strategy;
+	@SerializedName("cost")
 	private double cost;
+	@SerializedName("price")
 	private double price;
+	@SerializedName("tax")
 	private Tax tax;
+	@SerializedName("products")
 	private List<Product> products;
+	@SerializedName("ingredients")
 	private List<Ingredient> ingredients;
+	@SerializedName("syncId")
 	private long syncId;
 
 	  public long getId() {

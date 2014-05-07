@@ -2,12 +2,19 @@ package com.nest5.businessClient;
 
 import java.util.LinkedHashMap;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Unit {
 	
+	@SerializedName("id")
 	private long id;
+	@SerializedName("name")
 	private String name;
+	@SerializedName("initials")
 	private String initials;
+	@SerializedName("multipliers")
 	private LinkedHashMap<String,Double> multipliers;
+	@SerializedName("syncId")
 	private long syncId;
 
 	  public long getId() {

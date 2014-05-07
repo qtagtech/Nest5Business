@@ -1,10 +1,16 @@
 package com.nest5.businessClient;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Tax {
 	
+	@SerializedName("id")
 	private long id;
+	@SerializedName("name")
 	private String name;
+	@SerializedName("percentage")
 	private double percentage;
+	@SerializedName("syncId")
 	private long syncId;
 	
 

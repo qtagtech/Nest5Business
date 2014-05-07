@@ -87,6 +87,13 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/red_button"
                 android:text="Eliminar" />
+            <Button
+                android:id="@+id/print_again"
+                style="@style/ButtonText"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/red_button"
+                android:text="Imprimir" />
         </LinearLayout>
     </ScrollView>
 

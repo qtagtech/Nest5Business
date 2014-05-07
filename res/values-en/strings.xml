@@ -98,6 +98,8 @@
     
     <!-- Company -->
     <string name="withNest5">With Nest5, get:</string>
+    <string name="print_invoice">Invoice</string>
+    <string name="print_order">Order</string>
     
     
 

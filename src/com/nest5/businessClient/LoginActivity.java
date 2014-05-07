@@ -1,25 +1,20 @@
 package com.nest5.businessClient;
 
 import java.io.File;
-import java.util.List;
-import java.util.prefs.Preferences;
-
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import org.json.JSONObject;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.DownloadManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -33,7 +28,10 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
+import com.parse.Parse;
+import com.parse.ParseAnalytics;
+import com.parse.ParseInstallation;
+import com.parse.PushService;
 
 /**
  * Activity which displays a login screen to the user, offering registration as
@@ -60,6 +58,7 @@ public class LoginActivity extends Activity {
 	private Context mContext;
 	private SharedPreferences prefs;
 	private static String deviceID;
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -99,7 +98,10 @@ public class LoginActivity extends Activity {
 				});
 		mContext = this;
 		 prefs = Util.getSharedPreferences(mContext);
-		 registerReceiver(onSyncDownloadComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+		 Parse.initialize(this, "qM91ypfRryTUwlFnTjDYV4JKacZzulk0LxAnAFML", "ZRiP4gEmwpvWrypr7cRK1G4ZWE1v9fm9EcyMrQqv");
+		 PushService.setDefaultPushCallback(this, Initialactivity.class);
+		 ParseInstallation.getCurrentInstallation().saveInBackground();
+		 
 	}
 	
 	@Override
@@ -115,11 +117,7 @@ public class LoginActivity extends Activity {
 	@Override
 	protected void onPause(){
 		super.onPause();
-		try{
-			unregisterReceiver(onSyncDownloadComplete);
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+		
 		
 	}
 	@Override
@@ -250,6 +248,7 @@ public class LoginActivity extends Activity {
 			JSONObject respuesta = null;
 				Log.i("MISPRUEBAS","LLEGUE");
 			try {
+				Log.i("MISPRUEBAS",msg.obj.toString());
 				respuesta = new JSONObject((String) msg.obj);
 			} catch (Exception e) {
 				Log.i("MISPRUEBAS","ERROR JSON");
@@ -285,6 +284,8 @@ public class LoginActivity extends Activity {
 					//http://localhost:8080/Nest5BusinessData/deviceOps/registerDevice?payload={%22device_id%22:%220A01B18B436A002555AF%22,%22company%22:1}
 					 restService = new RestService(sendDeviceHandler, mContext,
 					 Setup.PROD_BIGDATA_URL+"/deviceOps/registerDevice");
+					 Log.i("DEVICEID", deviceID);
+					 Log.i("DEVICEID", compid);
 					 String jString = "{device_id:"+deviceID+",company:"+compid+"}";
 					 prefs.edit().putBoolean(Setup.LOGGED_IN, true).putString(Setup.COMPANY_ID, compid).putString(Setup.COMPANY_NAME, compname).putString(Setup.DEVICE_REGISTERED_ID, deviceID).commit();
 					 restService.addParam("payload", jString);		 
@@ -349,24 +350,17 @@ public class LoginActivity extends Activity {
 						showProgress(true);
 						prefs.edit().putBoolean(Setup.DEVICE_REGISTERED, true).commit();
 						//before opening the main activity, sync the database
-						String url = Setup.PROD_BIGDATA_URL+"/databaseOps/importDatabase?payload={\"company\":"+prefs.getString(Setup.COMPANY_ID, "0")+"}";
-						DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-						
-						// in order for this if to run, you must use the android 3.2 to compile your app
-						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-						    request.allowScanningByMediaScanner();
-						    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
-						}
-
-
- 
-						request.setDestinationInExternalFilesDir(mContext, Environment.getDataDirectory() + "/databases/", "nest5posinit.sql");
-						request.setVisibleInDownloadsUi(false);
-						// get download service and enqueue file
-						DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-						manager.enqueue(request);
-						//Intent inten = new Intent(mContext, Initialactivity.class);
-						//startActivity(inten);
+						Runnable runnable = new Runnable() {
+					        public void run() {
+					        	try {
+				        			  downloadFile();
+				        		  } catch (Exception e) {}	
+					        	handler.sendEmptyMessage(0);    
+					    }
+				      };
+				      
+				      Thread mythread = new Thread(runnable);
+				      mythread.start();  
 					}
 					else{
 						if(responsecode == 55511){ //registered already
@@ -375,21 +369,20 @@ public class LoginActivity extends Activity {
 							Log.i("MISPRUEBAS",message);
 							prefs.edit().putBoolean(Setup.DEVICE_REGISTERED, true).commit();
 							//before opening the main activity, sync the database
-							String url = Setup.PROD_BIGDATA_URL+"/databaseOps/importDatabase?payload={\"company\":"+prefs.getString(Setup.COMPANY_ID, "0")+"}";
-							DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-							
-							// in order for this if to run, you must use the android 3.2 to compile your app
-							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-							    request.allowScanningByMediaScanner();
-							    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
-							}
-							request.setDestinationInExternalFilesDir(mContext, Environment.getDataDirectory() + "/databases/", "nest5posinit.sql");
-							request.setVisibleInDownloadsUi(false);
-							// get download service and enqueue file
-							DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-							manager.enqueue(request);
-							//Intent inten = new Intent(mContext, Initialactivity.class);
-							//startActivity(inten);
+							//final URL url = new URL(Setup.PROD_BIGDATA_URL+"/databaseOps/importDatabase?payload={\"company\":"+prefs.getString(Setup.COMPANY_ID, "0")+"}");
+							//Log.i("PRUEBAS",url.toString());
+							//DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+							Runnable runnable = new Runnable() {
+						        public void run() {
+						        	try {
+					        			  downloadFile();
+					        		  } catch (Exception e) {}	
+						        	handler.sendEmptyMessage(0);    
+						    }
+					      };
+					      
+					      Thread mythread = new Thread(runnable);
+					      mythread.start();   
 						}
 						else{
 							
@@ -400,15 +393,7 @@ public class LoginActivity extends Activity {
 						
 					}
 					//if registered, it doesn't matter if new are re-register, take minsale, maxsale and current sale for keeping them in the database.
-					/*
-					 * public static final String COMPANY_NIT = "company_message";
-    					public static final String COMPANY_TEL = "company_message";
-    					public static final String COMPANY_ADDRESS = "company_message";
-    					public static final String COMPANY_EMAIL = "company_message";
-    					public static final String COMPANY_URL = "company_message";
-    					public static final String COMPANY_MESSAGE = "company_message";
-    					
-    					*/
+					
 
 					int maxSale = 0;
 					int currentSale = 0;
@@ -420,6 +405,7 @@ public class LoginActivity extends Activity {
 					String url = "";
 					String invoiceMessage = "";
 					String tipMessage = "";
+					String resolution = "";
 					try {
 						maxSale = respuesta.getInt("maxSale");
 						Log.i("DATOSINFO","maxSale: "+String.valueOf(maxSale));
@@ -441,14 +427,19 @@ public class LoginActivity extends Activity {
 						Log.i("DATOSINFO","invoiceMessage: "+invoiceMessage);
 						tipMessage = respuesta.getString("tipMessage");
 						Log.i("DATOSINFO","tipMessage: "+tipMessage);
+						resolution = respuesta.getString("resolution");
+						Log.i("DATOSINFO","Resolution: "+resolution);
 					} catch (Exception e) {
 						Log.i("MISPRUEBAS","ERROR COGER DATOS de sales");
 						e.printStackTrace();
 					}
+					int actualsale = prefs.getInt(Setup.CURRENT_SALE, 0);
+					if(actualsale == 0){
+						prefs.edit().putInt(Setup.CURRENT_SALE, currentSale).commit();
+					}
 					
 					prefs.edit()
 					.putInt(Setup.MAX_SALE, maxSale)
-					.putInt(Setup.CURRENT_SALE, currentSale)
 					.putString(Setup.INVOICE_PREFIX, prefix)
 					.putString(Setup.COMPANY_ADDRESS, address)
 					.putString(Setup.COMPANY_EMAIL, email)
@@ -457,6 +448,7 @@ public class LoginActivity extends Activity {
 					.putString(Setup.COMPANY_TEL, tel)
 					.putString(Setup.COMPANY_URL, url)
 					.putString(Setup.TIP_MESSAGE, tipMessage)
+					.putString(Setup.RESOLUTION_MESSAGE, resolution)
 					.commit();
 				} else {
 					
@@ -476,32 +468,84 @@ public class LoginActivity extends Activity {
 		}
 	};
 	
-	/**
-	 * @param context used to check the device version and DownloadManager information
-	 * @return true if the download manager is available
-	 */
-	public static boolean isDownloadManagerAvailable(Context context) {
-	    try {
-	        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.GINGERBREAD) {
-	            return false;
-	        }
-	        Intent intent = new Intent(Intent.ACTION_MAIN);
-	        intent.addCategory(Intent.CATEGORY_LAUNCHER);
-	        intent.setClassName("com.android.providers.downloads.ui", "com.android.providers.downloads.ui.DownloadList");
-	        List<ResolveInfo> list = context.getPackageManager().queryIntentActivities(intent,
-	                PackageManager.MATCH_DEFAULT_ONLY);
-	        return list.size() > 0;
-	    } catch (Exception e) {
-	        return false;
-	    }
-	}
 	
-	BroadcastReceiver onSyncDownloadComplete=new BroadcastReceiver() {
-	    public void onReceive(Context ctxt, Intent intent) {
-	        // Do Something
-	    	showProgress(false);
-	    	Intent inten = new Intent(mContext, Initialactivity.class);
-			startActivity(inten);
-	    }
-	};
+	
+	
+	
+	public void downloadFile() {
+		try {
+	        //set the download URL, a url that points to a file on the internet
+	        //this is the file to be downloaded
+			prefs = Util.getSharedPreferences(mContext);
+			URL url = new URL(Setup.PROD_BIGDATA_URL+"/databaseOps/importDatabase?payload={\"company\":"+prefs.getString(Setup.COMPANY_ID, "0")+"}"); 
+
+	        //create the new connection
+	        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+
+	        //set up some things on the connection
+	        urlConnection.setRequestMethod("GET");
+	        urlConnection.setDoOutput(true);
+
+	        //and connect!
+	        urlConnection.connect();
+
+	        //set the path where we want to save the file
+	        //in this case, going to save it on the root directory of the
+	        //sd card.
+	        File SDCardFolder = new File (Environment.getExternalStorageDirectory() + "/nest5_files");
+	        if (!SDCardFolder.exists()) {
+	        	SDCardFolder.mkdirs();
+	        }
+	        //create a new file, specifying the path, and the filename
+	        //which we want to save the file as.
+
+	        File file = new File(SDCardFolder,"initpos.ne5");
+
+	        //this will be used to write the downloaded data into the file we created
+	        FileOutputStream fileOutput = new FileOutputStream(file);
+
+	        //this will be used in reading the data from the internet
+	        InputStream inputStream = urlConnection.getInputStream();
+
+	        //this is the total size of the file
+	        int totalSize = urlConnection.getContentLength();
+	        //variable to store total downloaded bytes
+	        int downloadedSize = 0;
+
+	        //create a buffer...
+	        byte[] buffer = new byte[1024];
+	        int bufferLength = 0; //used to store a temporary size of the buffer
+
+	        //now, read through the input buffer and write the contents to the file
+	        while ( (bufferLength = inputStream.read(buffer)) > 0 ) {
+	                //add the data in the buffer to the file in the file output stream (the file on the sd card
+	                fileOutput.write(buffer, 0, bufferLength);
+	                //add up the size so we know how much is downloaded
+	                downloadedSize += bufferLength;
+	                //this is where you would do something to report the prgress, like this maybe
+	                //updateProgress(downloadedSize, totalSize);
+
+	        }
+	        //close the output stream when done
+	        fileOutput.close();
+	        Log.i("PRUEBAS","Acabo el archivo");
+
+	//catch some possible errors...
+	} catch (MalformedURLException e) {
+	        e.printStackTrace();
+	} catch (IOException e) {
+	        e.printStackTrace();
+	}
+        
+  }
+	
+	Handler handler = new Handler() {
+		  @Override
+		  public void handleMessage(Message msg) {
+			  Log.i("PRUEBAS", "LLego de bajar el archivo");
+			  showProgress(false);
+		    	Intent inten = new Intent(mContext, Initialactivity.class);
+				startActivity(inten);
+		     }
+		 };
 }

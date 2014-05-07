@@ -38,7 +38,7 @@ public class PaymentForm extends DialogFragment {
 	
 	
 	public interface OnPayListener {
-        public void OnPayClicked(String method,double value,double discount);
+        public void OnPayClicked(String method,double value,double discount,int tip);
         
     }
 	
@@ -48,6 +48,7 @@ private Button cashBtn;
 private Button cardBtn;
 private EditText discountTxt;
 private Button payBtn;
+private Button tipBtn;
 private Button cancelBtn;
 private EditText valueTxt;
 private Double price;
@@ -108,6 +109,7 @@ public void onAttach(Activity activity){
     discountTxt = (EditText) view.findViewById(R.id.payment_form_discount);
     cashBtn.setBackgroundColor(Color.GRAY);
     cashBtn.setEnabled(false);
+    tipBtn = (Button) view.findViewById(R.id.tip_btn);
     frag = this;
     
     /*valueTxt.setOnFocusChangeListener(new OnFocusChangeListener() {
@@ -159,6 +161,20 @@ public void onAttach(Activity activity){
 			
 		}
 	});
+    tipBtn.setOnClickListener(new OnClickListener() {
+    	
+    	@Override
+    	public void onClick(View v) {
+    		if(tip == 1){
+    			v.setBackgroundDrawable(getResources().getDrawable(R.drawable.blue_button));
+    			tip = 0;
+    		}
+    		else{
+    			v.setBackgroundColor(Color.GRAY);
+    			tip = 1;
+    		}
+    	}
+    });
     cardBtn.setOnClickListener(new OnClickListener() {
 		
 		@Override
@@ -194,11 +210,11 @@ public void onAttach(Activity activity){
 			double discount = 0.0;
 			if(!disc.isEmpty() && disc != null)
 			{
-				val = Double.valueOf(discountTxt.getText().toString());
+				discount = Double.valueOf(discountTxt.getText().toString());
 				
 			}
 			
-			onPayListener.OnPayClicked(method,val,discount);
+			onPayListener.OnPayClicked(method,val,discount,tip);
 			Toast.makeText(mContext, "Cambio: "+String.valueOf(val - price), Toast.LENGTH_LONG).show();
 			frag.dismiss();
 			

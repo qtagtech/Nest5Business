@@ -1,17 +1,30 @@
 package com.nest5.businessClient;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Ingredient {
 	
+	@SerializedName("id")
 	private long id;
+	@SerializedName("name")
 	private String name;
+	@SerializedName("category")
 	private IngredientCategory category;
+	@SerializedName("tax")
 	private Tax tax;
+	@SerializedName("unit")
 	private Unit unit;
+	@SerializedName("qty")
 	private double qty;
+	@SerializedName("costPerUnit")
 	private double costPerUnit;
+	@SerializedName("pricePerUnit")
 	private double pricePerUnit;
+	@SerializedName("priceMeasure")
 	private double priceMeasure;
+	@SerializedName("date")
 	private long date;
+	@SerializedName("syncId")
 	private long syncId;
 
 	  public long getId() {

@@ -5,32 +5,19 @@
           android:title="Agregar"
           android:showAsAction="always"
            />
-    <item android:id="@+id/menu_load_register"
-          android:icon="@drawable/database"
-          android:title="Cargar Ventas Guardadas"
-          android:showAsAction="always"
-           />
     <item android:id="@+id/menu_connect_printer"
           android:icon="@drawable/printer_add"
           android:title="Conectar Impresora"
           android:showAsAction="always"
            />
-    <item android:id="@+id/menu_connect_device"
-          android:icon="@drawable/link"
-          android:title="Conectar Dispositivo de Aviso"
-          android:showAsAction="always"
-           />
+    <item android:id="@+id/print_zreport"
+          android:icon="@drawable/zreport"
+          android:title="Imprimir Cierre de Día"
+          android:showAsAction="always" />
     <item android:id="@+id/menu_sync"
           android:icon="@drawable/large_sync"
           android:title="Sincronización Completa"
           android:showAsAction="always" />
-    <item android:id="@+id/menu_settings"
-          android:icon="@drawable/settings"
-          android:title="Ajustes"
-          android:showAsAction="never" />
-    <item android:id="@+id/menu_user"
-          android:icon="@drawable/dancer"
-          android:title="Usuario"
-          android:showAsAction="never" />
+    
     
 </menu>

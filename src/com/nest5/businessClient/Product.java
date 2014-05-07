@@ -3,19 +3,30 @@ package com.nest5.businessClient;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gson.annotations.SerializedName;
+
 import android.content.Context;
 
 
 public class Product {
 	
+	@SerializedName("id")
 	private long id;
+	@SerializedName("name")
 	private String name;
+	@SerializedName("category")
 	private ProductCategory category;
+	@SerializedName("automaticCost")
 	private int automaticCost;
+	@SerializedName("cost")
 	private double cost;
+	@SerializedName("price")
 	private double price;
+	@SerializedName("tax")
 	private Tax tax;
+	@SerializedName("ingredients")
 	private List<Ingredient> ingredients;
+	@SerializedName("syncId")
 	private long syncId;
 
 	  public long getId() {

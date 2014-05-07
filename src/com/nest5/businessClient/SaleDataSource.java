@@ -49,7 +49,7 @@ public class SaleDataSource {
 	    values.put(Setup.COLUMN_SALE_RECEIVED, received);
 	    values.put(Setup.COLUMN_OWN_SYNC_ID, syncId);
 	    values.put(Setup.COLUMN_SALE_ISDELIVERY, delivery);
-	    values.put(Setup.COLUMN_SALE_ISTOGO, delivery);
+	    values.put(Setup.COLUMN_SALE_ISTOGO, togo);
 	    values.put(Setup.COLUMN_SALE_TIP, tip);
 	    values.put(Setup.COLUMN_SALE_DISCOUNT, discount);
 	    values.put(Setup.COLUMN_SALE_NUMBER, number);

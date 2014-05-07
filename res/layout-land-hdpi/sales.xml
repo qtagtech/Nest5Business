@@ -79,6 +79,14 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/blue_button"
                 android:text="Editar" />
+            
+            <Button
+                android:id="@+id/print_order"
+                style="@style/ButtonText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/blue_button"
+                android:text="Imprimir" />
 
             <Button
                 android:id="@+id/delete_turn"
@@ -87,6 +95,7 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/red_button"
                 android:text="Eliminar" />
+            
         </LinearLayout>
     </ScrollView>
 
