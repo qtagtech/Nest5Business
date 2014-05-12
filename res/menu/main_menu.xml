@@ -18,6 +18,11 @@
           android:icon="@drawable/large_sync"
           android:title="Sincronización Completa"
           android:showAsAction="always" />
+    <item android:id="@+id/printeripport" 
+        android:titleCondensed="Configuración Impresión" 
+        android:title="Configuración Impresión" 
+        android:icon="@drawable/settings" 
+        android:showAsAction="ifRoom"></item>
     
     
 </menu>

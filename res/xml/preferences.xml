@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+        xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+            android:title="Configuración Impresora Serial">
+
+        <EditTextPreference
+                android:key="pref_printerip"
+                android:title="IP Impresora"
+                android:summary="Direcciòn IP configurada de la impresora o el adaptador serial a red"
+                android:dialogTitle="Configurar IP de Impresora de Red" />
+        <EditTextPreference
+                android:key="pref_printerport"
+                android:title="Puerto de Conexión"
+                android:summary="Puerto de Servidor de Impresora"
+                android:dialogTitle="Configurar Puerto de Impresora de Red" 
+                />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

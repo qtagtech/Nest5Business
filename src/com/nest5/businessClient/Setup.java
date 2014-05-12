@@ -167,6 +167,7 @@ public class Setup {
     public static final String PROD_URL = "http://api.nest5.com";
     //public static final String PROD_BIGDATA_URL = "http://192.168.1.189:8090/Nest5BusinessData";
     public static final String PROD_BIGDATA_URL = "http://bigdata.nest5.com";
+   
 
     
 

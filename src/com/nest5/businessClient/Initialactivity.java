@@ -100,6 +100,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
@@ -203,7 +204,35 @@ public class Initialactivity extends FragmentActivity implements
 	public static final int TABLE_TYPE_TODAY = 0;
 
 	public static final int TABLE_TYPE_ALL = 1;
-
+	
+	
+	/***
+	 * 
+	 * 
+	 * PRINTER OPTIONS
+	 * 
+	 * 
+	 * ****/
+	public static final char[] CLEAR_PRINTER = {(char)0x10};
+	public static final char[] FULL_CUT = {(char)0x19};
+	public static final char[] PARTIAL_CUT = {(char)0x1A};
+	public static final char[] INITIALIZE_PRINTER = {(char)0x1B,(char)0x40};
+	public static final char[] PRINT_FEED_ONE_LINE = {(char)0x0A};
+	public static final char[] PRINT_CARRIAGE = {(char)0x0D};
+	public static final char[] ADD_N_DOT_ROWS = {(char)0x16};
+	public static final char[] PRINT_FEED_N_LINES = {(char)0x1B,(char)0x64};
+	public static final char[] FINALIZE_TICKET = {(char)0x15,(char)0xFF};
+	public static final char[] HORIZONTAL_TAB = {(char)0x09};
+	public static final char[] JUSTIFICATION_CENTER = {(char)0x1B,(char)0x61,(char)0x31};
+	public static final char[] JUSTIFICATION_LEFT = {(char)0x1B,(char)0x61,(char)0x30};
+	public static final char[] JUSTIFICATION_RIGHT = {(char)0x1B,(char)0x61,(char)0x32};
+	public static final char[] DOUBLE_WIDE_CHARACTERS = {(char)0x12};
+	public static final char[] SINGLE_WIDE_CHARACTERS = {(char)0x13};
+	public static final char[] UNDERLINE_CANCEL = {(char)0x1B,(char)0x2D,(char)0x30};
+	public static final char[] UNDERLINE_SINGLE = {(char)0x1B,(char)0x2D,(char)0x31};
+	public static final char[] UNDERLINE_DOUBLE = {(char)0x1B,(char)0x2D,(char)0x32};
+	public static final char[] ITALIC_CANCEL = {(char)0x1B,(char)0x49,(char)0x00};
+	public static final char[] ITALIC_STYLE = {(char)0x1B,(char)0x49,(char)0x01};
 	/**
 	 * The current context.
 	 */
@@ -404,6 +433,15 @@ public class Initialactivity extends FragmentActivity implements
     private BluetoothChatService mChatService = null;
     private BluetoothSerialService mSerialService = null;
     private String mConnectedDeviceName = null;
+    
+    /****
+     * 
+     * 
+     * IMPRESION POR TCP / IP
+     * 
+     * ****/
+    
+    private TCPPrint mTCPPrint;
 
 	/**
 	 * @param isWifiP2pEnabled
@@ -639,6 +677,9 @@ public class Initialactivity extends FragmentActivity implements
 		mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		//mReader = new ACR31Reader(mAudioManager);
 		/* Initialize the reset progress dialog */
+		
+		
+		
 		mResetProgressDialog = new ProgressDialog(mContext);
 
 		// ACR31 RESET CALLBACK
@@ -778,6 +819,14 @@ public class Initialactivity extends FragmentActivity implements
 		////Log.i("SYNC", "syncrows en db: "+String.valueOf(syncRows.size()));
 		if(isConnectedToInternet())
 			updateMaxSales();
+		if(deviceText != null){
+			/**
+			 * Print over TCP / IP
+			 * 
+			 * ***/
+			new connectTask().execute("");
+		}
+		
 
 		//Toast.makeText(mContext, String.valueOf(productos.size()) ,Toast.LENGTH_LONG).show();
 	}
@@ -788,6 +837,8 @@ public class Initialactivity extends FragmentActivity implements
 		unregisterReceiver(receiver);
 		unregisterReceiver(onSyncDownloadComplete);
 		mResetProgressDialog.dismiss();
+		if(mTCPPrint != null)
+			mTCPPrint.stopClient();
 		keepCookingOrders();
 		//mReader.stop();
 
@@ -888,6 +939,10 @@ public class Initialactivity extends FragmentActivity implements
 	        }
 	        showScanDialog();
 			return true;
+		case R.id.printeripport:
+			showSettings();
+			return true;
+			
 		/*case R.id.menu_connect_device:
 			if (!isWifiP2pEnabled) {
 				Toast.makeText(Initialactivity.this,
@@ -1018,6 +1073,12 @@ public class Initialactivity extends FragmentActivity implements
 		android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
 		PrintInvoiceForm printOrderDialog = new PrintInvoiceForm();
 		printOrderDialog.show(fm, "fragment_edit_name");
+	}
+	
+	private void showSettings(){
+		Intent intent = new Intent();
+        intent.setClass(mContext, SetPreferenceActivity.class);
+        startActivityForResult(intent, 0); 
 	}
 
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
@@ -1387,6 +1448,19 @@ public class Initialactivity extends FragmentActivity implements
 		// Tomar la tabla de la izquierda del home view
 		table = (TableLayout) v.findViewById(R.id.my_table);
 		makeTable("NA");
+		
+		deviceText.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				if(mTCPPrint != null){
+					mTCPPrint.stopClient();
+				}
+				new connectTask().execute("");
+				
+				
+			}
+		});
 
 	}
 
@@ -2318,6 +2392,9 @@ public class Initialactivity extends FragmentActivity implements
 			float base = 0;
 			float iva = 0;
 			float total = 0;
+			ArrayList<String> productos = new ArrayList<String>();
+			ArrayList<String> quantities = new ArrayList<String>();
+			ArrayList<String> precios = new ArrayList<String>();
 			while (it.hasNext()) {
 
 				LinkedHashMap.Entry<Registrable, Integer> pairs = (LinkedHashMap.Entry<Registrable, Integer>) it
@@ -2338,6 +2415,7 @@ public class Initialactivity extends FragmentActivity implements
 					espacios1 += 14 - name.length();
 				}
 				factura.append(name);
+				productos.add(name);
 				int qtyL = String.valueOf(pairs.getValue()).length();
 				float precioiva = (float)Math.round(pairs.getKey().price + pairs.getKey().price
 						* pairs.getKey().tax );
@@ -2356,9 +2434,11 @@ public class Initialactivity extends FragmentActivity implements
 				for (int k = 0; k < espacios2; k++) {
 					factura.append(" ");
 				}
+				quantities.add(String.valueOf(pairs.getValue()));
 				factura.append("$");
 				factura.append(precioiva);
 				factura.append("\r\n");
+				precios.add("$"+precioiva);
 				lines++;
 			}
 			float propvalue = 0; 
@@ -2407,41 +2487,136 @@ public class Initialactivity extends FragmentActivity implements
 			            
 			        StringBuilder complete = new StringBuilder(String.valueOf(builder1.toString())).append(String.valueOf(builder2.toString()));
 			        String enviar = complete.toString(); 
-			       
-			        Log.d(TAG,"Cadena a enviar: "+enviar);
-			        try{
-			        	if(mChatService.getState() == mChatService.STATE_CONNECTED)
-						{
-							try {
-								mChatService.write(factura.toString().getBytes("x-UnicodeBig"));
-							} catch (UnsupportedEncodingException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
-						else
-						{
-							
-							//Log.i("FACTURA","Factura de Venta No. "+String.valueOf(currentSale));
-							//Log.i("FACTURA","Empresa: "+empresa);
-							//Log.i("FACTURA","Nit: "+nit);
-							//Log.i("FACTURA","Email: "+email);
-							//Log.i("FACTURA","Pagina: "+pagina);
-							//Log.i("FACTURA","Direccion: "+direccion);
-							//Log.i("FACTURA","Telefono: "+telefono);
-							//Log.i("FACTURA","Mensaje: "+mensaje);
-							//Log.i("FACTURA","Propina: "+propina);
-							//Log.i("FACTURA","Resolution: "+resolution);
-							//Log.i("FACTURA","Base: "+base);
-							//Log.i("FACTURA","IVA: "+iva);
-							//Log.i("FACTURA","Total: "+total);
-							//Log.i("FACTURA","PropinaVal: "+propvalue);
-							//Log.i("FACTURA","Precio Final: "+precfinal);
-							Toast.makeText(mContext, "No hay impresora conectada.", Toast.LENGTH_LONG).show();
-						}
-			        }catch(NullPointerException e){
-			        	e.printStackTrace();
-			        }
+					Boolean printed = true;
+					        try{
+					        	if(mChatService.getState() == mChatService.STATE_CONNECTED)
+								{
+									try {
+										mChatService.write(factura.toString().getBytes("x-UnicodeBig"));
+									} catch (UnsupportedEncodingException e) {
+										e.printStackTrace();
+									}
+								}
+								else
+								{
+									printed = false;
+									Toast.makeText(mContext, "No hay impresora bluetooth conectada.", Toast.LENGTH_LONG).show();
+								}
+					        }catch(NullPointerException e){
+					        	printed = false;
+					        	e.printStackTrace();
+					        }
+					        if(!printed){//buscar impresora TCP/IP
+					        	StringBuilder formateado = new StringBuilder();
+								formateado.append(CLEAR_PRINTER);
+								formateado.append(INITIALIZE_PRINTER);
+								formateado.append(JUSTIFICATION_CENTER);
+								formateado.append(DOUBLE_WIDE_CHARACTERS);
+								formateado.append(empresa);
+								formateado.append(SINGLE_WIDE_CHARACTERS);
+								formateado.append(PRINT_FEED_ONE_LINE);
+								formateado.append(nit);
+								formateado.append(PRINT_FEED_ONE_LINE);
+								formateado.append(direccion);
+								formateado.append(PRINT_FEED_ONE_LINE);
+								formateado.append(telefono);
+								formateado.append(PRINT_FEED_ONE_LINE);
+								formateado.append(email);
+								formateado.append(PRINT_FEED_ONE_LINE);
+								formateado.append(pagina);
+								formateado.append(PRINT_FEED_ONE_LINE);
+								formateado.append("Factura de Venta No."+String.valueOf(currentSale));
+								formateado.append(PRINT_FEED_ONE_LINE);
+								formateado.append(resolution);
+								formateado.append(PRINT_FEED_N_LINES);
+								formateado.append((char) 0x03);
+								formateado.append(DOUBLE_WIDE_CHARACTERS);
+								formateado.append(JUSTIFICATION_LEFT);
+								formateado.append("ITEM");
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append("CANT.");
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append("PRECIO");
+								formateado.append(SINGLE_WIDE_CHARACTERS);
+								formateado.append(PRINT_FEED_ONE_LINE);
+								for(String actual : productos){
+									int pos = productos.indexOf(actual);
+									String cantidad = quantities.get(pos);
+									String precio = precios.get(pos);
+									formateado.append(actual);
+									formateado.append(HORIZONTAL_TAB);
+									formateado.append(HORIZONTAL_TAB);
+									formateado.append("x"+cantidad);
+									formateado.append(HORIZONTAL_TAB);
+									formateado.append(HORIZONTAL_TAB);
+									formateado.append(precio);
+									formateado.append(PRINT_FEED_ONE_LINE);
+								}
+								formateado.append(DOUBLE_WIDE_CHARACTERS);
+								formateado.append("______________________");
+								formateado.append(SINGLE_WIDE_CHARACTERS);
+								formateado.append(PRINT_FEED_N_LINES);
+								formateado.append((char) 0x02);
+								formateado.append("BASE:");
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append("$"+base);
+								formateado.append(PRINT_FEED_ONE_LINE);
+								formateado.append("Impuesto:");
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append("$"+iva);
+								formateado.append(PRINT_FEED_ONE_LINE);
+								formateado.append("SUBTOTAL:");
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append("$"+total);
+								formateado.append(PRINT_FEED_ONE_LINE);
+								formateado.append("PROPINA:");
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append("$"+propvalue);
+								formateado.append(PRINT_FEED_ONE_LINE);
+								formateado.append("TOTAL:");
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append("$"+precfinal);
+								formateado.append(PRINT_FEED_ONE_LINE);
+								formateado.append(DOUBLE_WIDE_CHARACTERS);
+								formateado.append("______________________");
+								formateado.append(SINGLE_WIDE_CHARACTERS);
+								formateado.append(PRINT_FEED_N_LINES);
+								formateado.append((char) 0x02);
+								formateado.append(ITALIC_STYLE);
+								formateado.append(propina);
+								formateado.append(PRINT_FEED_N_LINES);
+								formateado.append((char) 0x02);
+								formateado.append(mensaje);
+								formateado.append(ITALIC_CANCEL);
+								formateado.append(FINALIZE_TICKET);
+								formateado.append(FULL_CUT);
+					        	 if (mTCPPrint != null) {
+					        		 if(mTCPPrint.getStatus() == TCPPrint.CONNECTED){
+					        			 mTCPPrint.sendMessage(formateado.toString());
+					        			 mTCPPrint.sendMessage(formateado.toString());
+					        		 }
+					        		 else{
+					        			 mTCPPrint.stopClient();
+					        			 new connectTask().execute(formateado.toString());
+					        			 alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Estamos tratando de reconectarnos e imprimir. Si no funciona, reinicia la Red o la impresora y ve a órdenes para imprimir el pedido.");
+					        		 }   
+					                }else{
+					                	alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Trataremos en este momento de nuevo de imprimir el pedido. Si no funciona, reinicia la red o la impreso y ve a órdenes para imprimir de nuevo la orden.");
+					                	new connectTask().execute(formateado.toString());
+					                }
+					        }
 			        currentOrder.clear(); //NUEVOO
 			        makeTable("NA");
 			        
@@ -2490,11 +2665,10 @@ public class Initialactivity extends FragmentActivity implements
 	
 	@Override
 	public void OnPrintSelect(int Type) {
-		currentOrder = cookingOrders.get(currentSelectedPosition);
+		LinkedHashMap<Registrable, Integer> imprimiendo = cookingOrders.get(currentSelectedPosition);
 			Date date = new Date();
 			String fecha = DateFormat.getDateFormat(Initialactivity.this).format(
 					date);
-			int lines = 0;
 			StringBuilder factura = new StringBuilder();
 			SharedPreferences prefs = Util.getSharedPreferences(mContext);
 			String empresa  = prefs.getString(Setup.COMPANY_NAME, "Nombre de Empresa");
@@ -2508,7 +2682,7 @@ public class Initialactivity extends FragmentActivity implements
 			String resolution  = prefs.getString(Setup.RESOLUTION_MESSAGE, "Resolución de facturación No. 00000-0000 de 1970 DIAN");
 			//int currentSale = prefs.getInt(Setup.CURRENT_SALE, 0);
 			factura.append("COPIA DE ORDEN\r\n");
-			factura.append("NO VÀLIDO COMO FACTURA\r\n");
+			factura.append("NO VÁLIDO COMO FACTURA\r\n");
 			factura.append("--------------------\r\n");
 			factura.append(empresa + "\r\n");
 			factura.append(empresa + "\r\n");
@@ -2518,17 +2692,11 @@ public class Initialactivity extends FragmentActivity implements
 			factura.append(email + "\r\n");
 			factura.append(pagina + "\r\n");
 			factura.append(resolution + "\r\n");
-			lines++;
 			factura.append("\r\n");
 			factura.append(fecha);
-			lines++;
-			lines++;
-			lines++;
 			factura.append("\r\n");
 			factura.append("    Item       Cantidad   Precio\r\n");
-			lines++;
-			int j = 0;
-			Iterator<Entry<Registrable, Integer>> it = currentOrder.entrySet()
+			Iterator<Entry<Registrable, Integer>> it = imprimiendo.entrySet()
 					.iterator();
 			////Log.i("MISPRUEBAS","Valor de currentOrder"+String.valueOf(currentOrder.size()));
 			// Log.d(TAG,String.valueOf(currentOrder.size()));
@@ -2536,6 +2704,9 @@ public class Initialactivity extends FragmentActivity implements
 			float base = 0;
 			float iva = 0;
 			float total = 0;
+			ArrayList<String> productos = new ArrayList<String>();
+			ArrayList<String> quantities = new ArrayList<String>();
+			ArrayList<String> precios = new ArrayList<String>();
 			while (it.hasNext()) {
 
 				LinkedHashMap.Entry<Registrable, Integer> pairs = (LinkedHashMap.Entry<Registrable, Integer>) it
@@ -2556,6 +2727,7 @@ public class Initialactivity extends FragmentActivity implements
 					espacios1 += 14 - name.length();
 				}
 				factura.append(name);
+				productos.add(name);
 				int qtyL = String.valueOf(pairs.getValue()).length();
 				float precioiva = (float)Math.round(pairs.getKey().price + pairs.getKey().price
 						* pairs.getKey().tax );
@@ -2571,17 +2743,15 @@ public class Initialactivity extends FragmentActivity implements
 					factura.append(" ");
 				}
 				factura.append(pairs.getValue());
+				quantities.add(String.valueOf(pairs.getValue()));
 				for (int k = 0; k < espacios2; k++) {
 					factura.append(" ");
 				}
 				factura.append("$");
 				factura.append(precioiva);
 				factura.append("\r\n");
-				lines++;
+				precios.add("$"+precioiva);
 			}
-
-			lines++;
-			lines++;
 			factura.append("\r\n");
 			factura.append("<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>\r\n");
 			factura.append("BASE:      $"+base+"\r\n");
@@ -2590,84 +2760,132 @@ public class Initialactivity extends FragmentActivity implements
 			factura.append("\r\n");
 			factura.append("<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>\r\n");
 			factura.append("\r\n");
-			lines++;
 			factura.append(propina + "\r\n");
 			factura.append(mensaje);
-			String send = factura.toString();
-			////Log.i("MISPRUEBAS",factura.toString());
 
-			// Enviar un string diferente que lleva la orden actual.
-		//	new WiFiSend().execute(comanda.toString());// enviar el mensaje de
-														// verdad
-			
-					int[] arrayOfInt = new int[2];
-					arrayOfInt[0] = 27;
-					arrayOfInt[1] = 64;
-					int[] array2 = new int[3];
-					array2[0] = 27;
-					array2[1] = 74;
-					array2[2] = 2;
-					StringBuilder builder1 = new StringBuilder();
-					for(int h= 0; h<2; h++)
-			        {
-						builder1.append(Character.toChars(arrayOfInt[h]));
-			        }
-					StringBuilder builder2 = new StringBuilder();
-					
-					builder2.append(Character.toChars(10));
-			        
-			        
-			            
-			        StringBuilder complete = new StringBuilder(String.valueOf(builder1.toString())).append(String.valueOf(builder2.toString()));
-			        String enviar = complete.toString(); 
-			       
-			        Log.d(TAG,"Cadena a enviar: "+enviar);
-			        try{
-			        	if(mChatService.getState() == mChatService.STATE_CONNECTED)
-						{
-							try {
-								mChatService.write(factura.toString().getBytes("x-UnicodeBig"));
-							} catch (UnsupportedEncodingException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
-						else
-						{
-							
-		
-							//Log.i("FACTURA","Empresa: "+empresa);
-							//Log.i("FACTURA","Nit: "+nit);
-							//Log.i("FACTURA","Email: "+email);
-							//Log.i("FACTURA","Pagina: "+pagina);
-							//Log.i("FACTURA","Direccion: "+direccion);
-							//Log.i("FACTURA","Telefono: "+telefono);
-							//Log.i("FACTURA","Mensaje: "+mensaje);
-							//Log.i("FACTURA","Propina: "+propina);
-							//Log.i("FACTURA","Resolution: "+resolution);
-							//Log.i("FACTURA","Base: "+base);
-							//Log.i("FACTURA","IVA: "+iva);
-							//Log.i("FACTURA","Total: "+total);
-							
-							Toast.makeText(mContext, "No hay impresora conectada.", Toast.LENGTH_LONG).show();
-						}
-			        }catch(NullPointerException e){
-			        	e.printStackTrace();
-			        	//Log.i("FACTURA","Empresa: "+empresa);
-						//Log.i("FACTURA","Nit: "+nit);
-						//Log.i("FACTURA","Email: "+email);
-						//Log.i("FACTURA","Pagina: "+pagina);
-						//Log.i("FACTURA","Direccion: "+direccion);
-						//Log.i("FACTURA","Telefono: "+telefono);
-						//Log.i("FACTURA","Mensaje: "+mensaje);
-						//Log.i("FACTURA","Propina: "+propina);
-						//Log.i("FACTURA","Resolution: "+resolution);
-						//Log.i("FACTURA","Base: "+base);
-						//Log.i("FACTURA","IVA: "+iva);
-						//Log.i("FACTURA","Total: "+total);
-			        }
-			        currentOrder.clear(); //NUEVOO
-			        makeTable("NA");
+					Boolean printed = true;
+					        try{
+					        	if(mChatService.getState() == mChatService.STATE_CONNECTED)
+								{
+									try {
+										mChatService.write(factura.toString().getBytes("x-UnicodeBig"));
+									} catch (UnsupportedEncodingException e) {
+										e.printStackTrace();
+									}
+								}
+								else
+								{
+									printed = false;
+									Toast.makeText(mContext, "No hay impresora bluetooth conectada.", Toast.LENGTH_LONG).show();
+								}
+					        }catch(NullPointerException e){
+					        	printed = false;
+					        	e.printStackTrace();
+					        }
+					        if(!printed){//buscar impresora TCP/IP
+					        	StringBuilder formateado = new StringBuilder();
+								formateado.append(CLEAR_PRINTER);
+								formateado.append(INITIALIZE_PRINTER);
+								formateado.append(JUSTIFICATION_CENTER);
+								formateado.append(DOUBLE_WIDE_CHARACTERS);
+								formateado.append("CUENTA PEDIDO No."+String.valueOf(currentSelectedPosition + 1));
+								formateado.append(SINGLE_WIDE_CHARACTERS);
+								formateado.append(PRINT_FEED_ONE_LINE);
+								formateado.append("NO VÁLIDO COMO FACTURA DE VENTA");
+								formateado.append(PRINT_FEED_ONE_LINE);
+								formateado.append(PRINT_FEED_N_LINES);
+								formateado.append((char) 0x03);
+								formateado.append(DOUBLE_WIDE_CHARACTERS);
+								formateado.append(JUSTIFICATION_LEFT);
+								formateado.append("ITEM");
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append("CANT.");
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append("PRECIO");
+								formateado.append(SINGLE_WIDE_CHARACTERS);
+								formateado.append(PRINT_FEED_ONE_LINE);
+								for(String actual : productos){
+									int pos = productos.indexOf(actual);
+									String cantidad = quantities.get(pos);
+									String precio = precios.get(pos);
+									formateado.append(actual);
+									formateado.append(HORIZONTAL_TAB);
+									formateado.append(HORIZONTAL_TAB);
+									formateado.append("x"+cantidad);
+									formateado.append(HORIZONTAL_TAB);
+									formateado.append(HORIZONTAL_TAB);
+									formateado.append(precio);
+									formateado.append(PRINT_FEED_ONE_LINE);
+								}
+								formateado.append(DOUBLE_WIDE_CHARACTERS);
+								formateado.append("______________________");
+								formateado.append(SINGLE_WIDE_CHARACTERS);
+								formateado.append(PRINT_FEED_N_LINES);
+								formateado.append((char) 0x02);
+								formateado.append("BASE:");
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append("$"+base);
+								formateado.append(PRINT_FEED_ONE_LINE);
+								formateado.append("Impuesto:");
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append("$"+iva);
+								formateado.append(PRINT_FEED_ONE_LINE);
+								formateado.append("TOTAL:");
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append("$"+total);
+								formateado.append(PRINT_FEED_ONE_LINE);
+								formateado.append(DOUBLE_WIDE_CHARACTERS);
+								formateado.append("______________________");
+								formateado.append(SINGLE_WIDE_CHARACTERS);
+								formateado.append(PRINT_FEED_N_LINES);
+								formateado.append((char) 0x02);
+								formateado.append(ITALIC_STYLE);
+								formateado.append(propina);
+								formateado.append(PRINT_FEED_ONE_LINE);
+								formateado.append("¿DESEA INCLUIRLA?");
+								formateado.append(PRINT_FEED_ONE_LINE);
+								formateado.append("SI: |____|");
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append("NO:|____|");
+								formateado.append(PRINT_FEED_N_LINES);
+								formateado.append((char) 0x02);
+								formateado.append(mensaje);
+								formateado.append(ITALIC_CANCEL);
+								formateado.append(FINALIZE_TICKET);
+								formateado.append(FULL_CUT);
+					        	 if (mTCPPrint != null) {
+					        		 if(mTCPPrint.getStatus() == TCPPrint.CONNECTED){
+					        			 mTCPPrint.sendMessage(formateado.toString());
+					        			 mTCPPrint.sendMessage(formateado.toString());
+					        		 }
+					        		 else{
+					        			 mTCPPrint.stopClient();
+					        			 new connectTask().execute(formateado.toString());
+					        			 alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Estamos tratando de reconectarnos e imprimir. Si no funciona, reinicia la Red o la impresora y ve a órdenes para imprimir el pedido.");
+					        		 }   
+					                }else{
+					                	alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Trataremos en este momento de nuevo de imprimir el pedido. Si no funciona, reinicia la red o la impreso y ve a órdenes para imprimir de nuevo la orden.");
+					                	new connectTask().execute(formateado.toString());
+					                }
+					        }
+			        //currentOrder.clear(); //NUEVOO
+			        //makeTable("NA");
+			        List<Long> items = new ArrayList<Long>();
+					for (LinkedHashMap<Registrable, Integer> current : cookingOrders) {
+						items.add(cookingOrdersTimes.get(current));
+					}
+
+					cookingAdapter = new SaleAdapter(mContext, items, inflater);
+					ordersList.setAdapter(cookingAdapter);
+					ordersList.setOnItemClickListener(orderListListener);
+			        currentSelectedPosition = -1;
 			        
 			
 		
@@ -3998,6 +4216,8 @@ public class Initialactivity extends FragmentActivity implements
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
+						String fecha = DateFormat.getDateFormat(Initialactivity.this).format(
+								new Date());
 						StringBuilder factura = new StringBuilder();
 						//factura.append("MR. PASTOR COMIDA\r\nRÁPIDA MEXICANA" + "\r\n");
 						SharedPreferences prefs = Util.getSharedPreferences(mContext);
@@ -4095,27 +4315,177 @@ public class Initialactivity extends FragmentActivity implements
 						factura.append("\r\n");
 						factura.append("________________________________\r\n");
 						factura.append(padLeft(labelTransacciones+" "+String.valueOf(contEfectivo + contTarjeta), (totalEspacios - (labelTransacciones+" "+String.valueOf(contEfectivo + contTarjeta)).length())));
-						        try{
-						        	if(mChatService.getState() == mChatService.STATE_CONNECTED)
-									{
-										try {
-											mChatService.write(factura.toString().getBytes("x-UnicodeBig"));
-										} catch (UnsupportedEncodingException e) {
-											// TODO Auto-generated catch block
-											e.printStackTrace();
-										}
-									}
-									else
-									{
-										
-										Log.i("MISPRUEBAS",factura.toString());
-										Toast.makeText(mContext, "No hay impresora conectada.", Toast.LENGTH_LONG).show();
-									}
-						        }catch(NullPointerException e){
-						        	Log.i("MISPRUEBAS",factura.toString());
-									Toast.makeText(mContext, "No hay impresora conectada.", Toast.LENGTH_LONG).show();
-						        	e.printStackTrace();
-						        }
+						Boolean printed = true;
+				        try{
+				        	if(mChatService.getState() == mChatService.STATE_CONNECTED)
+							{
+								try {
+									mChatService.write(factura.toString().getBytes("x-UnicodeBig"));
+								} catch (UnsupportedEncodingException e) {
+									e.printStackTrace();
+								}
+							}
+							else
+							{
+								printed = false;
+								Toast.makeText(mContext, "No hay impresora bluetooth conectada.", Toast.LENGTH_LONG).show();
+							}
+				        }catch(NullPointerException e){
+				        	printed = false;
+				        	e.printStackTrace();
+				        }
+				        if(!printed){//buscar impresora TCP/IP
+				        	StringBuilder formateado = new StringBuilder();
+				        	formateado.append(CLEAR_PRINTER);
+							formateado.append(INITIALIZE_PRINTER);
+							formateado.append(JUSTIFICATION_CENTER);
+							formateado.append(DOUBLE_WIDE_CHARACTERS);
+							formateado.append(empresa);
+							formateado.append(SINGLE_WIDE_CHARACTERS);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(nit);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(direccion);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(telefono);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(email);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(pagina);
+							formateado.append(PRINT_FEED_N_LINES);
+							formateado.append((char) 0x03);
+							formateado.append(DOUBLE_WIDE_CHARACTERS);
+							formateado.append("CIERRE DE CAJA Z");
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(fecha);
+							formateado.append(SINGLE_WIDE_CHARACTERS);
+							formateado.append(PRINT_FEED_N_LINES);
+							formateado.append((char) 0x03);
+							formateado.append(SINGLE_WIDE_CHARACTERS);
+							formateado.append(JUSTIFICATION_LEFT);
+							formateado.append(labelVentasBrutas);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_RIGHT);
+							formateado.append("$"+String.valueOf(ventas));
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_LEFT);
+							formateado.append(labelDescuentos);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_RIGHT);
+							formateado.append("$"+String.valueOf(descuentos));
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_LEFT);
+							formateado.append(labelImpuestos);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_RIGHT);
+							formateado.append("$"+String.valueOf(impuestos));
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_LEFT);
+							formateado.append(DOUBLE_WIDE_CHARACTERS);
+							formateado.append("______________________");
+							formateado.append(SINGLE_WIDE_CHARACTERS);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_RIGHT);
+							formateado.append(labelSubtotal+" $"+String.valueOf(ventas - descuentos + impuestos));
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_LEFT);
+							formateado.append(labelPropinas);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_RIGHT);
+							formateado.append("$"+String.valueOf(propinas));
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_LEFT);
+							formateado.append(DOUBLE_WIDE_CHARACTERS);
+							formateado.append("______________________");
+							formateado.append(SINGLE_WIDE_CHARACTERS);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_RIGHT);
+							formateado.append(labelIngresosCaja+" $"+String.valueOf(ventas - descuentos + impuestos + propinas));
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_LEFT);
+							formateado.append(labelDomicilio);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_RIGHT);
+							formateado.append("$"+String.valueOf(domicilios));
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_LEFT);
+							formateado.append(labelLlevar);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_RIGHT);
+							formateado.append("$"+String.valueOf(llevar));
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_LEFT);
+							formateado.append(labelEfectivo);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_RIGHT);
+							formateado.append("$"+String.valueOf(efectivo));
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_LEFT);
+							formateado.append(labelTarjeta);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_RIGHT);
+							formateado.append("$"+String.valueOf(tarjeta));
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_LEFT);
+							formateado.append(DOUBLE_WIDE_CHARACTERS);
+							formateado.append("______________________");
+							formateado.append(SINGLE_WIDE_CHARACTERS);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_RIGHT);
+							formateado.append(labelIngresoReal+" $"+String.valueOf(ventas - descuentos + impuestos + propinas));
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(labelContado+" $"+String.valueOf(ventas - descuentos + impuestos));
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_LEFT);
+							formateado.append(labelDomicilio);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_RIGHT);
+							formateado.append(String.valueOf(contDomicilio));
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_LEFT);
+							formateado.append(labelLlevar);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_RIGHT);
+							formateado.append(String.valueOf(contLlevar));
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_LEFT);
+							formateado.append(labelEfectivo);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_RIGHT);
+							formateado.append(String.valueOf(contEfectivo));
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_LEFT);
+							formateado.append(labelTarjeta);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_RIGHT);
+							formateado.append(String.valueOf(contTarjeta));
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_LEFT);
+							formateado.append(DOUBLE_WIDE_CHARACTERS);
+							formateado.append("______________________");
+							formateado.append(SINGLE_WIDE_CHARACTERS);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_RIGHT);
+							formateado.append(labelTransacciones+" "+String.valueOf(contEfectivo + contTarjeta));
+							formateado.append(FINALIZE_TICKET);
+							formateado.append(FULL_CUT);
+				        	 if (mTCPPrint != null) {
+				        		 if(mTCPPrint.getStatus() == TCPPrint.CONNECTED){
+				        			 mTCPPrint.sendMessage(formateado.toString());
+				        			 mTCPPrint.sendMessage(formateado.toString());
+				        		 }
+				        		 else{
+				        			 mTCPPrint.stopClient();
+				        			 new connectTask().execute(formateado.toString());
+				        			 alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Estamos tratando de reconectarnos e imprimir. Si no funciona, reinicia la Red o la impresora y ve a órdenes para imprimir el pedido.");
+				        		 }   
+				                }else{
+				                	alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Trataremos en este momento de nuevo de imprimir el pedido. Si no funciona, reinicia la red o la impreso y ve a órdenes para imprimir de nuevo la orden.");
+				                	new connectTask().execute(formateado.toString());
+				                }
+				        }
 
 						
 						
@@ -4468,17 +4838,25 @@ public class Initialactivity extends FragmentActivity implements
 
 				int lines = 0;
 				StringBuilder factura = new StringBuilder();
-				//factura.append("MR. PASTOR COMIDA\r\nRÁPIDA MEXICANA" + "\r\n");
-				factura.append("-----COMANDA----COMANDA-----" + "\r\n");
+				String newline ="\r\n";
+				String title =  "-----COMANDA----COMANDA-----" + "\r\n";
+				String tableheader = "    Item              Cantidad\r\n";
+				String notas = "NOTAS\r\n";
+				factura.append(title);
 				lines++;
 				factura.append(fecha);
 				lines++;
 				lines++;
 				lines++;
-				factura.append("\r\n");
-				factura.append("    Item              Cantidad\r\n");
+				factura.append(newline);
+				factura.append(tableheader);
+				
 				lines++;
 				int j = 0;
+				LinkedList<String> productos = new LinkedList<String>();
+				LinkedList<Integer> quantities = new LinkedList<Integer>();
+				LinkedList<Double> precios = new LinkedList<Double>();
+				
 				Iterator<Entry<Registrable, Integer>> it = currentOrder.entrySet()
 						.iterator();
 				// Log.d(TAG,String.valueOf(currentOrder.size()));
@@ -4490,9 +4868,8 @@ public class Initialactivity extends FragmentActivity implements
 							.next();
 
 					currentObjects.put(pairs.getKey(), pairs.getValue());
-					Log.i("MISPRUEBAS",pairs.getKey().toString());
 					String name = pairs.getKey().name;
-
+					productos.add(name);
 					int longName = name.length();
 					int subLength = 14 - longName;
 					if (subLength < 0)
@@ -4504,6 +4881,7 @@ public class Initialactivity extends FragmentActivity implements
 						espacios1 += 14 - name.length();
 					}
 					factura.append(name);
+					
 					int qtyL = String.valueOf(pairs.getValue()).length();
 					espacios1 = espacios1 - qtyL < 1 ? espacios1 = 1 : espacios1 - qtyL;
 					//espacios2 = espacios2 - priceL < 1 ? espacios2 = 1 : espacios2 - priceL;
@@ -4512,18 +4890,15 @@ public class Initialactivity extends FragmentActivity implements
 						factura.append(" ");
 					}
 					factura.append(pairs.getValue());
+					quantities.add(pairs.getValue());
 					for (int k = 0; k < espacios2; k++) {
 						factura.append(" ");
 					}
-					factura.append("\r\n");
-					factura.append("NOTAS\r\n");
-					factura.append(note);
-					// solo en pruebas
-					j++;
-					if (j == 3)
-						j = 0;
+					factura.append(newline);
 					lines++;
 				}
+				factura.append(notas);
+				factura.append(note);
 				long startTime = System.currentTimeMillis();
 				cookingOrders.add(currentObjects);
 				cookingOrdersDelivery.put(currentObjects, isDelivery);
@@ -4543,6 +4918,7 @@ public class Initialactivity extends FragmentActivity implements
 				makeTable("NA");
 				lines++;
 				lines++;
+				Boolean printed = true;
 				        try{
 				        	if(mChatService.getState() == mChatService.STATE_CONNECTED)
 							{
@@ -4554,11 +4930,66 @@ public class Initialactivity extends FragmentActivity implements
 							}
 							else
 							{
+								printed = false;
 								Toast.makeText(mContext, "No hay impresora conectada.", Toast.LENGTH_LONG).show();
 							}
 				        }catch(NullPointerException e){
+				        	printed = false;
 				        	e.printStackTrace();
 				        }
+				        if(!printed){//buscar impresora TCP/IP
+				        	StringBuilder formateado = new StringBuilder();
+							formateado.append(CLEAR_PRINTER);
+							formateado.append(INITIALIZE_PRINTER);
+							formateado.append(JUSTIFICATION_CENTER);
+							formateado.append(DOUBLE_WIDE_CHARACTERS);
+							formateado.append("----COMANDA----");
+							formateado.append(PRINT_FEED_N_LINES);
+							formateado.append((char) 0x03);
+							formateado.append(JUSTIFICATION_LEFT);
+							formateado.append("ITEM");
+							formateado.append(HORIZONTAL_TAB);
+							formateado.append(HORIZONTAL_TAB);
+							formateado.append(HORIZONTAL_TAB);
+							formateado.append("CANTIDAD");
+							formateado.append(HORIZONTAL_TAB);
+							formateado.append(SINGLE_WIDE_CHARACTERS);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							for(String actual : productos){
+								int pos = productos.indexOf(actual);
+								int cantidad = quantities.get(pos);
+								formateado.append(actual);
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append(cantidad);
+								formateado.append(PRINT_FEED_ONE_LINE);
+							}
+							formateado.append(PRINT_FEED_N_LINES);
+							formateado.append((char) 0x02);
+							formateado.append(ITALIC_STYLE);
+							formateado.append(notas);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(note);
+							formateado.append(ITALIC_CANCEL);
+							formateado.append(FINALIZE_TICKET);
+							formateado.append(PARTIAL_CUT);
+				        	 if (mTCPPrint != null) {
+				        		 if(mTCPPrint.getStatus() == TCPPrint.CONNECTED){
+				        			 mTCPPrint.sendMessage(formateado.toString());
+				        			 mTCPPrint.sendMessage(formateado.toString());
+				        		 }
+				        		 else{
+				        			 mTCPPrint.stopClient();
+				        			 new connectTask().execute(formateado.toString());
+				        			 alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Estamos tratando de reconectarnos e imprimir. Si no funciona, reinicia la Red o la impresora y ve a órdenes para imprimir el pedido.");
+				        		 }   
+				                }else{
+				                	alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Trataremos en este momento de nuevo de imprimir el pedido. Si no funciona, reinicia la red o la impreso y ve a órdenes para imprimir de nuevo la orden.");
+				                	new connectTask().execute(formateado.toString());
+				                }
+				        }
+				        
 				        
 				        
 		
@@ -4794,6 +5225,60 @@ public class Initialactivity extends FragmentActivity implements
 		}
 		
 	}
+	
+	/*****
+	 * 
+	 * 
+	 * Print over tcp / ip
+	 * 
+	 * *****/
+	
+	
+	public class connectTask extends AsyncTask<String,String,TCPPrint> {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+		String server = prefs.getString("pref_printerip", "0.0.0.0");
+		int port = Integer.parseInt(prefs.getString("pref_printerport", "4098"));
+        @Override
+        protected TCPPrint doInBackground(String... message) {
+            mTCPPrint = new TCPPrint(new TCPPrint.OnMessageReceived() {
+                @Override
+                public void messageReceived(String message) {
+                    publishProgress(message);
+                }
+            }, mContext,server,port);
+            mTCPPrint.run();
+            return null;
+        }
+ 
+        @Override
+        protected void onProgressUpdate(String... values) {
+            super.onProgressUpdate(values);
+            for(String actual : values){
+            	if(actual.equals(TCPPrint.STATUS_CHANGE)){
+                	//hay un cambio de estado en la conexiòn con la impresora
+                	switch(mTCPPrint.getStatus()){
+                	case TCPPrint.CONNECTED:
+                		deviceText.setText("CONECTADO A IMPRESORA");
+                		break;
+                	case TCPPrint.DISCONNECTED:
+                		deviceText.setText("¡ATENCIÒN! NO HAY IMPRESORA");
+                		break;
+                	case TCPPrint.CONNECTING:
+                		deviceText.setText("CONECTANDO...");
+                		break;
+                	case TCPPrint.SUDDENLY_DISCONNECTED:
+                		deviceText.setText("¡ATENCIÒN! NO HAY IMPRESORA");
+                		alertbox("¡Oops!", "Por alguna razón se ha perdido la conexión con la impresora. Intenta presionando en el texto de conexión y si no funciona reinicia tu router o adaptador.");
+                		if(mTCPPrint != null){
+        					mTCPPrint.stopClient();
+        				}
+        				new connectTask().execute("");
+                		break;
+                	}
+                }
+            }
+        }
+    }
 	
 	
 
