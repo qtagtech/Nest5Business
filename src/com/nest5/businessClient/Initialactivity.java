@@ -2383,7 +2383,6 @@ public class Initialactivity extends FragmentActivity implements
 			factura.append("\r\n");
 			factura.append("    Item       Cantidad   Precio\r\n");
 			lines++;
-			int j = 0;
 			Iterator<Entry<Registrable, Integer>> it = currentOrder.entrySet()
 					.iterator();
 			////Log.i("MISPRUEBAS","Valor de currentOrder"+String.valueOf(currentOrder.size()));
@@ -2444,15 +2443,21 @@ public class Initialactivity extends FragmentActivity implements
 			float propvalue = 0; 
 					if(tipp == 1)
 						propvalue = (float)Math.round(total * 0.1);
+					
+			float descuento = 0;
+			if(discount > 0){
+				descuento = (float) Math.round( base - ( base * ( discount / 0 ) ) );
+			}
 			lines++;
 			lines++;
 			factura.append("\r\n");
 			factura.append("<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>\r\n");
 			factura.append("BASE:      $"+base+"\r\n");
+			factura.append("Descuento ("+discount+"):      $"+descuento+"\r\n");
 			factura.append("Imp.:      $"+iva+"\r\n");
-			factura.append("SUBTOTAL:     $"+total+"\r\n");
+			factura.append("SUBTOTAL:     $"+Math.round(total - descuento)+"\r\n");
 			factura.append("PROPINA:     $"+propvalue+"\r\n");
-			float precfinal = propvalue + total;
+			float precfinal = propvalue + total - descuento;
 			factura.append("TOTAL:     $"+precfinal+"\r\n");
 			factura.append("\r\n");
 			factura.append("<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>\r\n");
@@ -2528,6 +2533,8 @@ public class Initialactivity extends FragmentActivity implements
 								formateado.append("Factura de Venta No."+String.valueOf(currentSale));
 								formateado.append(PRINT_FEED_ONE_LINE);
 								formateado.append(resolution);
+								formateado.append(fecha);
+								formateado.append(PRINT_FEED_ONE_LINE);
 								formateado.append(PRINT_FEED_N_LINES);
 								formateado.append((char) 0x03);
 								formateado.append(DOUBLE_WIDE_CHARACTERS);
@@ -2564,6 +2571,12 @@ public class Initialactivity extends FragmentActivity implements
 								formateado.append(HORIZONTAL_TAB);
 								formateado.append("$"+base);
 								formateado.append(PRINT_FEED_ONE_LINE);
+								formateado.append("DESCUENTO (:"+discount+"%)");
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append(HORIZONTAL_TAB);
+								formateado.append("$"+descuento);
+								formateado.append(PRINT_FEED_ONE_LINE);
 								formateado.append("Impuesto:");
 								formateado.append(HORIZONTAL_TAB);
 								formateado.append(HORIZONTAL_TAB);
@@ -2574,7 +2587,7 @@ public class Initialactivity extends FragmentActivity implements
 								formateado.append(HORIZONTAL_TAB);
 								formateado.append(HORIZONTAL_TAB);
 								formateado.append(HORIZONTAL_TAB);
-								formateado.append("$"+total);
+								formateado.append("$"+Math.round(total - descuento));
 								formateado.append(PRINT_FEED_ONE_LINE);
 								formateado.append("PROPINA:");
 								formateado.append(HORIZONTAL_TAB);
