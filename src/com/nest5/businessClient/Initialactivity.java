@@ -70,6 +70,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
@@ -100,6 +101,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
@@ -433,6 +435,7 @@ public class Initialactivity extends FragmentActivity implements
     private BluetoothChatService mChatService = null;
     private BluetoothSerialService mSerialService = null;
     private String mConnectedDeviceName = null;
+    private Menu mMenu;
     
     /****
      * 
@@ -829,6 +832,10 @@ public class Initialactivity extends FragmentActivity implements
 		
 
 		//Toast.makeText(mContext, String.valueOf(productos.size()) ,Toast.LENGTH_LONG).show();
+		
+		
+		
+		
 	}
 
 	@Override
@@ -901,8 +908,21 @@ public class Initialactivity extends FragmentActivity implements
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
+		mMenu = menu;
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.main_menu, menu);
+			SharedPreferences defaultprefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+			boolean layouttables = defaultprefs.getBoolean("arrange_tables", false);
+			Log.i("MISPRUEBAS", "creando menu...");
+			if(layouttables){
+				MenuItem tables = mMenu.findItem(R.id.layouttables);
+				if(!tables.isVisible()){
+					tables.setVisible(true);
+					invalidateOptionsMenu();
+				}
+				
+			}	
+		
 		return true;
 	}
 
@@ -939,8 +959,11 @@ public class Initialactivity extends FragmentActivity implements
 	        }
 	        showScanDialog();
 			return true;
-		case R.id.printeripport:
+		case R.id.appsettings:
 			showSettings();
+			return true;
+		case R.id.layouttables:
+			showTableLayout();
 			return true;
 			
 		/*case R.id.menu_connect_device:
@@ -1080,6 +1103,13 @@ public class Initialactivity extends FragmentActivity implements
         intent.setClass(mContext, SetPreferenceActivity.class);
         startActivityForResult(intent, 0); 
 	}
+	
+	private void showTableLayout() {
+		Intent intent = new Intent();
+        intent.setClass(mContext, TablesActivity.class);
+        startActivityForResult(intent, 0); 
+	}
+
 
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		IntentResult scanResult = IntentIntegrator.parseActivityResult(
@@ -1089,6 +1119,20 @@ public class Initialactivity extends FragmentActivity implements
 
 		}
 		// else continue with any other code you need in the method
+		
+			SharedPreferences defaultprefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+			boolean layouttables = defaultprefs.getBoolean("arrange_tables", false);
+			MenuItem tablelayouts = mMenu.findItem(R.id.layouttables);
+			boolean change = false;
+			if(tablelayouts.isVisible() != layouttables)
+				change = true;
+			tablelayouts.setVisible(layouttables);
+			if(change){
+				invalidateOptionsMenu();
+			}
+			
+			
+		
 	}
 
 	/**
@@ -5292,6 +5336,8 @@ public class Initialactivity extends FragmentActivity implements
             }
         }
     }
+
+	
 	
 	
 

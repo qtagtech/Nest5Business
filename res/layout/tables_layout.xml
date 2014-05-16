@@ -1,5 +1,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/table_layout_home"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -7,25 +8,38 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".MainActivity" >
+    tools:context=".Initialactivity" >
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="http://android-er.blogspot.com/"
-        android:textStyle="bold"
-        android:layout_gravity="center_horizontal"
-        android:autoLink="web" />
+   <LinearLayout 
+       android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:gravity="center_vertical|center_horizontal"
+       >
+       <Button 
+				        android:id="@+id/openpopup"
+				        android:layout_width="0dip"
+				        android:layout_weight="0.3"
+				        android:layout_gravity="center_horizontal|center_vertical"
+				        android:background="@drawable/blue_button" 
+			        	style="@style/ButtonText"				       
+				        android:text="Agregar Mesa"/>
+				    <Button 
+				        android:id="@+id/payment_option_card"
+				        android:layout_width="0dip"
+				        android:layout_weight="0.3"
+				        android:layout_gravity="center_horizontal|center_vertical"
+				        android:background="@drawable/green_button" 
+			        	style="@style/ButtonText"				       
+				        android:text="Salir y Guardar"/>
+   </LinearLayout>
 
-    <Button
-        android:id="@+id/openpopup"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="Open Popup Window" />
     
-    <ImageView 
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:src="@drawable/ic_launcher" />
+    
+   
 
 </LinearLayout>

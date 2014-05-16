@@ -18,7 +18,13 @@
           android:icon="@drawable/large_sync"
           android:title="Sincronización Completa"
           android:showAsAction="always" />
-    <item android:id="@+id/printeripport" 
+    <item android:id="@+id/layouttables" 
+        android:titleCondensed="Mesas" 
+        android:title="Distribución de Mesas" 
+        android:icon="@drawable/icon_tables" 
+        android:showAsAction="ifRoom"
+        android:visible="false"></item>
+    <item android:id="@+id/appsettings" 
         android:titleCondensed="Configuración Impresión" 
         android:title="Configuración Impresión" 
         android:icon="@drawable/settings" 
