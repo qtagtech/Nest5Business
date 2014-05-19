@@ -55,6 +55,8 @@ public class Setup {
     public static final String COOKING_ORDERS_DELIVERIES = "saved_cooking_orders_deliveries";
     public static final String COOKING_ORDERS_TOGOS = "saved_cooking_orders_togos";
     public static final String COOKING_ORDERS_TIMES = "saved_cooking_orders_times";
+    public static final String HAS_CONFIGURED_TABLES = "has_configured_tables";
+    public static final String SAVED_TABLES = "saved_tables";
     
     
     
@@ -179,7 +181,7 @@ public class Setup {
     
     public static final String apiKey = "zAxEE9U1691Nq0h5JiJ0X20tcayF5RTpmzIOctVGNQNBByHslznDR0VP7rWOuyW";
     
-    //Íconos
+    //iconos
     public static final int ICON_WIN_STAR = 99;
     public static final int ICON_FACE_WIN = 0;
     public static final int ICON_FACE_ONE = 1;

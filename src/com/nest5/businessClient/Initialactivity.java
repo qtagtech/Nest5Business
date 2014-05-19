@@ -207,6 +207,8 @@ public class Initialactivity extends FragmentActivity implements
 
 	public static final int TABLE_TYPE_ALL = 1;
 	
+	private static final int RETURN_FROM_DESIGN_TABLE = 2;
+	
 	
 	/***
 	 * 
@@ -1107,7 +1109,7 @@ public class Initialactivity extends FragmentActivity implements
 	private void showTableLayout() {
 		Intent intent = new Intent();
         intent.setClass(mContext, TablesActivity.class);
-        startActivityForResult(intent, 0); 
+        startActivityForResult(intent, RETURN_FROM_DESIGN_TABLE); 
 	}
 
 
@@ -1118,6 +1120,30 @@ public class Initialactivity extends FragmentActivity implements
 		if (scanResult != null) {
 
 		}
+		
+		if (requestCode == RETURN_FROM_DESIGN_TABLE) {
+			String result = null;
+			Log.i("MISPRUEBAS","volviendo de hacer mesas");
+	        if(resultCode == RESULT_OK){
+	        	Log.i("MISPRUEBAS","result_OK");
+	            result = intent.getStringExtra(Setup.SAVED_TABLES);
+	        }
+	        if (resultCode == RESULT_CANCELED) {
+	            //Write your code if there's no result
+	        }
+			if(result != null){
+				Log.i("MISPRUEBAS",result);
+				//load tables view and allow to make order for it
+				Intent intento = new Intent();
+		        intento.setClass(mContext, TablesOrderActivity.class);
+		        startActivityForResult(intento, 0); 
+			}
+			else{
+				Log.i("MISPRUEBAS","resultado nulo");
+			}
+	    }
+		
+		
 		// else continue with any other code you need in the method
 		
 			SharedPreferences defaultprefs = PreferenceManager.getDefaultSharedPreferences(mContext);
@@ -2398,17 +2424,17 @@ public class Initialactivity extends FragmentActivity implements
 
 			int lines = 0;
 			StringBuilder factura = new StringBuilder();
-			//factura.append("MR. PASTOR COMIDA\r\nRÁPIDA MEXICANA" + "\r\n");
+			//factura.append("MR. PASTOR COMIDA\r\nRaPIDA MEXICANA" + "\r\n");
 			SharedPreferences prefs = Util.getSharedPreferences(mContext);
 			String empresa  = prefs.getString(Setup.COMPANY_NAME, "Nombre de Empresa");
 			String nit  = prefs.getString(Setup.COMPANY_NIT, "000000000-0");
 			String email  = prefs.getString(Setup.COMPANY_EMAIL, "email@empresa.com");
 			String pagina  = prefs.getString(Setup.COMPANY_URL, "http://www.empresa.com");
-			String direccion  = prefs.getString(Setup.COMPANY_ADDRESS, "Dirección Física Empresa");
+			String direccion  = prefs.getString(Setup.COMPANY_ADDRESS, "Direcci�n Física Empresa");
 			String telefono  = prefs.getString(Setup.COMPANY_TEL, "555-55-55");
-			String mensaje  = prefs.getString(Setup.COMPANY_MESSAGE, "No hay ningún mensaje configurado aún. En el mensaje es recomendable mencionar tus redes sociales, benficios y promociones que tengas, además de información de interés paratus clientes. ");
+			String mensaje  = prefs.getString(Setup.COMPANY_MESSAGE, "No hay ningún mensaje configurado aún. En el mensaje es recomendable mencionar tus redes sociales, benficios y promociones que tengas, además de informaci�n de interés paratus clientes. ");
 			String propina  = prefs.getString(Setup.TIP_MESSAGE, "No hay ningún mensaje de propina configurado aún. ");
-			String resolution  = prefs.getString(Setup.RESOLUTION_MESSAGE, "Resolución de facturación No. 00000-0000 de 1970 DIAN");
+			String resolution  = prefs.getString(Setup.RESOLUTION_MESSAGE, "Resoluci�n de facturaci�n No. 00000-0000 de 1970 DIAN");
 			int currentSale = prefs.getInt(Setup.CURRENT_SALE, 0);
 			factura.append(empresa + "\r\n");
 			factura.append(nit + "\r\n");
@@ -2667,10 +2693,10 @@ public class Initialactivity extends FragmentActivity implements
 					        		 else{
 					        			 mTCPPrint.stopClient();
 					        			 new connectTask().execute(formateado.toString());
-					        			 alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Estamos tratando de reconectarnos e imprimir. Si no funciona, reinicia la Red o la impresora y ve a órdenes para imprimir el pedido.");
+					        			 alertbox("�Oops!", "Al Parecer no hay impresora disponible. Estamos tratando de reconectarnos e imprimir. Si no funciona, reinicia la Red o la impresora y ve a �rdenes para imprimir el pedido.");
 					        		 }   
 					                }else{
-					                	alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Trataremos en este momento de nuevo de imprimir el pedido. Si no funciona, reinicia la red o la impreso y ve a órdenes para imprimir de nuevo la orden.");
+					                	alertbox("�Oops!", "Al Parecer no hay impresora disponible. Trataremos en este momento de nuevo de imprimir el pedido. Si no funciona, reinicia la red o la impreso y ve a �rdenes para imprimir de nuevo la orden.");
 					                	new connectTask().execute(formateado.toString());
 					                }
 					        }
@@ -2680,7 +2706,7 @@ public class Initialactivity extends FragmentActivity implements
 			
 		}
 		else{
-			alertbox("!ATENCIÓN!", "Esta venta no se puede facturar. Este dispositivo no tiene más facturas autorizadas. Consulta el administrador, o si tu lo eres, ve a tu panel de control Nest5 y autoriza más facturas. Para más información: http://soporte.nest5.com");
+			alertbox("!ATENCIÓN!", "Esta venta no se puede facturar. Este dispositivo no tiene más facturas autorizadas. Consulta el administrador, o si tu lo eres, ve a tu panel de control Nest5 y autoriza más facturas. Para más informaci�n: http://soporte.nest5.com");
 		}
 	}
 
@@ -2732,14 +2758,14 @@ public class Initialactivity extends FragmentActivity implements
 			String nit  = prefs.getString(Setup.COMPANY_NIT, "000000000-0");
 			String email  = prefs.getString(Setup.COMPANY_EMAIL, "email@empresa.com");
 			String pagina  = prefs.getString(Setup.COMPANY_URL, "http://www.empresa.com");
-			String direccion  = prefs.getString(Setup.COMPANY_ADDRESS, "Dirección Física Empresa");
+			String direccion  = prefs.getString(Setup.COMPANY_ADDRESS, "Direcci�n Física Empresa");
 			String telefono  = prefs.getString(Setup.COMPANY_TEL, "555-55-55");
-			String mensaje  = prefs.getString(Setup.COMPANY_MESSAGE, "No hay ningún mensaje configurado aún. En el mensaje es recomendable mencionar tus redes sociales, benficios y promociones que tengas, además de información de interés paratus clientes. ");
+			String mensaje  = prefs.getString(Setup.COMPANY_MESSAGE, "No hay ningún mensaje configurado aún. En el mensaje es recomendable mencionar tus redes sociales, benficios y promociones que tengas, además de informaci�n de interés paratus clientes. ");
 			String propina  = prefs.getString(Setup.TIP_MESSAGE, "No hay ningún mensaje de propina configurado aún. ");
-			String resolution  = prefs.getString(Setup.RESOLUTION_MESSAGE, "Resolución de facturación No. 00000-0000 de 1970 DIAN");
+			String resolution  = prefs.getString(Setup.RESOLUTION_MESSAGE, "Resoluci�n de facturaci�n No. 00000-0000 de 1970 DIAN");
 			//int currentSale = prefs.getInt(Setup.CURRENT_SALE, 0);
 			factura.append("COPIA DE ORDEN\r\n");
-			factura.append("NO VÁLIDO COMO FACTURA\r\n");
+			factura.append("NO V�LIDO COMO FACTURA\r\n");
 			factura.append("--------------------\r\n");
 			factura.append(empresa + "\r\n");
 			factura.append(empresa + "\r\n");
@@ -2848,7 +2874,7 @@ public class Initialactivity extends FragmentActivity implements
 								formateado.append("CUENTA PEDIDO No."+String.valueOf(currentSelectedPosition + 1));
 								formateado.append(SINGLE_WIDE_CHARACTERS);
 								formateado.append(PRINT_FEED_ONE_LINE);
-								formateado.append("NO VÁLIDO COMO FACTURA DE VENTA");
+								formateado.append("NO V�LIDO COMO FACTURA DE VENTA");
 								formateado.append(PRINT_FEED_ONE_LINE);
 								formateado.append(PRINT_FEED_N_LINES);
 								formateado.append((char) 0x03);
@@ -2925,10 +2951,10 @@ public class Initialactivity extends FragmentActivity implements
 					        		 else{
 					        			 mTCPPrint.stopClient();
 					        			 new connectTask().execute(formateado.toString());
-					        			 alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Estamos tratando de reconectarnos e imprimir. Si no funciona, reinicia la Red o la impresora y ve a órdenes para imprimir el pedido.");
+					        			 alertbox("�Oops!", "Al Parecer no hay impresora disponible. Estamos tratando de reconectarnos e imprimir. Si no funciona, reinicia la Red o la impresora y ve a �rdenes para imprimir el pedido.");
 					        		 }   
 					                }else{
-					                	alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Trataremos en este momento de nuevo de imprimir el pedido. Si no funciona, reinicia la red o la impreso y ve a órdenes para imprimir de nuevo la orden.");
+					                	alertbox("�Oops!", "Al Parecer no hay impresora disponible. Trataremos en este momento de nuevo de imprimir el pedido. Si no funciona, reinicia la red o la impreso y ve a �rdenes para imprimir de nuevo la orden.");
 					                	new connectTask().execute(formateado.toString());
 					                }
 					        }
@@ -2953,7 +2979,7 @@ public class Initialactivity extends FragmentActivity implements
 		SharedPreferences prefs = Util.getSharedPreferences(mContext);
 		mResetProgressDialog = new ProgressDialog(mContext);
 		mResetProgressDialog
-				.setMessage("Recibiendo Información Actualizada...");
+				.setMessage("Recibiendo Informaci�n Actualizada...");
 		mResetProgressDialog.setCancelable(false);
 		mResetProgressDialog.setIndeterminate(true);
 		mResetProgressDialog.show();
@@ -3091,7 +3117,7 @@ public class Initialactivity extends FragmentActivity implements
 			@Override
 			public void onFailure(int reason) {
 				Toast.makeText(Initialactivity.this,
-						"La conexión falló. Reinténtalo de nuevo.",
+						"La conexi�n fall�. Reinténtalo de nuevo.",
 						Toast.LENGTH_SHORT).show();
 			}
 		});
@@ -3104,7 +3130,7 @@ public class Initialactivity extends FragmentActivity implements
 
 			@Override
 			public void onFailure(int reasonCode) {
-				Log.d(TAG, "La desconexiÃ³n fallÃ³, la razón es:" + reasonCode);
+				Log.d(TAG, "La desconexiÃ³n fallÃ³, la raz�n es:" + reasonCode);
 
 			}
 
@@ -3152,7 +3178,7 @@ public class Initialactivity extends FragmentActivity implements
 		if (manager != null && !retryChannel) {
 			Toast.makeText(
 					this,
-					"Se perdió la conexión con el canal, inténtalo de nuevo.",
+					"Se perdi� la conexi�n con el canal, inténtalo de nuevo.",
 					Toast.LENGTH_LONG).show();
 			// resetData();
 			retryChannel = true;
@@ -3160,7 +3186,7 @@ public class Initialactivity extends FragmentActivity implements
 		} else {
 			Toast.makeText(
 					this,
-					"¡Error grave!. Se perdió por completo la conexión con dispositivos. Reintenta Desactivando/Activando WifiDirect otra vez.",
+					"�Error grave!. Se perdi� por completo la conexi�n con dispositivos. Reintenta Desactivando/Activando WifiDirect otra vez.",
 					Toast.LENGTH_LONG).show();
 		}
 	}
@@ -3373,7 +3399,7 @@ public class Initialactivity extends FragmentActivity implements
 		if (currentVolume < maxVolume) {
 
 			showMessageDialog(
-					"Atención",
+					"Atenci�n",
 					"Para leer una tarjeta Nest5 debes subir el volumen de tu dispositivo al máximo.");
 			ret = false;
 		}
@@ -3436,11 +3462,11 @@ public class Initialactivity extends FragmentActivity implements
 			if(isConnectedToInternet()){
 				sendAllSyncRows();
 				//alerta
-				alertbox("¡Oops!", "Parece que hay registros de ventas o inventario sin guardar. Intentaremos sincronizar de nuevo y luego por favor presiona el botón otra vez.");
+				alertbox("�Oops!", "Parece que hay registros de ventas o inventario sin guardar. Intentaremos sincronizar de nuevo y luego por favor presiona el bot�n otra vez.");
 			}
 			else{//avisa que no hay internet, si el problema persiste entrar a soporte.nest5.com
 				//alerta
-				alertbox("¡Oops!", "Para esta operación debes estar conectado a Internet. Conéctate y vuelve a presionar el botón.");
+				alertbox("�Oops!", "Para esta operaci�n debes estar conectado a Internet. Conéctate y vuelve a presionar el bot�n.");
 			}
 		}
 		else{
@@ -3454,7 +3480,7 @@ public class Initialactivity extends FragmentActivity implements
 				saveFileRecord();
 			}
 			else{
-				alertbox("¡Oops!", "Para esta operación debes estar conectado a Internet. Conéctate y vuelve a presionar el botón.");
+				alertbox("�Oops!", "Para esta operaci�n debes estar conectado a Internet. Conéctate y vuelve a presionar el bot�n.");
 			}
 			
 		}
@@ -3471,7 +3497,7 @@ public class Initialactivity extends FragmentActivity implements
 	private void saveFileRecord() {
 		if(isConnectedToInternet()){
 			mResetProgressDialog
-			.setMessage("Actualizando información. Esto puede tardar unos minutos.");
+			.setMessage("Actualizando informaci�n. Esto puede tardar unos minutos.");
 			mResetProgressDialog.setCancelable(false);
 			mResetProgressDialog.setIndeterminate(true);
 			mResetProgressDialog.show();
@@ -3490,7 +3516,7 @@ public class Initialactivity extends FragmentActivity implements
 		  mythread.start();  
 		}
 		else{
-			alertbox("¡Oops!", "Para esta operación debes estar conectado a Internet. Conéctate y vuelve a presionar el botón.");
+			alertbox("�Oops!", "Para esta operaci�n debes estar conectado a Internet. Conéctate y vuelve a presionar el bot�n.");
 		}
 		 
 		
@@ -3638,7 +3664,7 @@ public class Initialactivity extends FragmentActivity implements
 			Promo[] promos = null;
 			User user = null;
 			JSONObject respuesta = null;
-			String mensaje = "Error de Comunicación con Nest5, inténtalo de nuevo por favor.";
+			String mensaje = "Error de Comunicaci�n con Nest5, inténtalo de nuevo por favor.";
 			int status = 0;
 			try {
 				respuesta = new JSONObject((String) msg.obj);
@@ -3751,7 +3777,7 @@ public class Initialactivity extends FragmentActivity implements
 			Promo[] promos = null;
 			User user = null;
 			JSONObject respuesta = null;
-			String mensaje = "Error de Comunicación con Nest5, inténtalo de nuevo por favor.";
+			String mensaje = "Error de Comunicaci�n con Nest5, inténtalo de nuevo por favor.";
 			int status = 0;
 			try {
 				respuesta = new JSONObject((String) msg.obj);
@@ -3862,7 +3888,7 @@ public class Initialactivity extends FragmentActivity implements
 		public void handleMessage(Message msg) {
 			mResetProgressDialog.dismiss();
 			JSONObject respuesta = null;
-			String mensaje = "Error de Comunicación con Nest5, inténtalo de nuevo por favor.";
+			String mensaje = "Error de Comunicaci�n con Nest5, inténtalo de nuevo por favor.";
 			int status = 0;
 			int sellos = 0;
 			int coupones = 0;
@@ -3918,7 +3944,7 @@ public class Initialactivity extends FragmentActivity implements
 		public void handleMessage(Message msg) {
 			mResetProgressDialog.dismiss();
 			JSONObject respuesta = null;
-			String mensaje = "Error de Comunicación con Nest5, inténtalo de nuevo por favor.";
+			String mensaje = "Error de Comunicaci�n con Nest5, inténtalo de nuevo por favor.";
 			int status = 0;
 
 			try {
@@ -3942,7 +3968,7 @@ public class Initialactivity extends FragmentActivity implements
 					showMessageDialog(
 							"Beneficio redimido con Éxito",
 							currentUser.name
-									+ " ha redimido un beneficio y ahora enamóralo entregándoselo.");
+									+ " ha redimido un beneficio y ahora enam�ralo entregándoselo.");
 
 				} else {
 					//Log.i("MISPRUEBAS", "ERROR 3");
@@ -3967,7 +3993,7 @@ public class Initialactivity extends FragmentActivity implements
 			//mResetProgressDialog.dismiss();
 			JSONObject respuesta = null;
 				//Log.i("MISPRUEBAS","LLEGUE DE subir fila");
-				totalSync--;//no importa lo que pase, cada que trata de subir una fila dice que lo hizo, solo borra la syncrow de la base de ddatos si se guarda nuevo documento o se actualiza, de resto queda ahi, para un próximo intento
+				totalSync--;//no importa lo que pase, cada que trata de subir una fila dice que lo hizo, solo borra la syncrow de la base de ddatos si se guarda nuevo documento o se actualiza, de resto queda ahi, para un pr�ximo intento
 			try {
 				respuesta = new JSONObject((String) msg.obj);
 			} catch (Exception e) {
@@ -4026,14 +4052,14 @@ public class Initialactivity extends FragmentActivity implements
 							}
 						}
 					}
-					else{//se presentó un error desconocido
+					else{//se present� un error desconocido
 						Log.w("MISPRUEBAS","ERROR desconocido al subir syncRow");
 					}
 					
 					
 					
 				} else {
-					if(status == 200){ //se actualizó una fila, 
+					if(status == 200){ //se actualiz� una fila, 
 						//ok! status received, but still we have to check for code 555 that says everything done in Nest5 as expected.
 						if(responsecode == 555 ){
 							try {
@@ -4059,8 +4085,8 @@ public class Initialactivity extends FragmentActivity implements
 					}
 					else{
 						if(status == 406){//se hizo overlap con otra fila enviada desde otro dispositivo
-							if(responsecode == 55513){ //confirmar que el http 406 si haya sido enviado porque el error era de overlap, el código 13 dice que si
-								//se debe pedir que manden una actualización de la fila, para tomar el valor que puso otro dispositivo que no permitió que este se guardara por obverlap
+							if(responsecode == 55513){ //confirmar que el http 406 si haya sido enviado porque el error era de overlap, el c�digo 13 dice que si
+								//se debe pedir que manden una actualizaci�n de la fila, para tomar el valor que puso otro dispositivo que no permiti� que este se guardara por obverlap
 								try {
 									sync_row = respuesta.getLong("syncRow");
 
@@ -4276,13 +4302,13 @@ public class Initialactivity extends FragmentActivity implements
 						String fecha = DateFormat.getDateFormat(Initialactivity.this).format(
 								new Date());
 						StringBuilder factura = new StringBuilder();
-						//factura.append("MR. PASTOR COMIDA\r\nRÁPIDA MEXICANA" + "\r\n");
+						//factura.append("MR. PASTOR COMIDA\r\nRaPIDA MEXICANA" + "\r\n");
 						SharedPreferences prefs = Util.getSharedPreferences(mContext);
 						String empresa  = prefs.getString(Setup.COMPANY_NAME, "Nombre de Empresa");
 						String nit  = prefs.getString(Setup.COMPANY_NIT, "000000000-0");
 						String email  = prefs.getString(Setup.COMPANY_EMAIL, "email@empresa.com");
 						String pagina  = prefs.getString(Setup.COMPANY_URL, "http://www.empresa.com");
-						String direccion  = prefs.getString(Setup.COMPANY_ADDRESS, "Dirección Física Empresa");
+						String direccion  = prefs.getString(Setup.COMPANY_ADDRESS, "Direcci�n Física Empresa");
 						String telefono  = prefs.getString(Setup.COMPANY_TEL, "555-55-55");
 						factura.append(empresa + "\r\n");
 						factura.append(nit + "\r\n");
@@ -4536,10 +4562,10 @@ public class Initialactivity extends FragmentActivity implements
 				        		 else{
 				        			 mTCPPrint.stopClient();
 				        			 new connectTask().execute(formateado.toString());
-				        			 alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Estamos tratando de reconectarnos e imprimir. Si no funciona, reinicia la Red o la impresora y ve a órdenes para imprimir el pedido.");
+				        			 alertbox("�Oops!", "Al Parecer no hay impresora disponible. Estamos tratando de reconectarnos e imprimir. Si no funciona, reinicia la Red o la impresora y ve a �rdenes para imprimir el pedido.");
 				        		 }   
 				                }else{
-				                	alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Trataremos en este momento de nuevo de imprimir el pedido. Si no funciona, reinicia la red o la impreso y ve a órdenes para imprimir de nuevo la orden.");
+				                	alertbox("�Oops!", "Al Parecer no hay impresora disponible. Trataremos en este momento de nuevo de imprimir el pedido. Si no funciona, reinicia la red o la impreso y ve a �rdenes para imprimir de nuevo la orden.");
 				                	new connectTask().execute(formateado.toString());
 				                }
 				        }
@@ -4835,7 +4861,7 @@ public class Initialactivity extends FragmentActivity implements
     		prefs.edit().putInt(Setup.CURRENT_SALE, currentSale + 1).commit();
     	}
     	else{
-    		return -1; //no se puede crear venta, no hay números de facturación disponibles. 
+    		return -1; //no se puede crear venta, no hay números de facturaci�n disponibles. 
     	}
     	
     	return currentSale + 1;
@@ -5039,10 +5065,10 @@ public class Initialactivity extends FragmentActivity implements
 				        		 else{
 				        			 mTCPPrint.stopClient();
 				        			 new connectTask().execute(formateado.toString());
-				        			 alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Estamos tratando de reconectarnos e imprimir. Si no funciona, reinicia la Red o la impresora y ve a órdenes para imprimir el pedido.");
+				        			 alertbox("�Oops!", "Al Parecer no hay impresora disponible. Estamos tratando de reconectarnos e imprimir. Si no funciona, reinicia la Red o la impresora y ve a �rdenes para imprimir el pedido.");
 				        		 }   
 				                }else{
-				                	alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Trataremos en este momento de nuevo de imprimir el pedido. Si no funciona, reinicia la red o la impreso y ve a órdenes para imprimir de nuevo la orden.");
+				                	alertbox("�Oops!", "Al Parecer no hay impresora disponible. Trataremos en este momento de nuevo de imprimir el pedido. Si no funciona, reinicia la red o la impreso y ve a �rdenes para imprimir de nuevo la orden.");
 				                	new connectTask().execute(formateado.toString());
 				                }
 				        }
@@ -5054,7 +5080,7 @@ public class Initialactivity extends FragmentActivity implements
 	
 	private void saveSale(String method,Double value,Double discount,int delivery,int togo, int tip){
 		int number = checkSaleNumber(); 
-		int nextsale = addSale(); //se aumenta el valor de facturación, //si falla se resta un numero de las ventas actuales mas adelante,.
+		int nextsale = addSale(); //se aumenta el valor de facturaci�n, //si falla se resta un numero de las ventas actuales mas adelante,.
 		Sale createdSale = null;
 		long saveDate = System.currentTimeMillis();
 		LinkedHashMap<Registrable,Integer> currentSale = currentOrder;
@@ -5071,7 +5097,7 @@ public class Initialactivity extends FragmentActivity implements
 			
 		}
 		else{
-			alertbox("!ATENCIÓN!", "Esta venta no se puede facturar. Este dispositivo no tiene más facturas autorizadas. Consulta el administrador, o si tu lo eres, ve a tu panel de control Nest5 y autoriza más facturas. Para más información: http://soporte.nest5.com");
+			alertbox("!ATENCIÓN!", "Esta venta no se puede facturar. Este dispositivo no tiene más facturas autorizadas. Consulta el administrador, o si tu lo eres, ve a tu panel de control Nest5 y autoriza más facturas. Para más informaci�n: http://soporte.nest5.com");
 		}
 		if (createdSale != null) {
 			Iterator<Entry<Registrable, Integer>> it = currentSale
@@ -5123,7 +5149,7 @@ public class Initialactivity extends FragmentActivity implements
 			createSyncRow("\""+Setup.TABLE_SALE+"\"",createdSale.getId(), createdSale.getSyncId(), createdSale.serializedFields());
 
 		} else {
-			subSale();//falló uardando venta por lo tanto resetea el valor de facturación actual al anterior.
+			subSale();//fall� uardando venta por lo tanto resetea el valor de facturaci�n actual al anterior.
 			Toast.makeText(mContext, "Error al Guardar la venta",
 					Toast.LENGTH_LONG).show();
 			
@@ -5318,14 +5344,14 @@ public class Initialactivity extends FragmentActivity implements
                 		deviceText.setText("CONECTADO A IMPRESORA");
                 		break;
                 	case TCPPrint.DISCONNECTED:
-                		deviceText.setText("¡ATENCIÒN! NO HAY IMPRESORA");
+                		deviceText.setText("�ATENCI�N! NO HAY IMPRESORA");
                 		break;
                 	case TCPPrint.CONNECTING:
                 		deviceText.setText("CONECTANDO...");
                 		break;
                 	case TCPPrint.SUDDENLY_DISCONNECTED:
-                		deviceText.setText("¡ATENCIÒN! NO HAY IMPRESORA");
-                		alertbox("¡Oops!", "Por alguna razón se ha perdido la conexión con la impresora. Intenta presionando en el texto de conexión y si no funciona reinicia tu router o adaptador.");
+                		deviceText.setText("�ATENCI�N! NO HAY IMPRESORA");
+                		alertbox("�Oops!", "Por alguna raz�n se ha perdido la conexi�n con la impresora. Intenta presionando en el texto de conexi�n y si no funciona reinicia tu router o adaptador.");
                 		if(mTCPPrint != null){
         					mTCPPrint.stopClient();
         				}

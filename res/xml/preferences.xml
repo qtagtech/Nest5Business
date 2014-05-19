@@ -10,6 +10,18 @@
         android:title="¿Configurar distribución de Mesas?"
         android:summary="Si tienes un restaurante o local con puestos para sentar comensales, organiza su distribución"
         android:defaultValue="false" />
+        <EditTextPreference
+                android:key="quant_tables"
+                android:dependency="arrange_tables"
+                android:title="¿Cuántas Mesas Hay?"
+                android:summary="Escribe el número de mesas que hay disponibles para configurar en el local actual"
+                android:dialogTitle="Número de Mesas Disponibles" />
+        <EditTextPreference
+                android:key="max_clients_table"
+                android:dependency="arrange_tables"
+                android:title="¿Cuántas personas se acomodan en la mesa más grande?"
+                android:summary="Indica el número máximo de personas que caben en una mesa de tu local, toma como referencia la mesa más grande que tengas."
+                android:dialogTitle="Máximo de puestos por Mesa" />
         
 
     </PreferenceCategory>
@@ -19,7 +31,7 @@
         <EditTextPreference
                 android:key="pref_printerip"
                 android:title="IP Impresora"
-                android:summary="Direcciòn IP configurada de la impresora o el adaptador serial a red"
+                android:summary="Dirección IP configurada de la impresora o el adaptador serial a red"
                 android:dialogTitle="Configurar IP de Impresora de Red" />
         <EditTextPreference
                 android:key="pref_printerport"
