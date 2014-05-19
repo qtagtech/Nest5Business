@@ -98,5 +98,6 @@
     
     <string name="remove">Eliminar</string>
     <string name="open">Abrir</string>
+    <string name="close">Cerrar</string>
 
 </resources>

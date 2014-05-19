@@ -17,7 +17,7 @@ package com.nest5.businessClient;
 /*
  * 
  * <a href="http://thenounproject.com/noun/piggy-bank/#icon-No2155" target="_blank">Piggy Bank</a> designed by <a href="http://thenounproject.com/jezmael" target="_blank">Jezmael Basilio</a> from The Noun Project
- * 
+ * Table designed by RaÃºl Inc from the Noun Project
  * */
 
 import java.io.DataInputStream;
@@ -207,7 +207,9 @@ public class Initialactivity extends FragmentActivity implements
 
 	public static final int TABLE_TYPE_ALL = 1;
 	
-	private static final int RETURN_FROM_DESIGN_TABLE = 2;
+	private static final int RETURN_FROM_DESIGN_TABLE = 5551;
+	
+	private static final int RETURN_FROM_OPENCLOSE_TABLE = 5552;
 	
 	
 	/***
@@ -342,6 +344,7 @@ public class Initialactivity extends FragmentActivity implements
 	List<SyncRow> syncRows;
 
 	private LinkedHashMap<Registrable, Integer> currentOrder;
+	private CurrentTable<Table,Integer> currentTable;
 	private List<Registrable> currentList;
 	private List<Registrable> inTableRegistrable;
 	private LinkedHashMap<String, LinkedHashMap<Registrable, Integer>> savedOrders;
@@ -353,6 +356,8 @@ public class Initialactivity extends FragmentActivity implements
 	private LinkedHashMap<LinkedHashMap<Registrable, Integer>, Double> cookingOrdersDiscount;
 	private LinkedHashMap<LinkedHashMap<Registrable, Integer>, Long> cookingOrdersTimes;
 	private LinkedHashMap<LinkedHashMap<Registrable, Integer>, Double> cookingOrdersReceived;
+	private LinkedHashMap<LinkedHashMap<Registrable, Integer>, CurrentTable<Table,Integer>> cookingOrdersTable;
+	private LinkedList<CurrentTable<Table,Integer>> openTables;
 	private String[] frases;
 	private int currentSelectedPosition = -1;
 	private long editItemId = -1;
@@ -669,6 +674,8 @@ public class Initialactivity extends FragmentActivity implements
 		//cookingOrdersTip = new LinkedHashMap<LinkedHashMap<Registrable, Integer>, Integer>();
 		//cookingOrdersDiscount = new LinkedHashMap<LinkedHashMap<Registrable, Integer>, Double>();
 		cookingOrdersTimes = new LinkedHashMap<LinkedHashMap<Registrable, Integer>, Long>();
+		cookingOrdersTable = new LinkedHashMap<LinkedHashMap<Registrable, Integer>, CurrentTable<Table,Integer>>();
+		openTables = new LinkedList<CurrentTable<Table,Integer>>();
 		//cookingOrdersReceived = new LinkedHashMap<LinkedHashMap<Registrable, Integer>, Double>();
 		frases = getResources().getStringArray(R.array.phrases);
 		timer = new Timer();
@@ -915,13 +922,18 @@ public class Initialactivity extends FragmentActivity implements
 		inflater.inflate(R.menu.main_menu, menu);
 			SharedPreferences defaultprefs = PreferenceManager.getDefaultSharedPreferences(mContext);
 			boolean layouttables = defaultprefs.getBoolean("arrange_tables", false);
-			Log.i("MISPRUEBAS", "creando menu...");
 			if(layouttables){
 				MenuItem tables = mMenu.findItem(R.id.layouttables);
 				if(!tables.isVisible()){
 					tables.setVisible(true);
 					invalidateOptionsMenu();
 				}
+				MenuItem mesas = mMenu.findItem(R.id.menu_show_tables);
+				if(!mesas.isVisible()){
+					mesas.setVisible(true);
+					invalidateOptionsMenu();
+				}
+				
 				
 			}	
 		
@@ -966,6 +978,9 @@ public class Initialactivity extends FragmentActivity implements
 			return true;
 		case R.id.layouttables:
 			showTableLayout();
+			return true;
+		case R.id.menu_show_tables:
+			showMesasLayout();
 			return true;
 			
 		/*case R.id.menu_connect_device:
@@ -1111,6 +1126,17 @@ public class Initialactivity extends FragmentActivity implements
         intent.setClass(mContext, TablesActivity.class);
         startActivityForResult(intent, RETURN_FROM_DESIGN_TABLE); 
 	}
+	private void showMesasLayout() {
+		Intent intento = new Intent();
+		if(openTables.size() > 0){
+			Gson gson = new Gson();
+		    String list = gson.toJson(openTables); 
+		    intento.putExtra("mesasabiertas", list);
+		}
+		 
+        intento.setClass(mContext, TablesOrderActivity.class);
+        startActivityForResult(intento, RETURN_FROM_OPENCLOSE_TABLE); 
+	}
 
 
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
@@ -1123,25 +1149,41 @@ public class Initialactivity extends FragmentActivity implements
 		
 		if (requestCode == RETURN_FROM_DESIGN_TABLE) {
 			String result = null;
-			Log.i("MISPRUEBAS","volviendo de hacer mesas");
 	        if(resultCode == RESULT_OK){
-	        	Log.i("MISPRUEBAS","result_OK");
 	            result = intent.getStringExtra(Setup.SAVED_TABLES);
 	        }
 	        if (resultCode == RESULT_CANCELED) {
 	            //Write your code if there's no result
 	        }
 			if(result != null){
-				Log.i("MISPRUEBAS",result);
 				//load tables view and allow to make order for it
-				Intent intento = new Intent();
-		        intento.setClass(mContext, TablesOrderActivity.class);
-		        startActivityForResult(intento, 0); 
-			}
-			else{
-				Log.i("MISPRUEBAS","resultado nulo");
+				showMesasLayout();
 			}
 	    }
+		
+		if(requestCode == RETURN_FROM_OPENCLOSE_TABLE){
+			Table actual = null;
+			int clientes = 0;
+	        if(resultCode == RESULT_OK){
+	            actual = intent.getParcelableExtra("MIMESA");
+	            clientes = intent.getIntExtra("MIMESACLIENTES", 0);
+	        }
+	        if (resultCode == RESULT_CANCELED) {
+	            //Write your code if there's no result
+	        }
+	        
+	        if(resultCode == Setup.CLOSE_TABLE){
+	        	//tomar mesa que se cierra, preguntar si es cancelar venta o pagar, si es cancelar borra de opentables, de orders etc y si es pagar, pone en currentsale y abre dialogo pagar
+	        }
+			if(actual != null){
+				//load tables view and allow to make order for it
+				currentTable = new CurrentTable<Table, Integer>(actual, clientes); 
+				statusText.setVisibility(View.VISIBLE);
+				statusText.setText(actual.getName() + " con "+clientes+" Clientes.");
+				Log.i("MISPRUEBAS",currentTable.getTable().getName());
+			}
+			
+		}
 		
 		
 		// else continue with any other code you need in the method
@@ -1149,10 +1191,12 @@ public class Initialactivity extends FragmentActivity implements
 			SharedPreferences defaultprefs = PreferenceManager.getDefaultSharedPreferences(mContext);
 			boolean layouttables = defaultprefs.getBoolean("arrange_tables", false);
 			MenuItem tablelayouts = mMenu.findItem(R.id.layouttables);
+			MenuItem showtables = mMenu.findItem(R.id.menu_show_tables);
 			boolean change = false;
 			if(tablelayouts.isVisible() != layouttables)
 				change = true;
 			tablelayouts.setVisible(layouttables);
+			showtables.setVisible(layouttables);
 			if(change){
 				invalidateOptionsMenu();
 			}
@@ -1502,10 +1546,21 @@ public class Initialactivity extends FragmentActivity implements
 			ll.addView(btnTag);
 
 		}
+		SharedPreferences defaultprefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+		boolean layouttables = defaultprefs.getBoolean("arrange_tables", false);
+		
 		itemsView = (GridView) v.findViewById(R.id.gridview);
 		statusText = (TextView) v.findViewById(R.id.group_owner);
 		deviceText = (TextView) v.findViewById(R.id.device_info);
 		saleValue = (TextView) v.findViewById(R.id.sale_info);
+		if(layouttables){
+			statusText.setVisibility(View.VISIBLE);
+			//statusText.setText("No hay Mesa Seleccionada.");
+		}
+		else{
+			statusText.setVisibility(View.INVISIBLE);
+			statusText.setText("");
+		}
 		updateSaleValue();
 		pagarButton = (Button) v.findViewById(R.id.pay_register);
 		guardarButton = (Button) v.findViewById(R.id.save_register);
@@ -1580,6 +1635,8 @@ public class Initialactivity extends FragmentActivity implements
 				//cookingOrdersDiscount.remove(currentSale);
 				//cookingOrdersReceived.remove(currentSale);
 				cookingOrdersTimes.remove(currentSale);
+				openTables.remove(cookingOrdersTable.get(currentSale));
+				cookingOrdersTable.remove(currentSale);
 				currentSelectedPosition = -1;
 				//sendCommandMessage(DELETE_ALL_COMMAND);
 				List<Long> items = new ArrayList<Long>();
@@ -1615,6 +1672,8 @@ public class Initialactivity extends FragmentActivity implements
 				//cookingOrdersDiscount.remove(currentSale);
 				//cookingOrdersReceived.remove(currentSale);
 				cookingOrdersTimes.remove(currentSale);
+				openTables.remove(cookingOrdersTable.get(currentSale));
+				cookingOrdersTable.remove(currentSale);
 				currentSelectedPosition = -1;
 
 				List<Long> items = new ArrayList<Long>();
@@ -2430,11 +2489,11 @@ public class Initialactivity extends FragmentActivity implements
 			String nit  = prefs.getString(Setup.COMPANY_NIT, "000000000-0");
 			String email  = prefs.getString(Setup.COMPANY_EMAIL, "email@empresa.com");
 			String pagina  = prefs.getString(Setup.COMPANY_URL, "http://www.empresa.com");
-			String direccion  = prefs.getString(Setup.COMPANY_ADDRESS, "Dirección FÃ­sica Empresa");
+			String direccion  = prefs.getString(Setup.COMPANY_ADDRESS, "Direcciï¿½n FÃ­sica Empresa");
 			String telefono  = prefs.getString(Setup.COMPANY_TEL, "555-55-55");
-			String mensaje  = prefs.getString(Setup.COMPANY_MESSAGE, "No hay ningÃºn mensaje configurado aÃºn. En el mensaje es recomendable mencionar tus redes sociales, benficios y promociones que tengas, ademÃ¡s de información de interÃ©s paratus clientes. ");
+			String mensaje  = prefs.getString(Setup.COMPANY_MESSAGE, "No hay ningÃºn mensaje configurado aÃºn. En el mensaje es recomendable mencionar tus redes sociales, benficios y promociones que tengas, ademÃ¡s de informaciï¿½n de interÃ©s paratus clientes. ");
 			String propina  = prefs.getString(Setup.TIP_MESSAGE, "No hay ningÃºn mensaje de propina configurado aÃºn. ");
-			String resolution  = prefs.getString(Setup.RESOLUTION_MESSAGE, "Resolución de facturación No. 00000-0000 de 1970 DIAN");
+			String resolution  = prefs.getString(Setup.RESOLUTION_MESSAGE, "Resoluciï¿½n de facturaciï¿½n No. 00000-0000 de 1970 DIAN");
 			int currentSale = prefs.getInt(Setup.CURRENT_SALE, 0);
 			factura.append(empresa + "\r\n");
 			factura.append(nit + "\r\n");
@@ -2693,10 +2752,10 @@ public class Initialactivity extends FragmentActivity implements
 					        		 else{
 					        			 mTCPPrint.stopClient();
 					        			 new connectTask().execute(formateado.toString());
-					        			 alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Estamos tratando de reconectarnos e imprimir. Si no funciona, reinicia la Red o la impresora y ve a órdenes para imprimir el pedido.");
+					        			 alertbox("ï¿½Oops!", "Al Parecer no hay impresora disponible. Estamos tratando de reconectarnos e imprimir. Si no funciona, reinicia la Red o la impresora y ve a ï¿½rdenes para imprimir el pedido.");
 					        		 }   
 					                }else{
-					                	alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Trataremos en este momento de nuevo de imprimir el pedido. Si no funciona, reinicia la red o la impreso y ve a órdenes para imprimir de nuevo la orden.");
+					                	alertbox("ï¿½Oops!", "Al Parecer no hay impresora disponible. Trataremos en este momento de nuevo de imprimir el pedido. Si no funciona, reinicia la red o la impreso y ve a ï¿½rdenes para imprimir de nuevo la orden.");
 					                	new connectTask().execute(formateado.toString());
 					                }
 					        }
@@ -2706,7 +2765,7 @@ public class Initialactivity extends FragmentActivity implements
 			
 		}
 		else{
-			alertbox("!ATENCIÃ“N!", "Esta venta no se puede facturar. Este dispositivo no tiene mÃ¡s facturas autorizadas. Consulta el administrador, o si tu lo eres, ve a tu panel de control Nest5 y autoriza mÃ¡s facturas. Para mÃ¡s información: http://soporte.nest5.com");
+			alertbox("!ATENCIÃ“N!", "Esta venta no se puede facturar. Este dispositivo no tiene mÃ¡s facturas autorizadas. Consulta el administrador, o si tu lo eres, ve a tu panel de control Nest5 y autoriza mÃ¡s facturas. Para mÃ¡s informaciï¿½n: http://soporte.nest5.com");
 		}
 	}
 
@@ -2758,14 +2817,14 @@ public class Initialactivity extends FragmentActivity implements
 			String nit  = prefs.getString(Setup.COMPANY_NIT, "000000000-0");
 			String email  = prefs.getString(Setup.COMPANY_EMAIL, "email@empresa.com");
 			String pagina  = prefs.getString(Setup.COMPANY_URL, "http://www.empresa.com");
-			String direccion  = prefs.getString(Setup.COMPANY_ADDRESS, "Dirección FÃ­sica Empresa");
+			String direccion  = prefs.getString(Setup.COMPANY_ADDRESS, "Direcciï¿½n FÃ­sica Empresa");
 			String telefono  = prefs.getString(Setup.COMPANY_TEL, "555-55-55");
-			String mensaje  = prefs.getString(Setup.COMPANY_MESSAGE, "No hay ningÃºn mensaje configurado aÃºn. En el mensaje es recomendable mencionar tus redes sociales, benficios y promociones que tengas, ademÃ¡s de información de interÃ©s paratus clientes. ");
+			String mensaje  = prefs.getString(Setup.COMPANY_MESSAGE, "No hay ningÃºn mensaje configurado aÃºn. En el mensaje es recomendable mencionar tus redes sociales, benficios y promociones que tengas, ademÃ¡s de informaciï¿½n de interÃ©s paratus clientes. ");
 			String propina  = prefs.getString(Setup.TIP_MESSAGE, "No hay ningÃºn mensaje de propina configurado aÃºn. ");
-			String resolution  = prefs.getString(Setup.RESOLUTION_MESSAGE, "Resolución de facturación No. 00000-0000 de 1970 DIAN");
+			String resolution  = prefs.getString(Setup.RESOLUTION_MESSAGE, "Resoluciï¿½n de facturaciï¿½n No. 00000-0000 de 1970 DIAN");
 			//int currentSale = prefs.getInt(Setup.CURRENT_SALE, 0);
 			factura.append("COPIA DE ORDEN\r\n");
-			factura.append("NO VÁLIDO COMO FACTURA\r\n");
+			factura.append("NO Vï¿½LIDO COMO FACTURA\r\n");
 			factura.append("--------------------\r\n");
 			factura.append(empresa + "\r\n");
 			factura.append(empresa + "\r\n");
@@ -2874,7 +2933,7 @@ public class Initialactivity extends FragmentActivity implements
 								formateado.append("CUENTA PEDIDO No."+String.valueOf(currentSelectedPosition + 1));
 								formateado.append(SINGLE_WIDE_CHARACTERS);
 								formateado.append(PRINT_FEED_ONE_LINE);
-								formateado.append("NO VÁLIDO COMO FACTURA DE VENTA");
+								formateado.append("NO Vï¿½LIDO COMO FACTURA DE VENTA");
 								formateado.append(PRINT_FEED_ONE_LINE);
 								formateado.append(PRINT_FEED_N_LINES);
 								formateado.append((char) 0x03);
@@ -2951,10 +3010,10 @@ public class Initialactivity extends FragmentActivity implements
 					        		 else{
 					        			 mTCPPrint.stopClient();
 					        			 new connectTask().execute(formateado.toString());
-					        			 alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Estamos tratando de reconectarnos e imprimir. Si no funciona, reinicia la Red o la impresora y ve a órdenes para imprimir el pedido.");
+					        			 alertbox("Â¡Oops!", "Al Parecer no hay impresora disponible. Estamos tratando de reconectarnos e imprimir. Si no funciona, reinicia la Red o la impresora y ve a ï¿½rdenes para imprimir el pedido.");
 					        		 }   
 					                }else{
-					                	alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Trataremos en este momento de nuevo de imprimir el pedido. Si no funciona, reinicia la red o la impreso y ve a órdenes para imprimir de nuevo la orden.");
+					                	alertbox("Â¡Oops!", "Al Parecer no hay impresora disponible. Trataremos en este momento de nuevo de imprimir el pedido. Si no funciona, reinicia la red o la impreso y ve a ï¿½rdenes para imprimir de nuevo la orden.");
 					                	new connectTask().execute(formateado.toString());
 					                }
 					        }
@@ -2979,7 +3038,7 @@ public class Initialactivity extends FragmentActivity implements
 		SharedPreferences prefs = Util.getSharedPreferences(mContext);
 		mResetProgressDialog = new ProgressDialog(mContext);
 		mResetProgressDialog
-				.setMessage("Recibiendo Información Actualizada...");
+				.setMessage("Recibiendo Informaciï¿½n Actualizada...");
 		mResetProgressDialog.setCancelable(false);
 		mResetProgressDialog.setIndeterminate(true);
 		mResetProgressDialog.show();
@@ -3117,7 +3176,7 @@ public class Initialactivity extends FragmentActivity implements
 			@Override
 			public void onFailure(int reason) {
 				Toast.makeText(Initialactivity.this,
-						"La conexión falló. ReintÃ©ntalo de nuevo.",
+						"La conexiï¿½n fallï¿½. ReintÃ©ntalo de nuevo.",
 						Toast.LENGTH_SHORT).show();
 			}
 		});
@@ -3130,7 +3189,7 @@ public class Initialactivity extends FragmentActivity implements
 
 			@Override
 			public void onFailure(int reasonCode) {
-				Log.d(TAG, "La desconexiÃƒÂ³n fallÃƒÂ³, la razón es:" + reasonCode);
+				Log.d(TAG, "La desconexiÃƒÂ³n fallÃƒÂ³, la razï¿½n es:" + reasonCode);
 
 			}
 
@@ -3178,7 +3237,7 @@ public class Initialactivity extends FragmentActivity implements
 		if (manager != null && !retryChannel) {
 			Toast.makeText(
 					this,
-					"Se perdió la conexión con el canal, intÃ©ntalo de nuevo.",
+					"Se perdiï¿½ la conexiï¿½n con el canal, intÃ©ntalo de nuevo.",
 					Toast.LENGTH_LONG).show();
 			// resetData();
 			retryChannel = true;
@@ -3186,7 +3245,7 @@ public class Initialactivity extends FragmentActivity implements
 		} else {
 			Toast.makeText(
 					this,
-					"¡Error grave!. Se perdió por completo la conexión con dispositivos. Reintenta Desactivando/Activando WifiDirect otra vez.",
+					"ï¿½Error grave!. Se perdiï¿½ por completo la conexiï¿½n con dispositivos. Reintenta Desactivando/Activando WifiDirect otra vez.",
 					Toast.LENGTH_LONG).show();
 		}
 	}
@@ -3399,7 +3458,7 @@ public class Initialactivity extends FragmentActivity implements
 		if (currentVolume < maxVolume) {
 
 			showMessageDialog(
-					"Atención",
+					"AtenciÃ³n",
 					"Para leer una tarjeta Nest5 debes subir el volumen de tu dispositivo al mÃ¡ximo.");
 			ret = false;
 		}
@@ -3462,11 +3521,11 @@ public class Initialactivity extends FragmentActivity implements
 			if(isConnectedToInternet()){
 				sendAllSyncRows();
 				//alerta
-				alertbox("¡Oops!", "Parece que hay registros de ventas o inventario sin guardar. Intentaremos sincronizar de nuevo y luego por favor presiona el botón otra vez.");
+				alertbox("ï¿½Oops!", "Parece que hay registros de ventas o inventario sin guardar. Intentaremos sincronizar de nuevo y luego por favor presiona el botï¿½n otra vez.");
 			}
 			else{//avisa que no hay internet, si el problema persiste entrar a soporte.nest5.com
 				//alerta
-				alertbox("¡Oops!", "Para esta operación debes estar conectado a Internet. ConÃ©ctate y vuelve a presionar el botón.");
+				alertbox("ï¿½Oops!", "Para esta operaciï¿½n debes estar conectado a Internet. ConÃ©ctate y vuelve a presionar el botï¿½n.");
 			}
 		}
 		else{
@@ -3480,7 +3539,7 @@ public class Initialactivity extends FragmentActivity implements
 				saveFileRecord();
 			}
 			else{
-				alertbox("¡Oops!", "Para esta operación debes estar conectado a Internet. ConÃ©ctate y vuelve a presionar el botón.");
+				alertbox("ï¿½Oops!", "Para esta operaciï¿½n debes estar conectado a Internet. ConÃ©ctate y vuelve a presionar el botï¿½n.");
 			}
 			
 		}
@@ -3497,7 +3556,7 @@ public class Initialactivity extends FragmentActivity implements
 	private void saveFileRecord() {
 		if(isConnectedToInternet()){
 			mResetProgressDialog
-			.setMessage("Actualizando información. Esto puede tardar unos minutos.");
+			.setMessage("Actualizando informaciÃ³n. Esto puede tardar unos minutos.");
 			mResetProgressDialog.setCancelable(false);
 			mResetProgressDialog.setIndeterminate(true);
 			mResetProgressDialog.show();
@@ -3516,7 +3575,7 @@ public class Initialactivity extends FragmentActivity implements
 		  mythread.start();  
 		}
 		else{
-			alertbox("¡Oops!", "Para esta operación debes estar conectado a Internet. ConÃ©ctate y vuelve a presionar el botón.");
+			alertbox("Â¡Oops!", "Para esta operaciÃ³n debes estar conectado a Internet. ConÃ©ctate y vuelve a presionar el botÃ³n.");
 		}
 		 
 		
@@ -3664,7 +3723,7 @@ public class Initialactivity extends FragmentActivity implements
 			Promo[] promos = null;
 			User user = null;
 			JSONObject respuesta = null;
-			String mensaje = "Error de Comunicación con Nest5, intÃ©ntalo de nuevo por favor.";
+			String mensaje = "Error de Comunicaciï¿½n con Nest5, intÃ©ntalo de nuevo por favor.";
 			int status = 0;
 			try {
 				respuesta = new JSONObject((String) msg.obj);
@@ -3777,7 +3836,7 @@ public class Initialactivity extends FragmentActivity implements
 			Promo[] promos = null;
 			User user = null;
 			JSONObject respuesta = null;
-			String mensaje = "Error de Comunicación con Nest5, intÃ©ntalo de nuevo por favor.";
+			String mensaje = "Error de Comunicaciï¿½n con Nest5, intÃ©ntalo de nuevo por favor.";
 			int status = 0;
 			try {
 				respuesta = new JSONObject((String) msg.obj);
@@ -3888,7 +3947,7 @@ public class Initialactivity extends FragmentActivity implements
 		public void handleMessage(Message msg) {
 			mResetProgressDialog.dismiss();
 			JSONObject respuesta = null;
-			String mensaje = "Error de Comunicación con Nest5, intÃ©ntalo de nuevo por favor.";
+			String mensaje = "Error de Comunicaciï¿½n con Nest5, intÃ©ntalo de nuevo por favor.";
 			int status = 0;
 			int sellos = 0;
 			int coupones = 0;
@@ -3944,7 +4003,7 @@ public class Initialactivity extends FragmentActivity implements
 		public void handleMessage(Message msg) {
 			mResetProgressDialog.dismiss();
 			JSONObject respuesta = null;
-			String mensaje = "Error de Comunicación con Nest5, intÃ©ntalo de nuevo por favor.";
+			String mensaje = "Error de Comunicaciï¿½n con Nest5, intÃ©ntalo de nuevo por favor.";
 			int status = 0;
 
 			try {
@@ -3968,7 +4027,7 @@ public class Initialactivity extends FragmentActivity implements
 					showMessageDialog(
 							"Beneficio redimido con Ã‰xito",
 							currentUser.name
-									+ " ha redimido un beneficio y ahora enamóralo entregÃ¡ndoselo.");
+									+ " ha redimido un beneficio y ahora enamï¿½ralo entregÃ¡ndoselo.");
 
 				} else {
 					//Log.i("MISPRUEBAS", "ERROR 3");
@@ -3993,7 +4052,7 @@ public class Initialactivity extends FragmentActivity implements
 			//mResetProgressDialog.dismiss();
 			JSONObject respuesta = null;
 				//Log.i("MISPRUEBAS","LLEGUE DE subir fila");
-				totalSync--;//no importa lo que pase, cada que trata de subir una fila dice que lo hizo, solo borra la syncrow de la base de ddatos si se guarda nuevo documento o se actualiza, de resto queda ahi, para un próximo intento
+				totalSync--;//no importa lo que pase, cada que trata de subir una fila dice que lo hizo, solo borra la syncrow de la base de ddatos si se guarda nuevo documento o se actualiza, de resto queda ahi, para un prï¿½ximo intento
 			try {
 				respuesta = new JSONObject((String) msg.obj);
 			} catch (Exception e) {
@@ -4052,14 +4111,14 @@ public class Initialactivity extends FragmentActivity implements
 							}
 						}
 					}
-					else{//se presentó un error desconocido
+					else{//se presentï¿½ un error desconocido
 						Log.w("MISPRUEBAS","ERROR desconocido al subir syncRow");
 					}
 					
 					
 					
 				} else {
-					if(status == 200){ //se actualizó una fila, 
+					if(status == 200){ //se actualizï¿½ una fila, 
 						//ok! status received, but still we have to check for code 555 that says everything done in Nest5 as expected.
 						if(responsecode == 555 ){
 							try {
@@ -4085,8 +4144,8 @@ public class Initialactivity extends FragmentActivity implements
 					}
 					else{
 						if(status == 406){//se hizo overlap con otra fila enviada desde otro dispositivo
-							if(responsecode == 55513){ //confirmar que el http 406 si haya sido enviado porque el error era de overlap, el código 13 dice que si
-								//se debe pedir que manden una actualización de la fila, para tomar el valor que puso otro dispositivo que no permitió que este se guardara por obverlap
+							if(responsecode == 55513){ //confirmar que el http 406 si haya sido enviado porque el error era de overlap, el cï¿½digo 13 dice que si
+								//se debe pedir que manden una actualizaciï¿½n de la fila, para tomar el valor que puso otro dispositivo que no permitiï¿½ que este se guardara por obverlap
 								try {
 									sync_row = respuesta.getLong("syncRow");
 
@@ -4308,7 +4367,7 @@ public class Initialactivity extends FragmentActivity implements
 						String nit  = prefs.getString(Setup.COMPANY_NIT, "000000000-0");
 						String email  = prefs.getString(Setup.COMPANY_EMAIL, "email@empresa.com");
 						String pagina  = prefs.getString(Setup.COMPANY_URL, "http://www.empresa.com");
-						String direccion  = prefs.getString(Setup.COMPANY_ADDRESS, "Dirección FÃ­sica Empresa");
+						String direccion  = prefs.getString(Setup.COMPANY_ADDRESS, "Direcciï¿½n FÃ­sica Empresa");
 						String telefono  = prefs.getString(Setup.COMPANY_TEL, "555-55-55");
 						factura.append(empresa + "\r\n");
 						factura.append(nit + "\r\n");
@@ -4562,10 +4621,10 @@ public class Initialactivity extends FragmentActivity implements
 				        		 else{
 				        			 mTCPPrint.stopClient();
 				        			 new connectTask().execute(formateado.toString());
-				        			 alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Estamos tratando de reconectarnos e imprimir. Si no funciona, reinicia la Red o la impresora y ve a órdenes para imprimir el pedido.");
+				        			 alertbox("ï¿½Oops!", "Al Parecer no hay impresora disponible. Estamos tratando de reconectarnos e imprimir. Si no funciona, reinicia la Red o la impresora y ve a ï¿½rdenes para imprimir el pedido.");
 				        		 }   
 				                }else{
-				                	alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Trataremos en este momento de nuevo de imprimir el pedido. Si no funciona, reinicia la red o la impreso y ve a órdenes para imprimir de nuevo la orden.");
+				                	alertbox("ï¿½Oops!", "Al Parecer no hay impresora disponible. Trataremos en este momento de nuevo de imprimir el pedido. Si no funciona, reinicia la red o la impreso y ve a ï¿½rdenes para imprimir de nuevo la orden.");
 				                	new connectTask().execute(formateado.toString());
 				                }
 				        }
@@ -4861,7 +4920,7 @@ public class Initialactivity extends FragmentActivity implements
     		prefs.edit().putInt(Setup.CURRENT_SALE, currentSale + 1).commit();
     	}
     	else{
-    		return -1; //no se puede crear venta, no hay nÃºmeros de facturación disponibles. 
+    		return -1; //no se puede crear venta, no hay nÃºmeros de facturaciï¿½n disponibles. 
     	}
     	
     	return currentSale + 1;
@@ -4987,6 +5046,11 @@ public class Initialactivity extends FragmentActivity implements
 				cookingOrdersDelivery.put(currentObjects, isDelivery);
 				cookingOrdersTogo.put(currentObjects, isTogo);
 				cookingOrdersTimes.put(currentObjects, startTime);
+				if(currentTable != null){
+					cookingOrdersTable.put(currentObjects, currentTable);
+					openTables.push(currentTable);
+				}
+					
 				List<Long> items = new ArrayList<Long>();
 				for (LinkedHashMap<Registrable, Integer> current : cookingOrders) {
 					items.add(cookingOrdersTimes.get(current));
@@ -5065,10 +5129,10 @@ public class Initialactivity extends FragmentActivity implements
 				        		 else{
 				        			 mTCPPrint.stopClient();
 				        			 new connectTask().execute(formateado.toString());
-				        			 alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Estamos tratando de reconectarnos e imprimir. Si no funciona, reinicia la Red o la impresora y ve a órdenes para imprimir el pedido.");
+				        			 alertbox("ï¿½Oops!", "Al Parecer no hay impresora disponible. Estamos tratando de reconectarnos e imprimir. Si no funciona, reinicia la Red o la impresora y ve a ï¿½rdenes para imprimir el pedido.");
 				        		 }   
 				                }else{
-				                	alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Trataremos en este momento de nuevo de imprimir el pedido. Si no funciona, reinicia la red o la impreso y ve a órdenes para imprimir de nuevo la orden.");
+				                	alertbox("ï¿½Oops!", "Al Parecer no hay impresora disponible. Trataremos en este momento de nuevo de imprimir el pedido. Si no funciona, reinicia la red o la impreso y ve a ï¿½rdenes para imprimir de nuevo la orden.");
 				                	new connectTask().execute(formateado.toString());
 				                }
 				        }
@@ -5080,7 +5144,7 @@ public class Initialactivity extends FragmentActivity implements
 	
 	private void saveSale(String method,Double value,Double discount,int delivery,int togo, int tip){
 		int number = checkSaleNumber(); 
-		int nextsale = addSale(); //se aumenta el valor de facturación, //si falla se resta un numero de las ventas actuales mas adelante,.
+		int nextsale = addSale(); //se aumenta el valor de facturaciï¿½n, //si falla se resta un numero de las ventas actuales mas adelante,.
 		Sale createdSale = null;
 		long saveDate = System.currentTimeMillis();
 		LinkedHashMap<Registrable,Integer> currentSale = currentOrder;
@@ -5097,7 +5161,7 @@ public class Initialactivity extends FragmentActivity implements
 			
 		}
 		else{
-			alertbox("!ATENCIÃ“N!", "Esta venta no se puede facturar. Este dispositivo no tiene mÃ¡s facturas autorizadas. Consulta el administrador, o si tu lo eres, ve a tu panel de control Nest5 y autoriza mÃ¡s facturas. Para mÃ¡s información: http://soporte.nest5.com");
+			alertbox("!ATENCIÃ“N!", "Esta venta no se puede facturar. Este dispositivo no tiene mÃ¡s facturas autorizadas. Consulta el administrador, o si tu lo eres, ve a tu panel de control Nest5 y autoriza mÃ¡s facturas. Para mÃ¡s informaciï¿½n: http://soporte.nest5.com");
 		}
 		if (createdSale != null) {
 			Iterator<Entry<Registrable, Integer>> it = currentSale
@@ -5118,6 +5182,8 @@ public class Initialactivity extends FragmentActivity implements
 				cookingOrdersDelivery.remove(currentSale);
 				cookingOrdersTogo.remove(currentSale);
 				cookingOrdersTimes.remove(currentSale);
+				openTables.remove(cookingOrdersTable.get(currentSale));
+				cookingOrdersTable.remove(currentSale);
 			}catch(Exception e){
 				//Log.i("ERRORES_REMOVE","HAY UN ERROR AL REMOVER CURRENTSALE DE COOKINGORDERS");
 				e.printStackTrace();
@@ -5149,7 +5215,7 @@ public class Initialactivity extends FragmentActivity implements
 			createSyncRow("\""+Setup.TABLE_SALE+"\"",createdSale.getId(), createdSale.getSyncId(), createdSale.serializedFields());
 
 		} else {
-			subSale();//falló uardando venta por lo tanto resetea el valor de facturación actual al anterior.
+			subSale();//fallï¿½ uardando venta por lo tanto resetea el valor de facturaciï¿½n actual al anterior.
 			Toast.makeText(mContext, "Error al Guardar la venta",
 					Toast.LENGTH_LONG).show();
 			
@@ -5161,14 +5227,14 @@ public class Initialactivity extends FragmentActivity implements
 		String deliveries = "";
 		String togos = "";
 		String times = "";
-		for(Entry<LinkedHashMap<Registrable, Integer>, Integer> actual : cookingOrdersTogo.entrySet()){
-        	Log.i("MISPRUEBAS",actual.toString());
-        }
+		String tables = "";
+		String opentables = "";
+		
 		try {
 			GsonBuilder gb = new GsonBuilder();
 			gb.registerTypeAdapter(LinkedList.class, new SerialiserLinkedList());
 			Gson gson = gb.create();
-			Log.i("MISPRUEBAS","antes de la lista sigue el linkedhashmap");
+			//Log.i("MISPRUEBAS","antes de la lista sigue el linkedhashmap");
 			list = gson.toJson(cookingOrders);
 			gb.registerTypeAdapter(new LinkedHashMap<LinkedHashMap<Registrable, Integer>, Integer>().getClass(), new SerialiserLinkedHashMap());
 			gson = gb.create();
@@ -5177,14 +5243,22 @@ public class Initialactivity extends FragmentActivity implements
 			}
 			
 	        
-	        Log.i("MISPRUEBAS","ya paso la lista sigue el linkedhashmap");
+	        //Log.i("MISPRUEBAS","ya paso la lista sigue el linkedhashmap");
 	        togos = gson.toJson(cookingOrdersTogo);
-	        Log.i("MISPRUEBAS","acabo el primer linkedhashmap");
+	        //Log.i("MISPRUEBAS","acabo el primer linkedhashmap");
 	        deliveries = gson.toJson(cookingOrdersDelivery);
-	        Log.i("MISPRUEBAS","acabo el segundo linkedhashmap");
+	        //Log.i("MISPRUEBAS","TAMAÃ‘P DE COOKINGORDERSTABE : "+cookingOrdersTable.size());
 	        gb.registerTypeAdapter(new LinkedHashMap<LinkedHashMap<Registrable, Integer>, Long>().getClass(), new SerialiserLinkedHashMapLong());
 	        gson = gb.create();
 	        times = gson.toJson(cookingOrdersTimes);
+	        if(cookingOrdersTable.size() > 0){ //it can be 0 when there are orders but not assigned to a table
+	        	gb.registerTypeAdapter(new LinkedHashMap<LinkedHashMap<Registrable, Integer>, CurrentTable<Table,Integer>>().getClass(), new SerialiserLinkedHashMapCurrentTable());
+		        gson = gb.create();
+		        tables = gson.toJson(cookingOrdersTable);
+		        //Log.i("MISPRUEBAS","acabo el segundo linkedhashmap: "+tables);	
+	        }
+	        
+	       
 	        //Log.i("MISPRUEBAS","Lista: "+list);
 	        
 		}catch(Exception e){
@@ -5192,11 +5266,12 @@ public class Initialactivity extends FragmentActivity implements
 		}
 		if(!list.equalsIgnoreCase("")){
 			SharedPreferences prefs = Util.getSharedPreferences(mContext);
-			prefs.edit().putString(Setup.COOKING_ORDERS, list).putString(Setup.COOKING_ORDERS_DELIVERIES, deliveries).putString(Setup.COOKING_ORDERS_TOGOS, togos).putString(Setup.COOKING_ORDERS_TIMES, times).commit();
+			prefs.edit().putString(Setup.COOKING_ORDERS, list).putString(Setup.COOKING_ORDERS_DELIVERIES, deliveries).putString(Setup.COOKING_ORDERS_TOGOS, togos).putString(Setup.COOKING_ORDERS_TIMES, times).putString(Setup.COOKING_ORDERS_TABLES, tables).commit();
 			cookingOrders.clear();
 			cookingOrdersDelivery.clear();
 			cookingOrdersTimes.clear();
 			cookingOrdersTogo.clear();
+			cookingOrdersTable.clear();
 			//Log.i("MISPRUEBAS","String de Cooking orders guardada");
 			//Log.i("MISPRUEBAS",times);
 		}
@@ -5208,13 +5283,16 @@ public class Initialactivity extends FragmentActivity implements
 		cookingOrders.clear();
 		cookingOrdersDelivery.clear();
 		cookingOrdersTimes.clear();
+		cookingOrdersTable.clear();
 		cookingOrdersTogo.clear();
+		openTables.clear();
 		SharedPreferences prefs = Util.getSharedPreferences(mContext);
 		String list = prefs.getString(Setup.COOKING_ORDERS, "[]");
 		String deliveries = prefs.getString(Setup.COOKING_ORDERS_DELIVERIES, "[]");
 		String togos = prefs.getString(Setup.COOKING_ORDERS_TOGOS, "[]");
 		String times = prefs.getString(Setup.COOKING_ORDERS_TIMES, "[]");
-		prefs.edit().putString(Setup.COOKING_ORDERS, null).putString(Setup.COOKING_ORDERS_DELIVERIES, null).putString(Setup.COOKING_ORDERS_TOGOS, null).putString(Setup.COOKING_ORDERS_TIMES, null).commit();
+		String tables = prefs.getString(Setup.COOKING_ORDERS_TABLES, "[]");
+		prefs.edit().putString(Setup.COOKING_ORDERS, null).putString(Setup.COOKING_ORDERS_DELIVERIES, null).putString(Setup.COOKING_ORDERS_TOGOS, null).putString(Setup.COOKING_ORDERS_TIMES, null).putString(Setup.COOKING_ORDERS_TABLES, null).commit();
 		try{
 			GsonBuilder gsonBuilder = new GsonBuilder();
 		    gsonBuilder.registerTypeAdapter(LinkedList.class, new SerialiserLinkedList());
@@ -5225,7 +5303,8 @@ public class Initialactivity extends FragmentActivity implements
 		    LinkedHashMap<Registrable, Integer> cookingOrdersTogo_temp = gson.fromJson(togos, new LinkedHashMap<LinkedHashMap<Registrable, Integer>, Integer>().getClass());
 		    gsonBuilder.registerTypeAdapter(new LinkedHashMap<LinkedHashMap<Registrable, Integer>, Long>().getClass(), new SerialiserLinkedHashMapLong());
 		    gson = gsonBuilder.create();
-		    LinkedHashMap<Registrable,Long> cookingOrdersTimes_temp = gson.fromJson(times, new LinkedHashMap<LinkedHashMap<Registrable, Long>, Long>().getClass());
+		    LinkedHashMap<Registrable,Long> cookingOrdersTimes_temp = gson.fromJson(times, new LinkedHashMap<LinkedHashMap<Registrable, Integer>, Long>().getClass());
+		    
 		    Set<Map.Entry<Registrable,Integer>> valoresTogo = cookingOrdersTogo_temp.entrySet();
 		    Set<Map.Entry<Registrable,Integer>> valoresDelivery = cookingOrdersDelivery_temp.entrySet();
 		    Set<Map.Entry<Registrable,Long>> valoresTime = cookingOrdersTimes_temp.entrySet();
@@ -5247,6 +5326,7 @@ public class Initialactivity extends FragmentActivity implements
 		    	cookingOrdersTimes.put(actual,objeto.getValue());
 		    	i++;
 		    }
+		   
 		    List<Long> items = new ArrayList<Long>();
 			for (LinkedHashMap<Registrable, Integer> current : cookingOrders) {
 				items.add(cookingOrdersTimes.get(current));
@@ -5258,6 +5338,21 @@ public class Initialactivity extends FragmentActivity implements
 			if (!isTimerRunning) {
 				startTimer();
 			}
+			if(tables != "[]"){ //if any order is assigned to a table
+			    gsonBuilder.registerTypeAdapter(new LinkedHashMap<LinkedHashMap<Registrable, Integer>, CurrentTable<Table,Integer>>().getClass(), new SerialiserLinkedHashMapCurrentTable());
+			    gson = gsonBuilder.create();
+			    LinkedHashMap<Registrable,CurrentTable<Table,Integer>> cookingOrdersTable_temp = gson.fromJson(tables, new LinkedHashMap<LinkedHashMap<Registrable, Integer>, CurrentTable<Table,Integer>>().getClass());
+			    Set<Map.Entry<Registrable,CurrentTable<Table,Integer>>> valoresTable = cookingOrdersTable_temp.entrySet();
+			    i = 0;
+			    for(Entry<Registrable, CurrentTable<Table,Integer>> objeto : valoresTable){
+			    	LinkedHashMap<Registrable, Integer> actual = cookingOrders.get(i);
+			    	cookingOrdersTable.put(actual,objeto.getValue());
+			    	openTables.push(objeto.getValue());
+			    	i++;
+			    }
+			    
+			}
+			
 		    //Log.i("MISPRUEBAS","TamaÃ±o de la lista convertida desde el string por gson");
 		    //Log.i("MISPRUEBAS",String.valueOf(cookingOrdersDelivery.size()));
 		    //Log.i("MISPRUEBAS",String.valueOf(cookingOrdersTogo.size()));
@@ -5344,14 +5439,14 @@ public class Initialactivity extends FragmentActivity implements
                 		deviceText.setText("CONECTADO A IMPRESORA");
                 		break;
                 	case TCPPrint.DISCONNECTED:
-                		deviceText.setText("¡ATENCIÓN! NO HAY IMPRESORA");
+                		deviceText.setText("Â¡ATENCIÃ“N! NO HAY IMPRESORA");
                 		break;
                 	case TCPPrint.CONNECTING:
                 		deviceText.setText("CONECTANDO...");
                 		break;
                 	case TCPPrint.SUDDENLY_DISCONNECTED:
-                		deviceText.setText("¡ATENCIÓN! NO HAY IMPRESORA");
-                		alertbox("¡Oops!", "Por alguna razón se ha perdido la conexión con la impresora. Intenta presionando en el texto de conexión y si no funciona reinicia tu router o adaptador.");
+                		deviceText.setText("Â¡ATENCIÃ“N! NO HAY IMPRESORA");
+                		alertbox("Â¡Oops!", "Por alguna razÃ³n se ha perdido la conexiÃ³n con la impresora. Intenta presionando en el texto de conexiÃ³n y si no funciona reinicia tu router o adaptador.");
                 		if(mTCPPrint != null){
         					mTCPPrint.stopClient();
         				}

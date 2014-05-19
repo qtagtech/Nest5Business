@@ -55,8 +55,10 @@ public class Setup {
     public static final String COOKING_ORDERS_DELIVERIES = "saved_cooking_orders_deliveries";
     public static final String COOKING_ORDERS_TOGOS = "saved_cooking_orders_togos";
     public static final String COOKING_ORDERS_TIMES = "saved_cooking_orders_times";
+    public static final String COOKING_ORDERS_TABLES = "saved_cooking_orders_tables";
     public static final String HAS_CONFIGURED_TABLES = "has_configured_tables";
     public static final String SAVED_TABLES = "saved_tables";
+    public static final int CLOSE_TABLE = 555225;
     
     
     

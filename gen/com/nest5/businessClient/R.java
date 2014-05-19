@@ -225,58 +225,59 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int ic_launcher=0x7f020032;
         public static final int ic_mailboxes_accounts=0x7f020033;
         public static final int icon=0x7f020034;
-        public static final int icon_tables=0x7f020035;
-        public static final int ipod=0x7f020036;
-        public static final int item_container_gradient=0x7f020037;
-        public static final int item_title_gradient=0x7f020038;
-        public static final int kitchen_texture=0x7f020039;
-        public static final int large_sync=0x7f02003a;
-        public static final int letrero_nest5=0x7f02003b;
-        public static final int link=0x7f02003c;
-        public static final int list_selector=0x7f02003d;
-        public static final int list_selector_focused=0x7f02003e;
-        public static final int list_selector_normal=0x7f02003f;
-        public static final int list_selector_pressed=0x7f020040;
-        public static final int loading=0x7f020041;
-        public static final int loading_image=0x7f020042;
-        public static final int loading_image_land=0x7f020043;
-        public static final int lt_white_grunge_01=0x7f020044;
-        public static final int map=0x7f020045;
-        public static final int meat=0x7f020046;
-        public static final int menu_icon=0x7f020047;
-        public static final int nest5_pin=0x7f020048;
-        public static final int olla=0x7f020049;
-        public static final int printer_add=0x7f02004a;
-        public static final int promo_title_gradient=0x7f02004b;
-        public static final int red_button=0x7f02004c;
-        public static final int rosewood=0x7f02004d;
-        public static final int round_button=0x7f02004e;
-        public static final int round_red_button=0x7f02004f;
-        public static final int save_piggy=0x7f020050;
-        public static final int search=0x7f020051;
-        public static final int sello_estrella=0x7f020052;
-        public static final int selloparaana=0x7f020053;
-        public static final int separator=0x7f020054;
-        public static final int settings=0x7f020055;
-        public static final int shelve=0x7f020056;
-        public static final int silver_texture=0x7f020057;
-        public static final int star=0x7f020058;
-        public static final int status_icon=0x7f020059;
-        public static final int stub=0x7f02005a;
-        public static final int sync=0x7f02005b;
-        public static final int tick=0x7f02005c;
-        public static final int title_bar_default=0x7f02005d;
-        public static final int tw_button=0x7f02005e;
-        public static final int twitter_normal=0x7f02005f;
-        public static final int twitter_pressed=0x7f020060;
-        public static final int user=0x7f020061;
-        public static final int wheat=0x7f020062;
-        public static final int white_gradient=0x7f020063;
-        public static final int win_star=0x7f020064;
-        public static final int wine=0x7f020065;
-        public static final int wood=0x7f020066;
-        public static final int wood_texture=0x7f020067;
-        public static final int zreport=0x7f020068;
+        public static final int icon_mesas=0x7f020035;
+        public static final int icon_tables=0x7f020036;
+        public static final int ipod=0x7f020037;
+        public static final int item_container_gradient=0x7f020038;
+        public static final int item_title_gradient=0x7f020039;
+        public static final int kitchen_texture=0x7f02003a;
+        public static final int large_sync=0x7f02003b;
+        public static final int letrero_nest5=0x7f02003c;
+        public static final int link=0x7f02003d;
+        public static final int list_selector=0x7f02003e;
+        public static final int list_selector_focused=0x7f02003f;
+        public static final int list_selector_normal=0x7f020040;
+        public static final int list_selector_pressed=0x7f020041;
+        public static final int loading=0x7f020042;
+        public static final int loading_image=0x7f020043;
+        public static final int loading_image_land=0x7f020044;
+        public static final int lt_white_grunge_01=0x7f020045;
+        public static final int map=0x7f020046;
+        public static final int meat=0x7f020047;
+        public static final int menu_icon=0x7f020048;
+        public static final int nest5_pin=0x7f020049;
+        public static final int olla=0x7f02004a;
+        public static final int printer_add=0x7f02004b;
+        public static final int promo_title_gradient=0x7f02004c;
+        public static final int red_button=0x7f02004d;
+        public static final int rosewood=0x7f02004e;
+        public static final int round_button=0x7f02004f;
+        public static final int round_red_button=0x7f020050;
+        public static final int save_piggy=0x7f020051;
+        public static final int search=0x7f020052;
+        public static final int sello_estrella=0x7f020053;
+        public static final int selloparaana=0x7f020054;
+        public static final int separator=0x7f020055;
+        public static final int settings=0x7f020056;
+        public static final int shelve=0x7f020057;
+        public static final int silver_texture=0x7f020058;
+        public static final int star=0x7f020059;
+        public static final int status_icon=0x7f02005a;
+        public static final int stub=0x7f02005b;
+        public static final int sync=0x7f02005c;
+        public static final int tick=0x7f02005d;
+        public static final int title_bar_default=0x7f02005e;
+        public static final int tw_button=0x7f02005f;
+        public static final int twitter_normal=0x7f020060;
+        public static final int twitter_pressed=0x7f020061;
+        public static final int user=0x7f020062;
+        public static final int wheat=0x7f020063;
+        public static final int white_gradient=0x7f020064;
+        public static final int win_star=0x7f020065;
+        public static final int wine=0x7f020066;
+        public static final int wood=0x7f020067;
+        public static final int wood_texture=0x7f020068;
+        public static final int zreport=0x7f020069;
     }
     public static final class id {
         public static final int BtnSlide=0x7f0c0092;
@@ -294,7 +295,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int add_product_scroll=0x7f0c0021;
         public static final int app_infotext_layout=0x7f0c009c;
         public static final int appentry=0x7f0c00df;
-        public static final int appsettings=0x7f0c010d;
+        public static final int appsettings=0x7f0c010e;
         public static final int bill_display=0x7f0c0055;
         public static final int button_scan=0x7f0c0084;
         public static final int cancel_recepie=0x7f0c0047;
@@ -433,7 +434,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int item_name=0x7f0c00b5;
         public static final int item_price=0x7f0c00b6;
         public static final int item_timer=0x7f0c00f5;
-        public static final int layouttables=0x7f0c010c;
+        public static final int layouttables=0x7f0c010d;
         public static final int list=0x7f0c009a;
         public static final int loading_image=0x7f0c008f;
         public static final int login=0x7f0c0006;
@@ -449,9 +450,10 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int mennu_banner=0x7f0c0098;
         public static final int mennu_separator=0x7f0c0099;
         public static final int menu=0x7f0c0097;
-        public static final int menu_add=0x7f0c0108;
-        public static final int menu_connect_printer=0x7f0c0109;
-        public static final int menu_sync=0x7f0c010b;
+        public static final int menu_add=0x7f0c0109;
+        public static final int menu_connect_printer=0x7f0c010a;
+        public static final int menu_show_tables=0x7f0c0108;
+        public static final int menu_sync=0x7f0c010c;
         public static final int my_table=0x7f0c0057;
         public static final int mygallery=0x7f0c00b7;
         public static final int nest5_read_buttons=0x7f0c00c4;
@@ -484,7 +486,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int popuptitle=0x7f0c00da;
         public static final int print_again=0x7f0c00f3;
         public static final int print_order=0x7f0c00f1;
-        public static final int print_zreport=0x7f0c010a;
+        public static final int print_zreport=0x7f0c010b;
         public static final int product_add_button=0x7f0c002d;
         public static final int product_add_list=0x7f0c0043;
         public static final int product_automatic_cost=0x7f0c0027;
@@ -633,10 +635,10 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
  Menu item text [CHAR LIMIT=NONE] 
          */
         public static final int accounts=0x7f090000;
-        public static final int action_forgot_password=0x7f090032;
-        public static final int action_register=0x7f090038;
-        public static final int action_sign_in_register=0x7f090030;
-        public static final int action_sign_in_short=0x7f090031;
+        public static final int action_forgot_password=0x7f090033;
+        public static final int action_register=0x7f090039;
+        public static final int action_sign_in_register=0x7f090031;
+        public static final int action_sign_in_short=0x7f090032;
         /**  Dialog button [CHAR LIMIT=NONE] 
  Dialog button [CHAR LIMIT=NONE] 
  Dialog button [CHAR LIMIT=NONE] 
@@ -653,6 +655,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
          */
         public static final int attention=0x7f090004;
         public static final int buyPerk=0x7f090026;
+        public static final int close=0x7f09002b;
         public static final int close_deals=0x7f090020;
         /**  Button text [CHAR LIMIT=NONE] 
  Button text [CHAR LIMIT=NONE] 
@@ -679,7 +682,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
  Message text [CHAR LIMIT=NONE] 
          */
         public static final int contacting_server=0x7f09000c;
-        public static final int device_error=0x7f09003a;
+        public static final int device_error=0x7f09003b;
         public static final int directory=0x7f090021;
         /**  Button text [CHAR LIMIT=NONE] 
  Button text [CHAR LIMIT=NONE] 
@@ -706,10 +709,10 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
  Deals 
          */
         public static final int emptyImage=0x7f090025;
-        public static final int error_field_required=0x7f090037;
-        public static final int error_incorrect_password=0x7f090036;
-        public static final int error_invalid_email=0x7f090034;
-        public static final int error_invalid_password=0x7f090035;
+        public static final int error_field_required=0x7f090038;
+        public static final int error_incorrect_password=0x7f090037;
+        public static final int error_invalid_email=0x7f090035;
+        public static final int error_invalid_password=0x7f090036;
         public static final int extrainfo=0x7f09001d;
         public static final int goToCoupons=0x7f090008;
         /**  Initial "hello, world" informational message [CHAR LIMIT=NONE] 
@@ -723,8 +726,8 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
          */
         public static final int hello_world_text=0x7f090012;
         public static final int login=0x7f09001c;
-        public static final int login_error=0x7f090039;
-        public static final int login_progress_signing_in=0x7f090033;
+        public static final int login_error=0x7f09003a;
+        public static final int login_progress_signing_in=0x7f090034;
         /**  Home 
  Home 
  Home 
@@ -740,12 +743,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int needs_account=0x7f090013;
         public static final int open=0x7f09002a;
         public static final int password=0x7f09001b;
-        public static final int print_invoice=0x7f09002b;
-        public static final int print_order=0x7f09002c;
+        public static final int print_invoice=0x7f09002c;
+        public static final int print_order=0x7f09002d;
         /**  Strings related to login 
          */
-        public static final int prompt_email=0x7f09002e;
-        public static final int prompt_password=0x7f09002f;
+        public static final int prompt_email=0x7f09002f;
+        public static final int prompt_password=0x7f090030;
         public static final int putname=0x7f09001e;
         public static final int redeem=0x7f090007;
         /**  Notification message [CHAR LIMIT=NONE] 
@@ -780,7 +783,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
  Dialog button text [CHAR LIMIT=NONE] 
          */
         public static final int skip=0x7f090018;
-        public static final int title_activity_login=0x7f09002d;
+        public static final int title_activity_login=0x7f09002e;
         /**  Notification message [CHAR LIMIT=NONE] 
  Notification message [CHAR LIMIT=NONE] 
  Notification message [CHAR LIMIT=NONE] 
