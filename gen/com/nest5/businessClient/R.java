@@ -635,10 +635,10 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
  Menu item text [CHAR LIMIT=NONE] 
          */
         public static final int accounts=0x7f090000;
-        public static final int action_forgot_password=0x7f090033;
-        public static final int action_register=0x7f090039;
-        public static final int action_sign_in_register=0x7f090031;
-        public static final int action_sign_in_short=0x7f090032;
+        public static final int action_forgot_password=0x7f090035;
+        public static final int action_register=0x7f09003b;
+        public static final int action_sign_in_register=0x7f090033;
+        public static final int action_sign_in_short=0x7f090034;
         /**  Dialog button [CHAR LIMIT=NONE] 
  Dialog button [CHAR LIMIT=NONE] 
  Dialog button [CHAR LIMIT=NONE] 
@@ -682,7 +682,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
  Message text [CHAR LIMIT=NONE] 
          */
         public static final int contacting_server=0x7f09000c;
-        public static final int device_error=0x7f09003b;
+        public static final int device_error=0x7f09003d;
         public static final int directory=0x7f090021;
         /**  Button text [CHAR LIMIT=NONE] 
  Button text [CHAR LIMIT=NONE] 
@@ -709,10 +709,10 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
  Deals 
          */
         public static final int emptyImage=0x7f090025;
-        public static final int error_field_required=0x7f090038;
-        public static final int error_incorrect_password=0x7f090037;
-        public static final int error_invalid_email=0x7f090035;
-        public static final int error_invalid_password=0x7f090036;
+        public static final int error_field_required=0x7f09003a;
+        public static final int error_incorrect_password=0x7f090039;
+        public static final int error_invalid_email=0x7f090037;
+        public static final int error_invalid_password=0x7f090038;
         public static final int extrainfo=0x7f09001d;
         public static final int goToCoupons=0x7f090008;
         /**  Initial "hello, world" informational message [CHAR LIMIT=NONE] 
@@ -726,8 +726,8 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
          */
         public static final int hello_world_text=0x7f090012;
         public static final int login=0x7f09001c;
-        public static final int login_error=0x7f09003a;
-        public static final int login_progress_signing_in=0x7f090034;
+        public static final int login_error=0x7f09003c;
+        public static final int login_progress_signing_in=0x7f090036;
         /**  Home 
  Home 
  Home 
@@ -743,12 +743,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int needs_account=0x7f090013;
         public static final int open=0x7f09002a;
         public static final int password=0x7f09001b;
-        public static final int print_invoice=0x7f09002c;
-        public static final int print_order=0x7f09002d;
+        public static final int print_invoice=0x7f09002e;
+        public static final int print_order=0x7f09002f;
         /**  Strings related to login 
          */
-        public static final int prompt_email=0x7f09002f;
-        public static final int prompt_password=0x7f090030;
+        public static final int prompt_email=0x7f090031;
+        public static final int prompt_password=0x7f090032;
         public static final int putname=0x7f09001e;
         public static final int redeem=0x7f090007;
         /**  Notification message [CHAR LIMIT=NONE] 
@@ -783,7 +783,9 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
  Dialog button text [CHAR LIMIT=NONE] 
          */
         public static final int skip=0x7f090018;
-        public static final int title_activity_login=0x7f09002e;
+        public static final int table_cancel=0x7f09002c;
+        public static final int table_close=0x7f09002d;
+        public static final int title_activity_login=0x7f090030;
         /**  Notification message [CHAR LIMIT=NONE] 
  Notification message [CHAR LIMIT=NONE] 
  Notification message [CHAR LIMIT=NONE] 

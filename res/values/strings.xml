@@ -99,5 +99,7 @@
     <string name="remove">Eliminar</string>
     <string name="open">Abrir</string>
     <string name="close">Cerrar</string>
+    <string name="table_cancel">Cancelar Orden</string>
+    <string name="table_close">Terminar Servicio</string>
 
 </resources>

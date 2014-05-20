@@ -153,6 +153,7 @@ import com.nest5.businessClient.AddIngredientCategoryForm.OnAddIngredientCategor
 import com.nest5.businessClient.AddIngredientForm.OnAddIngredientListener;
 import com.nest5.businessClient.AddProductCategoryForm.OnAddProductCategoryListener;
 import com.nest5.businessClient.AddProductForm.OnAddProductListener;
+import com.nest5.businessClient.CloseTableForm.OnSelectTableActionListener;
 import com.nest5.businessClient.CreateComboView.OnCreateComboListener;
 import com.nest5.businessClient.CreateProductView.OnCreateProductListener;
 import com.nest5.businessClient.DailyObjectFragment.OnDailyObjectFragmentCreatedListener;
@@ -190,7 +191,8 @@ public class Initialactivity extends FragmentActivity implements
 		OnInventoryObjectFragmentCreatedListener,
 		OnNest5ReadObjectFragmentCreatedListener,
 		ScanDevicesFragment.SelectDevice,
-		OnPrintSelectListener
+		OnPrintSelectListener,
+		OnSelectTableActionListener
 		{
 	/**
 	 * Tag for logging.
@@ -1167,6 +1169,13 @@ public class Initialactivity extends FragmentActivity implements
 	        if(resultCode == RESULT_OK){
 	            actual = intent.getParcelableExtra("MIMESA");
 	            clientes = intent.getIntExtra("MIMESACLIENTES", 0);
+	            if(actual != null){
+					//load tables view and allow to make order for it
+					currentTable = new CurrentTable<Table, Integer>(actual, clientes); 
+					statusText.setVisibility(View.VISIBLE);
+					statusText.setText(actual.getName() + " con "+clientes+" Clientes.");
+					Log.i("MISPRUEBAS",currentTable.getTable().getName());
+				}
 	        }
 	        if (resultCode == RESULT_CANCELED) {
 	            //Write your code if there's no result
@@ -1174,14 +1183,14 @@ public class Initialactivity extends FragmentActivity implements
 	        
 	        if(resultCode == Setup.CLOSE_TABLE){
 	        	//tomar mesa que se cierra, preguntar si es cancelar venta o pagar, si es cancelar borra de opentables, de orders etc y si es pagar, pone en currentsale y abre dialogo pagar
+	        	if(actual != null){
+					//load tables view and allow to make order for it
+					currentTable = new CurrentTable<Table, Integer>(actual, 0); 
+					statusText.setVisibility(View.VISIBLE);
+					statusText.setText("Cerrando: "+actual.getName());
+				}
 	        }
-			if(actual != null){
-				//load tables view and allow to make order for it
-				currentTable = new CurrentTable<Table, Integer>(actual, clientes); 
-				statusText.setVisibility(View.VISIBLE);
-				statusText.setText(actual.getName() + " con "+clientes+" Clientes.");
-				Log.i("MISPRUEBAS",currentTable.getTable().getName());
-			}
+			
 			
 		}
 		
@@ -3033,6 +3042,53 @@ public class Initialactivity extends FragmentActivity implements
 		
 		
 	};
+	
+	@Override
+	public void OnTableActionSelect(int Type) {
+		if(Type == CloseTableForm.CANCEL_ORDER){
+			if (currentTable == null)
+				return;
+			LinkedHashMap<Registrable,Integer> currentSale = null;
+			for(Entry<LinkedHashMap<Registrable, Integer>, CurrentTable<Table, Integer>> mesa : cookingOrdersTable.entrySet()){
+				if(mesa.getValue().getTable().getName().equalsIgnoreCase(currentTable.getTable().getName())){
+					currentSale = mesa.getKey();
+					break;
+				}
+			}
+			if(currentSale != null){
+				currentTable = null;
+				cookingOrders.remove(currentSale);
+				cookingOrdersDelivery.remove(currentSale);
+				cookingOrdersTimes.remove(currentSale);
+				cookingOrdersTogo.remove(currentSale);
+				cookingOrdersTable.remove(currentSale);
+				for(CurrentTable<Table, Integer> actual : openTables){
+					if(actual.getTable().getName().equalsIgnoreCase(currentTable.getTable().getName())){
+						openTables.remove(actual);
+						break;
+					}
+				}
+			}
+			
+		}
+		if(Type == CloseTableForm.PRINT_INVOICE){
+			if (currentTable == null)
+				return;
+			for(Entry<LinkedHashMap<Registrable, Integer>, CurrentTable<Table, Integer>> mesa : cookingOrdersTable.entrySet()){
+				if(mesa.getValue().getTable().getName().equalsIgnoreCase(currentTable.getTable().getName())){
+					currentOrder = mesa.getKey();
+					break;
+				}
+			}
+			for(CurrentTable<Table, Integer> actual : openTables){
+				if(actual.getTable().getName().equalsIgnoreCase(currentTable.getTable().getName())){
+					openTables.remove(actual);
+					break;
+				}
+			}
+			showPaymentFormDialog();
+		}
+	}
 	
 	private void onZReportSelect(){
 		SharedPreferences prefs = Util.getSharedPreferences(mContext);
@@ -5457,6 +5513,8 @@ public class Initialactivity extends FragmentActivity implements
             }
         }
     }
+
+	
 
 	
 	
