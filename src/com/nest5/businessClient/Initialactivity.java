@@ -114,6 +114,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
@@ -259,6 +260,7 @@ public class Initialactivity extends FragmentActivity implements
 	DemoCollectionPagerAdapter mDemoCollectionPagerAdapter;
 	ViewPager mViewPager;
 	GridView itemsView;
+	private AutoCompleteTextView autoCompleteTextView;
 	TableLayout table;
 	TableLayout dailyTable;
 	TableLayout inventoryTable;
@@ -303,6 +305,7 @@ public class Initialactivity extends FragmentActivity implements
 	List<Registrable> ingredientList;
 	List<Registrable> comboList;
 	List<Registrable> registerList;
+	List<Registrable> allRegistrables;
 	List<Unit> units;
 	List<Sale> saleList;
 	List<Sale> salesFromToday;
@@ -1545,6 +1548,7 @@ public class Initialactivity extends FragmentActivity implements
 		statusText = (TextView) v.findViewById(R.id.group_owner);
 		deviceText = (TextView) v.findViewById(R.id.device_info);
 		saleValue = (TextView) v.findViewById(R.id.sale_info);
+		autoCompleteTextView = (AutoCompleteTextView) findViewById(R.id.autocomplete_registrable);
 		if(layouttables){
 			statusText.setVisibility(View.VISIBLE);
 			//statusText.setText("No hay Mesa Seleccionada.");
@@ -1562,6 +1566,45 @@ public class Initialactivity extends FragmentActivity implements
 		gridAdapter = new ImageAdapter(mContext, registerList, inflater,
 				gridButtonListener);
 		setGridContent(gridAdapter, comboList);
+		ArrayList<String> registrables = new ArrayList<String>();
+		for(Registrable actual : allRegistrables){
+			registrables.add(actual.name);
+		}
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.list_item, registrables);
+        autoCompleteTextView.setAdapter(adapter);
+        autoCompleteTextView.setOnItemClickListener(new OnItemClickListener() {
+			public void onItemClick(AdapterView<?> parent, View v,
+					int position, long id) {
+				String selection = (String) parent.getItemAtPosition(position);
+		        int pos = -1;
+
+		        for (int i = 0; i < allRegistrables.size(); i++) {
+		            if (allRegistrables.get(i).name.equalsIgnoreCase(selection)) {
+		                pos = i;
+		                break;
+		            }
+		        }
+		        if(pos > -1){
+		        	if (currentOrder.containsKey(allRegistrables.get(pos))) {
+						currentOrder.put(allRegistrables.get(pos),
+								currentOrder.get(allRegistrables.get(pos)) + 1);
+
+					} else {
+						currentOrder.put(allRegistrables.get(pos), 1);
+					}
+					makeTable(allRegistrables.get(pos).name);	
+		        }
+		        else{
+		        	Toast.makeText(mContext, "No Existe el Ítem", Toast.LENGTH_LONG).show();
+		        }
+		        autoCompleteTextView.setText("");
+		        autoCompleteTextView.setHint("Buscar Ítems para Registrar");
+				
+			}
+			
+		});
+        autoCompleteTextView.setText("");
+        autoCompleteTextView.setHint("Buscar Ítems para Registrar");
 		// Tomar la tabla de la izquierda del home view
 		table = (TableLayout) v.findViewById(R.id.my_table);
 		makeTable("NA");
@@ -1578,6 +1621,7 @@ public class Initialactivity extends FragmentActivity implements
 				
 			}
 		});
+		
 
 	}
 	
@@ -5435,12 +5479,15 @@ public static class MHandler extends Handler {
 	private void updateRegistrables(){
 		try{
 			productList = new ArrayList<Registrable>();
+			allRegistrables = new ArrayList<Registrable>();
 			inflater = Initialactivity.this.getLayoutInflater();
 			Iterator<Product> iterator = productos.iterator();
 
 			while (iterator.hasNext()) {
 				// ////Log.i("HOLAAA",iterator.next().getName());
-				productList.add(new Registrable(iterator.next()));
+				Registrable current = new Registrable(iterator.next());
+				productList.add(current);
+				allRegistrables.add(current);
 
 			}
 			ingredientList = new ArrayList<Registrable>();
@@ -5448,7 +5495,9 @@ public static class MHandler extends Handler {
 
 			while (iterator2.hasNext()) {
 				// //////Log.i("HOLAAA",iterator.next().getName());
-				ingredientList.add(new Registrable(iterator2.next()));
+				Registrable current = new Registrable(iterator2.next());
+				ingredientList.add(current);
+				allRegistrables.add(current);
 
 			}
 
@@ -5458,7 +5507,9 @@ public static class MHandler extends Handler {
 
 			while (iterator3.hasNext()) {
 				// ////Log.i("HOLAAA",iterator.next().getName());
-				comboList.add(new Registrable(iterator3.next()));
+				Registrable current = new Registrable(iterator3.next());
+				comboList.add(current);
+				allRegistrables.add(current);
 
 			}
 		}catch(Exception e){
