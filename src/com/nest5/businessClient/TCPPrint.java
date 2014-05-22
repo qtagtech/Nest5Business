@@ -67,10 +67,10 @@ public class TCPPrint {
         try {
         	
         	SharedPreferences prefs = Util.getSharedPreferences(mContext);
-        	Log.i("TCP Print",SERVERIP);
-        	Log.i("TCP Print",String.valueOf(SERVERPORT));
+        	//Log.i("TCP Print",SERVERIP);
+        	//Log.i("TCP Print",String.valueOf(SERVERPORT));
             //here you must put your computer's IP address.
-        	Log.i("TCP Print","Empezando printer client");
+        	//Log.i("TCP Print","Empezando printer client");
             InetAddress serverAddr = InetAddress.getByName(SERVERIP);
             setStatus(CONNECTING);
             //create a socket to make the connection with the server

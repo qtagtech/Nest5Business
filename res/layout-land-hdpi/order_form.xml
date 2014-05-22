@@ -16,7 +16,6 @@
               android:id="@+id/payment_form_inner"
 			    android:layout_width="fill_parent"
 			    android:layout_height="wrap_content"
-			    
 			    android:orientation="vertical">
 			    <LinearLayout 
 			    android:id="@+id/payment_form_options"
@@ -33,16 +32,6 @@
 				        android:background="@drawable/blue_button" 
 			        	style="@style/ButtonText"				       
 				        android:text="Domicilio"/>
-				    
-				     
-			    </LinearLayout>
-			    <LinearLayout 
-			    android:id="@+id/delivery_options"
-			    android:layout_width="fill_parent"
-			    android:layout_height="wrap_content"
-			    android:weightSum="1">
-			        
-			       
 				    <Button 
 				        android:id="@+id/is_togo"
 				        android:layout_width="0dip"
@@ -51,6 +40,32 @@
 				        android:background="@drawable/blue_button" 
 			        	style="@style/ButtonText"				       
 				        android:text="Llevar"/>
+				    
+				     
+			    </LinearLayout>
+			    <LinearLayout 
+			    android:id="@+id/delivery_options"
+			    android:layout_width="fill_parent"
+			    android:layout_height="wrap_content"
+			    android:weightSum="1"
+			    android:orientation="vertical">
+			     <TextView 
+			        android:id="@+id/add_toopentable_title"
+			        android:layout_width="fill_parent"
+			        android:layout_height="50dip"
+			        android:textSize="20dp"
+			        android:text="¿Deseas agregar esta orden a una mesa abierta?"
+			        android:textStyle="bold"
+			        android:background="#cccccc"
+			        android:layout_gravity="center_vertical|center_horizontal"
+			        android:gravity="center_vertical|center_horizontal"/> 
+			    <Spinner 
+			      android:id="@+id/open_tables_add_order"
+			      android:drawSelectorOnTop="true"
+		          android:layout_width="fill_parent"
+		          android:layout_height="wrap_content"/>
+			    
+				    
 				    
 				    
 				     

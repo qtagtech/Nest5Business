@@ -43,6 +43,7 @@ public class TablesOrderActivity extends Activity {
 	private TextView tit;
 	private LinearLayout mainScreen;
 	private LinkedList<CurrentTable<Table,Integer>> openTables;
+	LinkedList<PopupWindow> todaslasmesas;
 	
 
 	@SuppressWarnings("unchecked")
@@ -58,6 +59,7 @@ public class TablesOrderActivity extends Activity {
 		SharedPreferences prefs  = Util.getSharedPreferences(mContext);
 		String mesas = prefs.getString(Setup.SAVED_TABLES, "");
 		openTables = new LinkedList<CurrentTable<Table,Integer>>();
+		todaslasmesas = new LinkedList<PopupWindow>();
 		try{
 			GsonBuilder gsonBuilder = new GsonBuilder();
 		    Gson gson = gsonBuilder.create();
@@ -70,9 +72,8 @@ public class TablesOrderActivity extends Activity {
 			GsonBuilder gsonBuilder = new GsonBuilder();
 		    Gson gson = gsonBuilder.create();
 		    String lista = getIntent().getStringExtra("mesasabiertas");
-		    Log.i("MISPRUEBAS","Lista : "+lista);
+		    //Log.i("MISPRUEBAS","Lista : "+lista);
 		    openTables = gson.fromJson(lista, new TypeToken<LinkedList<CurrentTable<Table,Integer>>>(){}.getType());
-		    Log.i("MISPRUEBAS","Tamño en clase: "+openTables.size());
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -111,15 +112,24 @@ public class TablesOrderActivity extends Activity {
 						adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 						clients.setAdapter(adapter);
 						if(openTables != null){
-							Log.i("MISPRUEBAS","En el if != null");
+							//Log.i("MISPRUEBAS","En el if != null");
 							for(CurrentTable<Table,Integer> mesa : openTables){
 								if(table.getName().equalsIgnoreCase(mesa.getTable().getName())){
 									//poner boton cerrar mesa
-									Log.i("MISPRUEBAS","nombres iguakes");
+									//Log.i("MISPRUEBAS","nombres iguakes");
 									btnOpenClose.setText(getResources().getString(R.string.close));
 								}
 							}
 						}
+						
+						DisplayMetrics displayMetrics = new DisplayMetrics();
+						  getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+						  int offsetX = displayMetrics.widthPixels - tit.getMeasuredWidth();
+						  int offsetY = displayMetrics.heightPixels;
+					
+					popupWindow.showAsDropDown(tit, table.getCoordinate_x() - offsetX, table.getCoordinate_y()  - offsetY/2 + 2*tit.getMeasuredHeight());
+					todaslasmesas.push(popupWindow);
+					//popupWindow.showAtLocation(tit, Gravity.NO_GRAVITY, );
 						
 						btnOpenClose.setOnClickListener(new Button.OnClickListener(){
 							@Override
@@ -127,7 +137,7 @@ public class TablesOrderActivity extends Activity {
 								if((((Button) v).getText().toString()).equalsIgnoreCase(getResources().getString(R.string.open))){
 									int client = (Integer) clients.getSelectedItem();
 									Intent returnIntent = new Intent();
-									//Log.i("MISPRUEBAS",table.getName());
+									////Log.i("MISPRUEBAS",table.getName());
 									returnIntent.putExtra("MIMESA",table);
 									returnIntent.putExtra("MIMESACLIENTES",client);
 									setResult(RESULT_OK,returnIntent);
@@ -137,19 +147,10 @@ public class TablesOrderActivity extends Activity {
 									returnIntent.putExtra("MIMESA",table);
 									setResult(Setup.CLOSE_TABLE,returnIntent);
 									finish();
+									
 								}
 								
 							}});
-								
-							  DisplayMetrics displayMetrics = new DisplayMetrics();
-							  getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-							  int offsetX = displayMetrics.widthPixels - tit.getMeasuredWidth();
-							  int offsetY = displayMetrics.heightPixels;
-						
-						popupWindow.showAsDropDown(tit, table.getCoordinate_x() - offsetX, table.getCoordinate_y()  - offsetY/2 + 2*tit.getMeasuredHeight());
-						//popupWindow.showAtLocation(tit, Gravity.NO_GRAVITY, );
-						
-						
 					}
 				}
 		    	
@@ -157,6 +158,18 @@ public class TablesOrderActivity extends Activity {
 		    }
 
 		}, 100L);
+		
+	}
+	
+	@Override
+	public void onPause(){
+		super.onPause();
+		if(todaslasmesas.size() > 0){
+			for(PopupWindow actual : todaslasmesas){
+				actual.dismiss();
+			}
+		}
+		
 		
 	}
 

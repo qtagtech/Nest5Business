@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.nest5.businessClient.HomeObjectFragment.OnHomeObjectFragmentCreatedListener;
+
 import android.app.Activity;
 import android.app.ActionBar.LayoutParams;
 import android.content.Context;
@@ -41,7 +43,12 @@ public class OrderForm extends DialogFragment {
         public void OnOrderClicked(int isDelivery, int isTogo,String note);
         
     }
-	
+	public interface OnOrderFomrFragmentCreatedListener {
+	    public void OnOrderFomrFragmentCreatedListener(View v);
+	    
+	}
+
+private OnOrderFomrFragmentCreatedListener onOrderFomrFragmentCreatedListener;	
 private Context mContext;
 private LinkedHashMap<Registrable, Integer> items;
 private Button deliveryBtn;
@@ -54,6 +61,7 @@ private OnOrderListener onOrderListener;
 private OrderForm frag;
 private Integer isDelivery = 0;
 private Integer isToGo = 0;
+private static View rootView;
 
 
 
@@ -68,6 +76,13 @@ public void onAttach(Activity activity){
 	}
 	catch(ClassCastException e){
 		throw new ClassCastException(activity.toString() + " must implement OnPayListener");
+	}
+	try
+	{
+		onOrderFomrFragmentCreatedListener = (OnOrderFomrFragmentCreatedListener) activity;
+	}
+	catch(ClassCastException e){
+		throw new ClassCastException(activity.toString() + " must implement OnOrderFomrFragmentCreatedListener");
 	}
 }
 
@@ -93,7 +108,8 @@ public void onAttach(Activity activity){
          Bundle savedInstanceState) {
 	 
 	 //frag = this;
-     View view = inflater.inflate(R.layout.order_form, container);
+     View view = inflater.inflate(R.layout.order_form, container);  //poner spinner
+     rootView = view;
     mContext = view.getContext();
     payBtn = (Button) view.findViewById(R.id.payment_form_pay_button);
     cancelBtn = (Button) view.findViewById(R.id.payment_form_cancel_button);
@@ -169,4 +185,10 @@ togoBtn.setOnClickListener(new OnClickListener() {
 
      return view;
  }
+ 
+ @Override 
+ public void onResume() {
+		super.onResume();
+		onOrderFomrFragmentCreatedListener.OnOrderFomrFragmentCreatedListener(rootView);
+	}
 }

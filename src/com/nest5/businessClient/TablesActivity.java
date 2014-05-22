@@ -42,6 +42,7 @@ public class TablesActivity extends Activity {
 	LinkedHashMap<PopupWindow,Integer> ClientesxMesa;
 	LinkedHashMap<PopupWindow,String> NombresxMesa;
 	LinkedHashMap<PopupWindow,int[]> CoordenadasxMesa;
+	
 
 	
 	private Typeface VarelaFont;
@@ -158,6 +159,7 @@ public class TablesActivity extends Activity {
 						mainl.getLocationOnScreen(coordinates);
 						Table actual = new Table(complete,clients,coordinates);
 						createdTables.push(actual);
+						mesa.dismiss();
 					}
 					GsonBuilder gb = new GsonBuilder();
 					Gson gson = gb.create();

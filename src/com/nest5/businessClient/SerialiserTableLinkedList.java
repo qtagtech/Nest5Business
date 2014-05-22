@@ -63,57 +63,57 @@ public class SerialiserTableLinkedList implements JsonSerializer<LinkedList<Link
 	public LinkedList<LinkedHashMap<Registrable, Integer>> deserialize(
 			JsonElement jsonElement, Type type, JsonDeserializationContext context)
 			throws JsonParseException {
-		////Log.i("MISPRUEBAS","CADENA: "+jsonElement.toString());
+		////////Log.i("MISPRUEBAS","CADENA: "+jsonElement.toString());
 		JsonArray ventas = jsonElement.getAsJsonArray();
-		//Log.i("MISPRUEBAS","CHECKPOINT1");
+		//////Log.i("MISPRUEBAS","CHECKPOINT1");
 		LinkedList<LinkedHashMap<Registrable, Integer>> lista = new LinkedList<LinkedHashMap<Registrable,Integer>>(); 
 		for(JsonElement venta : (JsonArray) ventas){
-			//Log.i("MISPRUEBAS","CHECKPOINT2");
+			//////Log.i("MISPRUEBAS","CHECKPOINT2");
 			LinkedHashMap<Registrable, Integer> actual = new LinkedHashMap<Registrable, Integer>();
 			for(JsonElement registrable : (JsonArray) venta){
-				//Log.i("MISPRUEBAS","CHECKPOINT3");
+				//////Log.i("MISPRUEBAS","CHECKPOINT3");
 				JsonObject element = ((JsonObject) registrable).get("element").getAsJsonObject();
-				//Log.i("MISPRUEBAS","CHECKPOINT3.1");
+				//////Log.i("MISPRUEBAS","CHECKPOINT3.1");
 				GsonBuilder gsBuilder = new GsonBuilder();
-				//Log.i("MISPRUEBAS","CHECKPOINT3.2");
+				//////Log.i("MISPRUEBAS","CHECKPOINT3.2");
 				Gson gs = gsBuilder.create();
-				//Log.i("MISPRUEBAS","CHECKPOINT3.3");
+				//////Log.i("MISPRUEBAS","CHECKPOINT3.3");
 				int tipo = ((JsonObject) registrable).get("type").getAsInt();
-				//Log.i("MISPRUEBAS","CHECKPOINT3.4");
+				//////Log.i("MISPRUEBAS","CHECKPOINT3.4");
 				Registrable actualRegistrable = null;
-				//Log.i("MISPRUEBAS","CHECKPOINT3.5");
-				//Log.i("MISPRUEBAS","CHECKPOINT4");
+				//////Log.i("MISPRUEBAS","CHECKPOINT3.5");
+				//////Log.i("MISPRUEBAS","CHECKPOINT4");
 				switch(tipo){
 				case Registrable.TYPE_INGREDIENT:
-					//Log.i("MISPRUEBAS","CHECKPOINT5");
+					//////Log.i("MISPRUEBAS","CHECKPOINT5");
 					Type entityType1 = new TypeToken<Ingredient>(){}.getType();
 					Ingredient ingrediente = gs.fromJson(element, entityType1);
 					actualRegistrable = new Registrable(ingrediente);
-					//Log.i("MISPRUEBAS","CHECKPOINT6");
+					//////Log.i("MISPRUEBAS","CHECKPOINT6");
 					break;
 				case Registrable.TYPE_PRODUCT:
-					//Log.i("MISPRUEBAS","CHECKPOINT5");
+					//////Log.i("MISPRUEBAS","CHECKPOINT5");
 					Type entityType2 = new TypeToken<Product>(){}.getType();
 					Product producto = gs.fromJson(element, entityType2);
 					actualRegistrable = new Registrable(producto);
-					//Log.i("MISPRUEBAS","CHECKPOINT6");
+					//////Log.i("MISPRUEBAS","CHECKPOINT6");
 					break;
 				case Registrable.TYPE_COMBO:
-					//Log.i("MISPRUEBAS","CHECKPOINT5");
+					//////Log.i("MISPRUEBAS","CHECKPOINT5");
 					Type entityType3 = new TypeToken<Combo>(){}.getType();
 					Combo combo = gs.fromJson(element, entityType3);
 					actualRegistrable = new Registrable(combo);
-					//Log.i("MISPRUEBAS","CHECKPOINT6");
+					//////Log.i("MISPRUEBAS","CHECKPOINT6");
 					break;
 				}
-				//Log.i("MISPRUEBAS","CHECKPOINT7");
+				//////Log.i("MISPRUEBAS","CHECKPOINT7");
 				int cantidad = ((JsonObject) registrable).get("quantity").getAsInt();
-				//Log.i("MISPRUEBAS","CHECKPOINT8");
+				//////Log.i("MISPRUEBAS","CHECKPOINT8");
 				actual.put(actualRegistrable, cantidad);
 				
 				
 			}
-			//Log.i("MISPRUEBAS","CHECKPOINT9");
+			//////Log.i("MISPRUEBAS","CHECKPOINT9");
 			lista.push(actual);
 		}
 		return lista;

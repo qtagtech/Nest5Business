@@ -25,6 +25,7 @@ import android.widget.AdapterView.OnItemClickListener;
 public class SaleAdapter extends ArrayAdapter<Long> {
     private Context mContext;
     private List<Long> items;
+    private List<String> tables;
     private LayoutInflater inflater;
     
     private Typeface varela;
@@ -40,11 +41,13 @@ public class SaleAdapter extends ArrayAdapter<Long> {
     
     
 
-    public SaleAdapter(Context c,List<Long> _items,LayoutInflater _inflater) {
+    public SaleAdapter(Context c,List<Long> _items,List<String> _tables,LayoutInflater _inflater) {
         super(c,R.layout.sell_item,_items);
     	mContext = c;
         items = _items;
         inflater = _inflater;
+        tables = _tables;
+        	
 
         //this.cListener = cListener;
         varela = Typeface.createFromAsset(mContext.getAssets(), "fonts/Varela-Regular.otf");
@@ -56,6 +59,9 @@ public class SaleAdapter extends ArrayAdapter<Long> {
 
     public Long getItem(int position) {
         return items.get(position);
+    }
+    public String getTable(int position){
+    	return tables.get(position);
     }
 
     public long getItemId(int position) {
@@ -85,8 +91,9 @@ public class SaleAdapter extends ArrayAdapter<Long> {
         //imageView.setImageResource(mThumbIds[position]);
        // return imageView;
         nameView = viewCache.getNameView();
-        nameView.setText("Venta número: "+String.valueOf(position + 1));
-        nameView.setTypeface(varela);
+        
+        nameView.setText(getTable(position)+System.getProperty("line.separator")+"Venta nÃºmero: "+String.valueOf(position + 1));
+        //nameView.setTypeface(varela);
         //imageView = viewCache.getImageView();
         //imageView.setTag("registrar"+position);
         //imageView.setImageResource(mThumbIds[4]);
