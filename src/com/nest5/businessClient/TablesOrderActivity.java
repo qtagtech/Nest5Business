@@ -6,6 +6,8 @@ import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
+import com.bugsense.trace.BugSenseHandler;
+import com.flurry.android.FlurryAgent;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -50,6 +52,7 @@ public class TablesOrderActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+        BugSenseHandler.initAndStartSession(TablesOrderActivity.this, "1a5a6af1");
 		setContentView(R.layout.tables_order_layout);
 		mContext = this;
 		BebasFont = Typeface
@@ -172,5 +175,24 @@ public class TablesOrderActivity extends Activity {
 		
 		
 	}
+    @Override
+    protected void onStart()
+    {
+        super.onStart();
+        FlurryAgent.onStartSession(this, "J63XVCZCXV4NN4P2SQZT");
+        SharedPreferences prefs = Util.getSharedPreferences(mContext);
+        String deviceId = prefs.getString(Setup.DEVICE_REGISTERED_ID, "null");
+        String compid = prefs.getString(Setup.COMPANY_ID, "0");
+        String jString = "{device_id:"+deviceId+",company:"+compid+"}";
+        BugSenseHandler.setUserIdentifier(jString);
+    }
+
+    @Override
+    protected void onStop()
+    {
+        super.onStop();
+        BugSenseHandler.closeSession(TablesOrderActivity.this);
+        FlurryAgent.onEndSession(this);
+    }
 
 }

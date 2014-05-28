@@ -52,6 +52,8 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.bugsense.trace.BugSenseHandler;
+import com.flurry.android.FlurryAgent;
 import org.json.JSONObject;
 
 import android.app.ActionBar;
@@ -491,6 +493,7 @@ public class Initialactivity extends FragmentActivity implements
 		this.savedInstanceState = savedInstanceState;
 		getWindow().setFormat(PixelFormat.RGBA_8888);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_DITHER);
+        BugSenseHandler.initAndStartSession(Initialactivity.this, "1a5a6af1");
 		setContentView(R.layout.swipe_view);
 		checkLogin();
 		// add necessary intent values to be matched.
@@ -741,6 +744,7 @@ public class Initialactivity extends FragmentActivity implements
 	@Override
 	protected void onStart() {
 		super.onStart();
+        FlurryAgent.onStartSession(this, "J63XVCZCXV4NN4P2SQZT");
 		//mReader.start();
 		// If BT is not on, request that it be enabled.óóóóó BTóóóóóóóóóóóó
         // setupChat() will then be called during onActivityRe//sultsetupChat() È»óó½«µóóóóÚ¼ó onActivityResult
@@ -763,6 +767,12 @@ public class Initialactivity extends FragmentActivity implements
 		}catch(Exception e){
 			e.printStackTrace();
 		}
+
+        SharedPreferences prefs = Util.getSharedPreferences(mContext);
+        String deviceId = prefs.getString(Setup.DEVICE_REGISTERED_ID, "null");
+        String compid = prefs.getString(Setup.COMPANY_ID, "0");
+        String jString = "{device_id:"+deviceId+",company:"+compid+"}";
+        BugSenseHandler.setUserIdentifier(jString);
         
 	}
 
@@ -863,6 +873,8 @@ public class Initialactivity extends FragmentActivity implements
 	@Override
 	protected void onStop() {
 		super.onStop();
+        FlurryAgent.onEndSession(this);
+        BugSenseHandler.closeSession(Initialactivity.this);
 		mResetProgressDialog.dismiss();
 		//mReader.stop();
 	}

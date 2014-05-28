@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.bugsense.trace.BugSenseHandler;
+import com.flurry.android.FlurryAgent;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -34,8 +36,8 @@ import android.graphics.Typeface;
 
 public class TablesActivity extends Activity {
 	private Context mContext;
-	int numTables;
-	int maxClients;
+	int numTables = 30 ;
+	int maxClients = 40;
 	Integer[] NumberOfClients;
 	Integer[] tables;
 	LinkedList<PopupWindow> mesas;
@@ -51,6 +53,7 @@ public class TablesActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+        BugSenseHandler.initAndStartSession(TablesActivity.this, "1a5a6af1");
 		setContentView(R.layout.tables_layout);
 		mContext = this;
 		BebasFont = Typeface
@@ -58,8 +61,17 @@ public class TablesActivity extends Activity {
 		VarelaFont = Typeface.createFromAsset(getAssets(),
 				"fonts/Varela-Regular.otf");
 		SharedPreferences defaultprefs = PreferenceManager.getDefaultSharedPreferences(mContext);
-		numTables = Integer.parseInt(defaultprefs.getString("quant_tables", "30"));
-		maxClients = Integer.parseInt(defaultprefs.getString("max_clients_table", "10"));
+        try{
+            numTables = Integer.parseInt(defaultprefs.getString("quant_tables", "30"));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        try{
+            maxClients = Integer.parseInt(defaultprefs.getString("max_clients_table", "10"));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
 		NumberOfClients = new Integer[maxClients];
 		for (int i = 0; i < NumberOfClients.length; i++)
 		    NumberOfClients[i] = i + 1;
@@ -177,5 +189,24 @@ public class TablesActivity extends Activity {
 			}
 		});
 	}
+    @Override
+    protected void onStart()
+    {
+        super.onStart();
+        FlurryAgent.onStartSession(this, "J63XVCZCXV4NN4P2SQZT");
+        SharedPreferences prefs = Util.getSharedPreferences(mContext);
+        String deviceId = prefs.getString(Setup.DEVICE_REGISTERED_ID, "null");
+        String compid = prefs.getString(Setup.COMPANY_ID, "0");
+        String jString = "{device_id:"+deviceId+",company:"+compid+"}";
+        BugSenseHandler.setUserIdentifier(jString);
+    }
+
+    @Override
+    protected void onStop()
+    {
+        super.onStop();
+        BugSenseHandler.closeSession(TablesActivity.this);
+        FlurryAgent.onEndSession(this);
+    }
 
 }

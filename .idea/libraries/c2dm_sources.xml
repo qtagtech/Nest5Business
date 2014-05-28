@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="c2dm-sources">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/c2dm.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/libs/c2dm-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
