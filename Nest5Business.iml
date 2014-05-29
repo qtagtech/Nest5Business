@@ -53,13 +53,13 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="Parse-1.4.3" level="project" />
+    <orderEntry type="library" name="Parse-1.4" level="project" />
     <orderEntry type="library" name="android-support-v4" level="project" />
-    <orderEntry type="library" name="gson-2.1-javadoc" level="project" />
-    <orderEntry type="library" name="aws-android-sdk-1.7.0-core" level="project" />
-    <orderEntry type="library" name="c2dm-sources" level="project" />
     <orderEntry type="library" name="bugsense-3.6.1" level="project" />
+    <orderEntry type="library" name="c2dm-sources" level="project" />
     <orderEntry type="library" name="FlurryAnalytics-4.0.0" level="project" />
+    <orderEntry type="library" name="gson-2.1" level="project" />
+    <orderEntry type="library" name="Robotium-5" level="project" />
   </component>
 </module>
 
