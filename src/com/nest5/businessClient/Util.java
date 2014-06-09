@@ -228,7 +228,7 @@ public class Util {
     	{
     		value = new DecimalFormat("#.#").format(distance); 
     		//value = String.format("%.%1g%n", distance);
-    		value +=" Kilómetros.";
+    		value +=" KilÃ³metros.";
     	}
     	return value;
     		

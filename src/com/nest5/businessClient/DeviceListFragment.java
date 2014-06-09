@@ -61,7 +61,7 @@ public void onAttach(Activity activity){
     /* ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
              R.array.planets_array, android.R.layout.simple_spinner_item);*/
      
-     getDialog().setTitle("Agregar Nueva Categoría de Producto");
+     getDialog().setTitle("Agregar Nueva CategorÃ­a de Producto");
      
      saveBtn.setOnClickListener(new OnClickListener() {
 		
@@ -73,7 +73,7 @@ public void onAttach(Activity activity){
 			if(ingName.isEmpty())
 			{
 				txtName.findFocus();
-				Toast.makeText(getActivity(), "Es necesario indicar un nombre de Categoría", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getActivity(), "Es necesario indicar un nombre de CategorÃ­a", Toast.LENGTH_SHORT).show();
 			}
 			else
 			{

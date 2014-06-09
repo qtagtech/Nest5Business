@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Nest5Business.iml" filepath="$PROJECT_DIR$/Nest5Business.iml" />
-      <module fileurl="file://$PROJECT_DIR$/Nest5BusinessTest/Nest5BusinessTest.iml" filepath="$PROJECT_DIR$/Nest5BusinessTest/Nest5BusinessTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../Nest5businessTest/Nest5businessTest.iml" filepath="$PROJECT_DIR$/../Nest5businessTest/Nest5businessTest.iml" />
     </modules>
   </component>
 </project>

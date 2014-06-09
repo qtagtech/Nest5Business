@@ -55,7 +55,7 @@ public void onAttach(Activity activity){
      orderButton.setText(mContext.getResources().getString(R.string.table_close));
      Button invoiceButton = (Button) view.findViewById(R.id.invoice_button);
      invoiceButton.setText(mContext.getResources().getString(R.string.table_cancel));
-     getDialog().setTitle("¿Qué deseas hacer?");
+     getDialog().setTitle("Â¿QuÃ© deseas hacer?");
      orderButton.setOnClickListener(new OnClickListener() {
 		
 		@Override

@@ -106,7 +106,7 @@ public class IntentIntegrator {
 
   public static final String DEFAULT_TITLE = "Install Barcode Scanner?";
   public static final String DEFAULT_MESSAGE =
-      "Para leer los códigos debes instalar BarCode Scanner. ¿Deseas instalarla ya? haz clic en Aceptar.";
+      "Para leer los cÃ³digos debes instalar BarCode Scanner. Â¿Deseas instalarla ya? haz clic en Aceptar.";
   public static final String DEFAULT_YES = "Aceptar";
   public static final String DEFAULT_NO = "Cancelar";
 

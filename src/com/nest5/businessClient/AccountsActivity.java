@@ -186,7 +186,7 @@ public class AccountsActivity extends Activity {
     		
     		prefs.edit().putInt(Util.INTERNET_CONNECTION, Util.INTERNET_DISCONNECTED).commit();
     		AlertDialog.Builder builder = new AlertDialog.Builder(this);  
-            builder.setMessage("No tienes una conexión a internet activa. Habilítala haciendo click en aceptar y seleccionando luego una red.")  
+            builder.setMessage("No tienes una conexiÃ³n a internet activa. HabilÃ­tala haciendo click en aceptar y seleccionando luego una red.")
                    .setCancelable(false)  
                    .setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {  
                        public void onClick(DialogInterface dialog, int id) {  
