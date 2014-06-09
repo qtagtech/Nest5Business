@@ -610,7 +610,7 @@ public class Initialactivity extends FragmentActivity implements
 
 		Tab homeTab = actionBar.newTab().setText("Inicio")
 				.setTabListener(tabListener);
-		Tab ordersTab = actionBar.newTab().setText("觬denes")
+		Tab ordersTab = actionBar.newTab().setText("脫rdenes")
 				.setTabListener(tabListener);
 		/*Tab dailyTab = actionBar.newTab().setText("Registros")
 				.setTabListener(tabListener);
@@ -788,8 +788,8 @@ public class Initialactivity extends FragmentActivity implements
 		prefs.edit().putBoolean(Setup.IS_UPDATING, false);
 		//mReader.start();
 		// Performing this check in onResume() covers the case in which BT was贸贸 onResume() 
-        // not enabled during onStart(), so we were paused to enable it...贸贸 onStart() .
-        // onResume() will be called when ACTION_REQUEST_ENABLE activity returns.ACTION_REQUEST_ENABLE  onResume()
+        // not enabled during onStart(), so we were paused to enable it...贸贸 onStart() 
+        // onResume() will be called when ACTION_REQUEST_ENABLE activity returns.ACTION_REQUEST_ENABLE
         if (mChatService != null) {
             // Only if the state is STATE_NONE, do we know that we haven't started already
         	
