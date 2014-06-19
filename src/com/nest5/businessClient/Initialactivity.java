@@ -3537,8 +3537,13 @@ public static class MHandler extends Handler {
 				items.add(cookingOrdersTimes.get(current));
 				nameTables.add(cookingOrdersTable.get(current).getTable().getName());
 			}
-			SaleAdapter cookingAdapter = new SaleAdapter(activity, items, nameTables,inflater);
-			ordersList.setAdapter(cookingAdapter);
+			try{
+				SaleAdapter cookingAdapter = new SaleAdapter(activity, items, nameTables,inflater);
+				ordersList.setAdapter(cookingAdapter);
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+			
 		}
 	};
 	
@@ -5886,8 +5891,11 @@ public static class MHandler extends Handler {
   				nameTables.add(Initialactivity.cookingOrdersTable.get(current).getTable().getName());
   			}
 	    	  SaleAdapter cookingAdapter = new SaleAdapter(activity, items, nameTables,Initialactivity.inflater);
-  			Initialactivity.ordersList.setAdapter(cookingAdapter);
-  			Initialactivity.ordersList.setOnItemClickListener(Initialactivity.orderListListener);
+	    	  if(Initialactivity.ordersList != null){
+	    		  Initialactivity.ordersList.setAdapter(cookingAdapter);
+	    			Initialactivity.ordersList.setOnItemClickListener(Initialactivity.orderListListener);  
+	    	  }
+  			
 	      }
 	    }
 	  }

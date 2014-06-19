@@ -204,7 +204,7 @@ public class LoginActivity extends Activity {
 
 			Log.i("MISPRUEBAS","EMPEZANDO REQUEST");
 			 restService = new RestService(sendCredentialsHandler, mContext,
-			 Setup.PROD_URL+"/company/checkLogin");
+			 Setup.PROD_URL+"/api/checkLogin");
 			 restService.addParam("email", mEmail);
 			 restService.addParam("password", mPassword);
 			 restService.setCredentials("apiadmin", Setup.apiKey);
