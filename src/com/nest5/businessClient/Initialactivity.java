@@ -787,9 +787,9 @@ public class Initialactivity extends FragmentActivity implements
 				Util.DISCONNECTED);
 		prefs.edit().putBoolean(Setup.IS_UPDATING, false);
 		//mReader.start();
-		// Performing this check in onResume() covers the case in which BT wasóó onResume() óóÖ´óÐ´Ë¼óóóóó BT óóóóóóóóó
-        // not enabled during onStart(), so we were paused to enable it...óó onStart() óÚ¼óóÞ·óóóóóóóÇ±óóóÍ£óóóóóó...
-        // onResume() will be called when ACTION_REQUEST_ENABLE activity returns.ACTION_REQUEST_ENABLE óî¶¯óóóóÊ±óóóóóóóó onResume()óó
+		// Performing this check in onResume() covers the case in which BT wasóó onResume() 
+        // not enabled during onStart(), so we were paused to enable it...óó onStart() 
+        // onResume() will be called when ACTION_REQUEST_ENABLE activity returns.ACTION_REQUEST_ENABLE
         if (mChatService != null) {
             // Only if the state is STATE_NONE, do we know that we haven't started already
         	
@@ -1607,16 +1607,16 @@ public class Initialactivity extends FragmentActivity implements
 					makeTable(allRegistrables.get(pos).name);	
 		        }
 		        else{
-		        	Toast.makeText(mContext, "No Existe el Ítem", Toast.LENGTH_LONG).show();
+		        	Toast.makeText(mContext, "No Existe el �tem", Toast.LENGTH_LONG).show();
 		        }
 		        autoCompleteTextView.setText("");
-		        autoCompleteTextView.setHint("Buscar Ítems para Registrar");
+		        autoCompleteTextView.setHint("Buscar �tems para Registrar");
 				
 			}
 			
 		});
         autoCompleteTextView.setText("");
-        autoCompleteTextView.setHint("Buscar Ítems para Registrar");
+        autoCompleteTextView.setHint("Buscar �tems para Registrar");
 		// Tomar la tabla de la izquierda del home view
 		table = (TableLayout) v.findViewById(R.id.my_table);
 		makeTable("NA");
@@ -2938,7 +2938,7 @@ public class Initialactivity extends FragmentActivity implements
 			String resolution  = prefs.getString(Setup.RESOLUTION_MESSAGE, "Resolución de facturación No. 00000-0000 de 1970 DIAN");
 			//int currentSale = prefs.getInt(Setup.CURRENT_SALE, 0);
 			factura.append("COPIA DE ORDEN\r\n");
-			factura.append("NO VÁLIDO COMO FACTURA\r\n");
+			factura.append("NO V�LIDO COMO FACTURA\r\n");
 			factura.append("--------------------\r\n");
 			factura.append(empresa + "\r\n");
 			factura.append(empresa + "\r\n");
@@ -3055,7 +3055,7 @@ public class Initialactivity extends FragmentActivity implements
 								formateado.append(PRINT_FEED_N_LINES);
 								formateado.append((char) 0x02);
 								formateado.append(SINGLE_WIDE_CHARACTERS);
-								formateado.append("NO VÁLIDO COMO FACTURA DE VENTA");
+								formateado.append("NO V�LIDO COMO FACTURA DE VENTA");
 								formateado.append(PRINT_FEED_ONE_LINE);
 								formateado.append(PRINT_FEED_N_LINES);
 								formateado.append((char) 0x03);
@@ -3537,8 +3537,13 @@ public static class MHandler extends Handler {
 				items.add(cookingOrdersTimes.get(current));
 				nameTables.add(cookingOrdersTable.get(current).getTable().getName());
 			}
-			SaleAdapter cookingAdapter = new SaleAdapter(activity, items, nameTables,inflater);
-			ordersList.setAdapter(cookingAdapter);
+			try{
+				SaleAdapter cookingAdapter = new SaleAdapter(activity, items, nameTables,inflater);
+				ordersList.setAdapter(cookingAdapter);
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+			
 		}
 	};
 	
@@ -5052,14 +5057,14 @@ public static class MHandler extends Handler {
                 break;
             case MESSAGE_WRITE:
                 byte[] writeBuf = (byte[]) msg.obj;
-                // construct a string from the bufferóóóóÒ»óóóóóóóóóÐµóóÖ·ó
+                // construct a string from the buffer
                 String writeMessage = new String(writeBuf);
                 Log.d("Escribio al socekt: ",writeMessage);
                 //mConversationArrayAdapter.add("Me:  " + writeMessage);
                 break;
             case MESSAGE_READ:
                 byte[] readBuf = (byte[]) msg.obj;
-                // construct a string from the valid bytes in the bufferóóóóÒ»óóóóóóÐ§óÖ½Ú»óóóóóóÐµóóÖ·ó
+                // construct a string from the valid bytes in the buffer
                 String readMessage = new String(readBuf, 0, msg.arg1);
                 Log.d(TAG,"Leido: "+ readMessage);
                 //mConversationArrayAdapter.add(mConnectedDeviceName+":  " + readMessage);
@@ -5886,8 +5891,11 @@ public static class MHandler extends Handler {
   				nameTables.add(Initialactivity.cookingOrdersTable.get(current).getTable().getName());
   			}
 	    	  SaleAdapter cookingAdapter = new SaleAdapter(activity, items, nameTables,Initialactivity.inflater);
-  			Initialactivity.ordersList.setAdapter(cookingAdapter);
-  			Initialactivity.ordersList.setOnItemClickListener(Initialactivity.orderListListener);
+	    	  if(Initialactivity.ordersList != null){
+	    		  Initialactivity.ordersList.setAdapter(cookingAdapter);
+	    			Initialactivity.ordersList.setOnItemClickListener(Initialactivity.orderListListener);  
+	    	  }
+  			
 	      }
 	    }
 	  }

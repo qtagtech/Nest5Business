@@ -148,7 +148,7 @@ public void onAttach(Activity activity){
      /*if (progressDialog != null && progressDialog.isShowing()) {
          progressDialog.dismiss();
      }
-     progressDialog = ProgressDialog.show(getActivity(), "Atr·s para Cancelar", "Buscando Dispositivos", true,
+     progressDialog = ProgressDialog.show(getActivity(), "Atr√°s para Cancelar", "Buscando Dispositivos", true,
              true, new DialogInterface.OnCancelListener() {
 
                  @Override
