@@ -54,6 +54,7 @@ import java.util.TimerTask;
 
 import com.bugsense.trace.BugSenseHandler;
 import com.flurry.android.FlurryAgent;
+
 import org.json.JSONObject;
 
 import android.app.ActionBar;
@@ -158,6 +159,9 @@ import com.nest5.businessClient.PrintInvoiceForm.OnPrintSelectListener;
 import com.nest5.businessClient.SalesObjectFragment.OnSalesObjectFragmentCreatedListener;
 import com.nest5.businessClient.SelectAddItem.OnAddItemSelectedListener;
 import com.nest5.businessClient.WifiDirectDialog.DeviceActionListener;
+import com.parse.Parse;
+import com.parse.ParseInstallation;
+import com.parse.PushService;
 
 
 public class Initialactivity extends FragmentActivity implements
@@ -745,6 +749,13 @@ public class Initialactivity extends FragmentActivity implements
 	protected void onStart() {
 		super.onStart();
         FlurryAgent.onStartSession(this, "J63XVCZCXV4NN4P2SQZT");
+        try{
+            Parse.initialize(this, "qM91ypfRryTUwlFnTjDYV4JKacZzulk0LxAnAFML", "ZRiP4gEmwpvWrypr7cRK1G4ZWE1v9fm9EcyMrQqv");
+            PushService.setDefaultPushCallback(this, Initialactivity.class);
+            ParseInstallation.getCurrentInstallation().saveInBackground();
+        }catch(Exception e){
+         e.printStackTrace();
+        }
 		//mReader.start();
 		// If BT is not on, request that it be enabled.贸贸贸贸贸 BT贸贸贸贸贸贸贸贸贸贸贸贸
         // setupChat() will then be called during onActivityRe//sultsetupChat() 脠禄贸贸陆芦碌贸贸贸贸脷录贸 onActivityResult
@@ -1607,16 +1618,16 @@ public class Initialactivity extends FragmentActivity implements
 					makeTable(allRegistrables.get(pos).name);	
 		        }
 		        else{
-		        	Toast.makeText(mContext, "No Existe el 蛅em", Toast.LENGTH_LONG).show();
+		        	Toast.makeText(mContext, "No Existe el 锟絫em", Toast.LENGTH_LONG).show();
 		        }
 		        autoCompleteTextView.setText("");
-		        autoCompleteTextView.setHint("Buscar 蛅ems para Registrar");
+		        autoCompleteTextView.setHint("Buscar 锟絫ems para Registrar");
 				
 			}
 			
 		});
         autoCompleteTextView.setText("");
-        autoCompleteTextView.setHint("Buscar 蛅ems para Registrar");
+        autoCompleteTextView.setHint("Buscar 锟絫ems para Registrar");
 		// Tomar la tabla de la izquierda del home view
 		table = (TableLayout) v.findViewById(R.id.my_table);
 		makeTable("NA");
@@ -2938,7 +2949,7 @@ public class Initialactivity extends FragmentActivity implements
 			String resolution  = prefs.getString(Setup.RESOLUTION_MESSAGE, "Resoluci贸n de facturaci贸n No. 00000-0000 de 1970 DIAN");
 			//int currentSale = prefs.getInt(Setup.CURRENT_SALE, 0);
 			factura.append("COPIA DE ORDEN\r\n");
-			factura.append("NO V蚅IDO COMO FACTURA\r\n");
+			factura.append("NO V锟絃IDO COMO FACTURA\r\n");
 			factura.append("--------------------\r\n");
 			factura.append(empresa + "\r\n");
 			factura.append(empresa + "\r\n");
@@ -3055,7 +3066,7 @@ public class Initialactivity extends FragmentActivity implements
 								formateado.append(PRINT_FEED_N_LINES);
 								formateado.append((char) 0x02);
 								formateado.append(SINGLE_WIDE_CHARACTERS);
-								formateado.append("NO V蚅IDO COMO FACTURA DE VENTA");
+								formateado.append("NO V锟絃IDO COMO FACTURA DE VENTA");
 								formateado.append(PRINT_FEED_ONE_LINE);
 								formateado.append(PRINT_FEED_N_LINES);
 								formateado.append((char) 0x03);
@@ -5549,13 +5560,23 @@ public static class MHandler extends Handler {
 		int port = Integer.parseInt(prefs.getString("pref_printerport", "4098"));
         @Override
         protected TCPPrint doInBackground(String... message) {
-            mTCPPrint = new TCPPrint(new TCPPrint.OnMessageReceived() {
-                @Override
-                public void messageReceived(String message) {
-                    publishProgress(message);
-                }
-            }, mContext,server,port);
-            mTCPPrint.run();
+        	try{
+        		mTCPPrint = new TCPPrint(new TCPPrint.OnMessageReceived() {
+                    @Override
+                    public void messageReceived(String message) {
+                        publishProgress(message);
+                    }
+                }, mContext,server,port);
+        	}catch(Exception e){
+        		e.printStackTrace();
+        	}
+        	try{
+        		mTCPPrint.run();
+        	}catch(Exception e){
+        		e.printStackTrace();
+        		}
+            
+            
             return null;
         }
  
