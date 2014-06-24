@@ -148,6 +148,7 @@ import com.nest5.businessClient.CloseTableForm.OnSelectTableActionListener;
 import com.nest5.businessClient.CreateComboView.OnCreateComboListener;
 import com.nest5.businessClient.CreateProductView.OnCreateProductListener;
 import com.nest5.businessClient.DailyObjectFragment.OnDailyObjectFragmentCreatedListener;
+import com.nest5.businessClient.DaoMaster.DevOpenHelper;
 import com.nest5.businessClient.HomeObjectFragment.OnHomeObjectFragmentCreatedListener;
 import com.nest5.businessClient.HomeObjectFragment.OnIngredientCategorySelectedListener;
 import com.nest5.businessClient.InventoryObjectFragment.OnInventoryObjectFragmentCreatedListener;
@@ -162,6 +163,8 @@ import com.nest5.businessClient.WifiDirectDialog.DeviceActionListener;
 import com.parse.Parse;
 import com.parse.ParseInstallation;
 import com.parse.PushService;
+
+
 
 
 public class Initialactivity extends FragmentActivity implements
@@ -368,6 +371,15 @@ public class Initialactivity extends FragmentActivity implements
 	private int totalSync = 0; //variable para contar cuantas synRows se han guardado con éxito
 	
 	/*
+	 * GREENDAO objects
+	 * 
+	 * */
+	
+	 private DaoMaster daoMaster;
+	 private DaoSession daoSession;
+	 private DailySaleDao dailySaleDao;
+	
+	/*
 	 * Sync Server - Big Data Server Variables
 	 * 
 	 * */
@@ -378,7 +390,7 @@ public class Initialactivity extends FragmentActivity implements
 	/***
 	 * 
 	 * 
-	 * CONEXIÃ“N BLUETOOTH IMPRESORAS
+	 * CONEXIÓN BLUETOOTH IMPRESORAS
 	 * 
 	 * 
 	 * */
@@ -658,12 +670,30 @@ public class Initialactivity extends FragmentActivity implements
 		
 		
 		mResetProgressDialog = new ProgressDialog(mContext);
+		
+		/*
+		 * 
+		 * *************** NEW DATABASE SCHEMA USING GREENDAO, USED FOR SAVING DAILY SALES IN DAILYTABLE
+		 * 
+		 * 
+		 * */
+		DevOpenHelper helper = new DaoMaster.DevOpenHelper(this, "nest5-local-db", null);
+        db = helper.getWritableDatabase();
+        daoMaster = new DaoMaster(db);
+        daoSession = daoMaster.newSession();
+        dailySaleDao = daoSession.getDailySaleDao();
+		
+        
+        /*
+		 * ********ENDS GREENDAO
+		 * 
+		 * 
+		 * */
 
 		// ACR31 RESET CALLBACK
 		/*mReader.setOnResetCompleteListener(new ACR31Reader.OnResetCompleteListener() {
 
 			
-			//hola como estas
 			@Override
 			public void onResetComplete(ACR31Reader reader) {
 
@@ -838,6 +868,7 @@ public class Initialactivity extends FragmentActivity implements
 				break;
 			}
 		}
+		//clean dailytable for sales older than today, leave only sales from today
 	}
 
 	@Override
@@ -5431,6 +5462,10 @@ public static class MHandler extends Handler {
 					discount,
 					nextsale);
 			
+			//save dailySale
+			DailySale dailySale = new DailySale(null, 0, delivery, togo, tip, nextsale, method, value, discount, new Date());
+			dailySaleDao.insert(dailySale);
+			
 		}
 		else{
 			alertbox("!ATENCIÓN!", "Esta venta no se puede facturar. Este dispositivo no tiene más facturas autorizadas. Consulta el administrador, o si tu lo eres, ve a tu panel de control Nest5 y autoriza más facturas. Para más información: http://soporte.nest5.com");
@@ -5488,6 +5523,8 @@ public static class MHandler extends Handler {
 			createdSale = saleDataSource.getSale(createdSale.getId());
 			//Log.w("GUARDANDOVENTA","Cantidad de productos: "+String.valueOf(createdSale.getProducts().size()));
 			createSyncRow("\""+Setup.TABLE_SALE+"\"",createdSale.getId(), createdSale.getSyncId(), createdSale.serializedFields());
+			
+			
 
 		} else {
 			subSale();//falló uardando venta por lo tanto resetea el valor de facturación actual al anterior.
@@ -5497,6 +5534,7 @@ public static class MHandler extends Handler {
 		}
 	}
 	
+
 	public static String padRight(String s, int n) {
 	     return String.format("%1$-" + n + "s", s);  
 	}
