@@ -55,6 +55,9 @@ import java.util.TimerTask;
 import com.bugsense.trace.BugSenseHandler;
 import com.flurry.android.FlurryAgent;
 
+import org.androidannotations.annotations.Background;
+import org.androidannotations.annotations.UiThread;
+import org.joda.time.LocalDateTime;
 import org.json.JSONObject;
 
 import android.app.ActionBar;
@@ -148,6 +151,7 @@ import com.nest5.businessClient.CloseTableForm.OnSelectTableActionListener;
 import com.nest5.businessClient.CreateComboView.OnCreateComboListener;
 import com.nest5.businessClient.CreateProductView.OnCreateProductListener;
 import com.nest5.businessClient.DailyObjectFragment.OnDailyObjectFragmentCreatedListener;
+import com.nest5.businessClient.DailySaleDao.Properties;
 import com.nest5.businessClient.DaoMaster.DevOpenHelper;
 import com.nest5.businessClient.HomeObjectFragment.OnHomeObjectFragmentCreatedListener;
 import com.nest5.businessClient.HomeObjectFragment.OnIngredientCategorySelectedListener;
@@ -778,10 +782,10 @@ public class Initialactivity extends FragmentActivity implements
 	@Override
 	protected void onStart() {
 		super.onStart();
-        FlurryAgent.onStartSession(this, "J63XVCZCXV4NN4P2SQZT");
+        FlurryAgent.onStartSession(Initialactivity.this, "J63XVCZCXV4NN4P2SQZT");
         try{
-            Parse.initialize(this, "qM91ypfRryTUwlFnTjDYV4JKacZzulk0LxAnAFML", "ZRiP4gEmwpvWrypr7cRK1G4ZWE1v9fm9EcyMrQqv");
-            PushService.setDefaultPushCallback(this, Initialactivity.class);
+            Parse.initialize(Initialactivity.this, "qM91ypfRryTUwlFnTjDYV4JKacZzulk0LxAnAFML", "ZRiP4gEmwpvWrypr7cRK1G4ZWE1v9fm9EcyMrQqv");
+            PushService.setDefaultPushCallback(Initialactivity.this, Initialactivity.class);
             ParseInstallation.getCurrentInstallation().saveInBackground();
         }catch(Exception e){
          e.printStackTrace();
@@ -869,6 +873,8 @@ public class Initialactivity extends FragmentActivity implements
 			}
 		}
 		//clean dailytable for sales older than today, leave only sales from today
+		//temporal, llamar el hacer cierre aca
+		getAllDailySales(dailySaleDao);
 	}
 
 	@Override
@@ -5595,9 +5601,19 @@ public static class MHandler extends Handler {
 	public class connectTask extends AsyncTask<String,String,TCPPrint> {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
 		String server = prefs.getString("pref_printerip", "0.0.0.0");
-		int port = Integer.parseInt(prefs.getString("pref_printerport", "4098"));
+		String porto = prefs.getString("pref_printerport", "4098");
+
+		
         @Override
         protected TCPPrint doInBackground(String... message) {
+        	
+        	int port = 4098;
+        	try{
+        		port = Integer.parseInt(porto);
+        	}catch(NumberFormatException e){
+        		e.printStackTrace();
+        	}
+
         	try{
         		mTCPPrint = new TCPPrint(new TCPPrint.OnMessageReceived() {
                     @Override
@@ -5958,6 +5974,22 @@ public static class MHandler extends Handler {
 	      }
 	    }
 	  }
+	
+	@Background // Executed in a background thread
+    void getAllDailySales(DailySaleDao dsd) {
+		LocalDateTime today = new LocalDateTime()
+			.withHourOfDay(0)
+			.withMinuteOfHour(0)
+			.withSecondOfMinute(0)
+			.withMillisOfSecond(0);
+		Log.i("MISPRUEBAS","inciio del dia: "+today.toString());
+		
+		List sales = dsd.queryBuilder()
+				.where(Properties.Date.ge(today.toDate()))
+				.list();
+		Log.i("MISPRUEBAS","sales: "+sales.size());
+		
+    }
 
 	
 	protected static LinkedList<LinkedHashMap<Registrable,Integer>> getCookingOrders(){
