@@ -35,6 +35,8 @@ public class DailySaleDao extends AbstractDao<DailySale, Long> {
         public final static Property Date = new Property(9, java.util.Date.class, "date", false, "DATE");
     };
 
+    private DaoSession daoSession;
+
 
     public DailySaleDao(DaoConfig config) {
         super(config);
@@ -42,6 +44,7 @@ public class DailySaleDao extends AbstractDao<DailySale, Long> {
     
     public DailySaleDao(DaoConfig config, DaoSession daoSession) {
         super(config, daoSession);
+        this.daoSession = daoSession;
     }
 
     /** Creates the underlying database table. */
@@ -116,6 +119,12 @@ public class DailySaleDao extends AbstractDao<DailySale, Long> {
         if (date != null) {
             stmt.bindLong(10, date.getTime());
         }
+    }
+
+    @Override
+    protected void attachEntity(DailySale entity) {
+        super.attachEntity(entity);
+        entity.__setDaoSession(daoSession);
     }
 
     /** @inheritdoc */

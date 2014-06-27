@@ -151,7 +151,11 @@ import com.nest5.businessClient.CloseTableForm.OnSelectTableActionListener;
 import com.nest5.businessClient.CreateComboView.OnCreateComboListener;
 import com.nest5.businessClient.CreateProductView.OnCreateProductListener;
 import com.nest5.businessClient.DailyObjectFragment.OnDailyObjectFragmentCreatedListener;
-import com.nest5.businessClient.DailySaleDao.Properties;
+import com.nest5.businessClient.DailySaleDao.*;
+import com.nest5.businessClient.ImpuestoDao.*;
+import com.nest5.businessClient.IngredienteDao.*;
+import com.nest5.businessClient.ProductoDao.*;
+import com.nest5.businessClient.CombinacionDao.*;
 import com.nest5.businessClient.DaoMaster.DevOpenHelper;
 import com.nest5.businessClient.HomeObjectFragment.OnHomeObjectFragmentCreatedListener;
 import com.nest5.businessClient.HomeObjectFragment.OnIngredientCategorySelectedListener;
@@ -164,9 +168,7 @@ import com.nest5.businessClient.PrintInvoiceForm.OnPrintSelectListener;
 import com.nest5.businessClient.SalesObjectFragment.OnSalesObjectFragmentCreatedListener;
 import com.nest5.businessClient.SelectAddItem.OnAddItemSelectedListener;
 import com.nest5.businessClient.WifiDirectDialog.DeviceActionListener;
-import com.parse.Parse;
-import com.parse.ParseInstallation;
-import com.parse.PushService;
+
 
 
 
@@ -204,6 +206,10 @@ public class Initialactivity extends FragmentActivity implements
 	private static final int RETURN_FROM_OPENCLOSE_TABLE = 5552;
 	
 	private static final int OPEN_TABLE_ACTION = 55515;
+	
+	private static final int NO_AUTHORIZED_INVOICES = 1;
+	
+	private static final int OTHER_ALERT_ERROR = 444;
 	
 	private boolean openOtherWindow = false;
 	private int openOtherWindowAction = 0;
@@ -301,7 +307,6 @@ public class Initialactivity extends FragmentActivity implements
 	private ComboDataSource comboDatasource;
 	private TaxDataSource taxDataSource;
 	private UnitDataSource unitDataSource;
-	private SaleDataSource saleDataSource;
 	private SyncRowDataSource syncRowDataSource;
 	ImageAdapter gridAdapter;
 	SaleAdapter cookingAdapter;
@@ -321,7 +326,6 @@ public class Initialactivity extends FragmentActivity implements
 	List<Registrable> allRegistrables;
 	List<Unit> units;
 	List<Sale> saleList;
-	List<Sale> salesFromToday;
 	List<SyncRow> syncRows;
 	private LinkedHashMap<Registrable, Integer> currentOrder;
 	private CurrentTable<Table,Integer> currentTable;
@@ -382,6 +386,15 @@ public class Initialactivity extends FragmentActivity implements
 	 private DaoMaster daoMaster;
 	 private DaoSession daoSession;
 	 private DailySaleDao dailySaleDao;
+	 private ImpuestoDao impuestoDao;
+	 private IngredienteDao ingredienteDao;
+	 private ProductoDao productoDao;
+	 private CombinacionDao combinacionDao;
+	 private SaleIngredienteDao saleIngredienteDao;
+	 private SaleProductoDao saleProductoDao;
+	 private SaleCombinacionDao saleCombinacionDao;
+	 
+	 
 	
 	/*
 	 * Sync Server - Big Data Server Variables
@@ -516,6 +529,8 @@ public class Initialactivity extends FragmentActivity implements
         BugSenseHandler.initAndStartSession(Initialactivity.this, "1a5a6af1");
 		setContentView(R.layout.swipe_view);
 		checkLogin();
+        
+        
 		// add necessary intent values to be matched.
 		
 		intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
@@ -552,9 +567,6 @@ public class Initialactivity extends FragmentActivity implements
 		comboDatasource = new ComboDataSource(dbHelper);
 		comboDatasource.open(db);
 		combos = comboDatasource.getAllCombos();
-		saleDataSource = new SaleDataSource(dbHelper);
-		saleDataSource.open(db);
-		saleList = saleDataSource.getAllSales();
 		syncRowDataSource = new SyncRowDataSource(dbHelper);
 		syncRowDataSource.open(db);
 		
@@ -582,7 +594,6 @@ public class Initialactivity extends FragmentActivity implements
 		//Log.d(TAG, now.toString());
 
 		//Log.d(TAG, "Diferencia entre tiempos: " + String.valueOf(end - init));
-		salesFromToday = saleDataSource.getAllSalesWithin(init, end);
 		updateRegistrables();
 		// ingredientDatasource.close();
 		mDemoCollectionPagerAdapter = new DemoCollectionPagerAdapter(
@@ -686,6 +697,13 @@ public class Initialactivity extends FragmentActivity implements
         daoMaster = new DaoMaster(db);
         daoSession = daoMaster.newSession();
         dailySaleDao = daoSession.getDailySaleDao();
+        impuestoDao = daoSession.getImpuestoDao();
+        ingredienteDao = daoSession.getIngredienteDao();
+        productoDao = daoSession.getProductoDao();
+        combinacionDao = daoSession.getCombinacionDao();
+        saleIngredienteDao = daoSession.getSaleIngredienteDao();
+        saleProductoDao = daoSession.getSaleProductoDao();
+        saleCombinacionDao = daoSession.getSaleCombinacionDao();
 		
         
         /*
@@ -783,13 +801,6 @@ public class Initialactivity extends FragmentActivity implements
 	protected void onStart() {
 		super.onStart();
         FlurryAgent.onStartSession(Initialactivity.this, "J63XVCZCXV4NN4P2SQZT");
-        try{
-            Parse.initialize(Initialactivity.this, "qM91ypfRryTUwlFnTjDYV4JKacZzulk0LxAnAFML", "ZRiP4gEmwpvWrypr7cRK1G4ZWE1v9fm9EcyMrQqv");
-            PushService.setDefaultPushCallback(Initialactivity.this, Initialactivity.class);
-            ParseInstallation.getCurrentInstallation().saveInBackground();
-        }catch(Exception e){
-         e.printStackTrace();
-        }
 		//mReader.start();
 		// If BT is not on, request that it be enabled.óóóóó BTóóóóóóóóóóóó
         // setupChat() will then be called during onActivityRe//sultsetupChat() È»óó½«µóóóóÚ¼ó onActivityResult
@@ -873,8 +884,7 @@ public class Initialactivity extends FragmentActivity implements
 			}
 		}
 		//clean dailytable for sales older than today, leave only sales from today
-		//temporal, llamar el hacer cierre aca
-		getAllDailySales(dailySaleDao);
+		
 	}
 
 	@Override
@@ -991,16 +1001,18 @@ public class Initialactivity extends FragmentActivity implements
 			backUpDb();
 			return true;
 		case R.id.print_zreport:
-			if(isConnectedToInternet())
+			/*if(isConnectedToInternet())
 				{
 				onZReportSelect();
 				}
 			else{
 				return false;
-				}
+				}*/
 		/*case R.id.menu_load_register:
 
 			return true;*/
+			getAllDailySales(dailySaleDao);
+			return true;
 		case R.id.menu_connect_printer:
 			mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();   
 	        if (mBluetoothAdapter == null) {
@@ -1617,7 +1629,6 @@ public class Initialactivity extends FragmentActivity implements
 			statusText.setVisibility(View.INVISIBLE);
 			statusText.setText("");
 		}
-		updateSaleValue();
 		pagarButton = (Button) v.findViewById(R.id.pay_register);
 		guardarButton = (Button) v.findViewById(R.id.save_register);
 		pagarButton.setOnClickListener(payListener);
@@ -1655,16 +1666,16 @@ public class Initialactivity extends FragmentActivity implements
 					makeTable(allRegistrables.get(pos).name);	
 		        }
 		        else{
-		        	Toast.makeText(mContext, "No Existe el �tem", Toast.LENGTH_LONG).show();
+		        	Toast.makeText(mContext, "No Existe el ítem", Toast.LENGTH_LONG).show();
 		        }
 		        autoCompleteTextView.setText("");
-		        autoCompleteTextView.setHint("Buscar �tems para Registrar");
+		        autoCompleteTextView.setHint("Buscar ítems para Registrar");
 				
 			}
 			
 		});
         autoCompleteTextView.setText("");
-        autoCompleteTextView.setHint("Buscar �tems para Registrar");
+        autoCompleteTextView.setHint("Buscar ítems para Registrar");
 		// Tomar la tabla de la izquierda del home view
 		table = (TableLayout) v.findViewById(R.id.my_table);
 		makeTable("NA");
@@ -1981,11 +1992,8 @@ public class Initialactivity extends FragmentActivity implements
 		public void onClick(View v) {
 			switch (v.getId()) {
 			case R.id.daily_all:
-				saleList = saleDataSource.getAllSales();
-				makeDailyTable(TABLE_TYPE_ALL);
 				break;
 			case R.id.daily_today:
-				makeDailyTable(TABLE_TYPE_TODAY);
 				break;
 			}
 
@@ -2215,201 +2223,7 @@ public class Initialactivity extends FragmentActivity implements
 
 	}
 
-	private void makeDailyTable(int TABLE_TYPE) {
-		dailyTable.removeAllViews();
-		Double total = 0.0;
-		DecimalFormat dec = new DecimalFormat("$###,###,###");
-		TextView tv = new TextView(mContext);
-		tv.setBackgroundColor(Color.parseColor("#80808080"));
-		tv.setHeight(2);
-		TableRow tr1 = (TableRow) getLayoutInflater().inflate(
-				R.layout.daily_table_row, null);
-		TextView tDate1 = (TextView) tr1.findViewById(R.id.cell_date);
-		TextView tItem1 = (TextView) tr1.findViewById(R.id.cell_item);
-		TextView tAccount1 = (TextView) tr1.findViewById(R.id.cell_account);
-		TextView tVal1 = (TextView) tr1.findViewById(R.id.cell_value);
-		TextView tTot1 = (TextView) tr1.findViewById(R.id.cell_total);
-		tDate1.setText("FECHA");
-		tAccount1.setText("CUENTA");
-		tItem1.setText("ITEM");
-		tVal1.setText("VALOR");
-		tTot1.setText("TOTAL");
-		tr1.setBackgroundColor(Color.CYAN);
-		dailyTable.addView(tr1);
-		dailyTable.addView(tv);
-		
-		//actualizar sales de hoy
-		Calendar today = Calendar.getInstance();
-		Calendar tomorrow = Calendar.getInstance();
-		today.set(Calendar.HOUR, 0);
-		today.set(Calendar.HOUR_OF_DAY, 0);
-		today.set(Calendar.MINUTE, 0);
-		today.set(Calendar.SECOND, 0);
-		today.set(Calendar.MILLISECOND, 0);
-		tomorrow.roll(Calendar.DATE, 1);
-		tomorrow.set(Calendar.HOUR, 0);
-		tomorrow.set(Calendar.HOUR_OF_DAY, 0);
-		tomorrow.set(Calendar.MINUTE, 0);
-		tomorrow.set(Calendar.SECOND, 0);
-		tomorrow.set(Calendar.MILLISECOND, 0);
 
-		init = today.getTimeInMillis();
-		end = tomorrow.getTimeInMillis();
-		Log.d("GUARDANDOVENTA", today.toString());
-		Log.d("GUARDANDOVENTA", tomorrow.toString());
-		Calendar now = Calendar.getInstance();
-		now.setTimeInMillis(System.currentTimeMillis());
-		Log.d(TAG, now.toString());
-
-		Log.d(TAG, "Diferencia entre tiempos: " + String.valueOf(end - init));
-		salesFromToday = saleDataSource.getAllSalesWithin(init, end);
-
-		List<Sale> usingSales = salesFromToday;
-
-		switch (TABLE_TYPE) {
-		case TABLE_TYPE_TODAY:
-			usingSales = salesFromToday;
-			break;
-		case TABLE_TYPE_ALL:
-			usingSales = saleList;
-			break;
-		}
-
-		for (Sale currentSale : usingSales) {
-
-			double totalLocal = 0.0;
-			LinkedHashMap<Combo, Double> combos = currentSale.getCombos();
-			LinkedHashMap<Product, Double> products = currentSale.getProducts();
-			LinkedHashMap<Ingredient, Double> ingredients = currentSale
-					.getIngredients();
-			Log.w("DAYILETABLES"," "+combos.size()+" "+products.size()+" "+ingredients.size());
-			Iterator<Entry<Combo, Double>> it = combos.entrySet().iterator();
-			Calendar date = Calendar.getInstance();
-			date.setTimeInMillis(currentSale.getDate());
-			String fecha = date.get(Calendar.MONTH) + "/"
-					+ date.get(Calendar.DAY_OF_MONTH) + "/"
-					+ date.get(Calendar.YEAR) + "\n"
-					+ date.get(Calendar.HOUR_OF_DAY) + ":"
-					+ date.get(Calendar.MINUTE) + ":"
-					+ date.get(Calendar.SECOND);
-			String account = currentSale.getPaymentMethod();
-			while (it.hasNext()) {
-				TableRow tr = (TableRow) getLayoutInflater().inflate(
-						R.layout.daily_table_row, null);
-				TextView tDate = (TextView) tr.findViewById(R.id.cell_date);
-				TextView tItem = (TextView) tr.findViewById(R.id.cell_item);
-				TextView tAccount = (TextView) tr
-						.findViewById(R.id.cell_account);
-				TextView tVal = (TextView) tr.findViewById(R.id.cell_value);
-				TextView tTot = (TextView) tr.findViewById(R.id.cell_total);
-				Map.Entry<Combo, Double> pair = (Map.Entry<Combo, Double>) it
-						.next();
-				Double value = pair.getValue() * pair.getKey().getPrice();
-
-				tDate.setText(fecha);
-				tAccount.setText(account);
-				tItem.setText(pair.getKey().getName() + " en Combo");
-				tVal.setText(dec.format(value));
-				tTot.setText("----");
-				total += value;
-				totalLocal += value;
-				dailyTable.addView(tr);
-
-				// Log.d("INGREDIENTES","INGREDIENTE: "+ingrediente.getKey().getName()+" "+ingrediente.getValue());
-			}
-
-			Iterator<Entry<Product, Double>> it2 = products.entrySet()
-					.iterator();
-
-			while (it2.hasNext()) {
-				Map.Entry<Product, Double> pair = (Map.Entry<Product, Double>) it2
-						.next();
-				TableRow tr = (TableRow) getLayoutInflater().inflate(
-						R.layout.daily_table_row, null);
-				TextView tDate = (TextView) tr.findViewById(R.id.cell_date);
-				TextView tItem = (TextView) tr.findViewById(R.id.cell_item);
-				TextView tAccount = (TextView) tr
-						.findViewById(R.id.cell_account);
-				TextView tVal = (TextView) tr.findViewById(R.id.cell_value);
-				TextView tTot = (TextView) tr.findViewById(R.id.cell_total);
-
-				Double value = pair.getValue() * pair.getKey().getPrice();
-
-				tDate.setText(fecha);
-				tAccount.setText(account);
-				tItem.setText(pair.getKey().getName());
-				tVal.setText(dec.format(value));
-				tTot.setText("----");
-				total += value;
-				totalLocal += value;
-				dailyTable.addView(tr);
-
-				// Log.d("INGREDIENTES","INGREDIENTE: "+ingrediente.getKey().getName()+" "+ingrediente.getValue());
-			}
-
-			Iterator<Entry<Ingredient, Double>> it3 = ingredients.entrySet()
-					.iterator();
-
-			while (it3.hasNext()) {
-				Map.Entry<Ingredient, Double> pair = (Map.Entry<Ingredient, Double>) it3
-						.next();
-				TableRow tr = (TableRow) getLayoutInflater().inflate(
-						R.layout.daily_table_row, null);
-				TextView tDate = (TextView) tr.findViewById(R.id.cell_date);
-				TextView tItem = (TextView) tr.findViewById(R.id.cell_item);
-				TextView tAccount = (TextView) tr
-						.findViewById(R.id.cell_account);
-				TextView tVal = (TextView) tr.findViewById(R.id.cell_value);
-				TextView tTot = (TextView) tr.findViewById(R.id.cell_total);
-
-				Double value = pair.getValue() * pair.getKey().getPrice();
-
-				tDate.setText(fecha);
-				tAccount.setText(account);
-				tItem.setText(pair.getKey().getName());
-				tVal.setText(dec.format(value));
-				tTot.setText("----");
-				total += value;
-				totalLocal += value;
-				dailyTable.addView(tr);
-
-				// Log.d("INGREDIENTES","INGREDIENTE: "+ingrediente.getKey().getName()+" "+ingrediente.getValue());
-			}
-
-			TableRow tr = (TableRow) getLayoutInflater().inflate(
-					R.layout.daily_table_row, null);
-			TextView tDate = (TextView) tr.findViewById(R.id.cell_date);
-			TextView tItem = (TextView) tr.findViewById(R.id.cell_item);
-			TextView tAccount = (TextView) tr.findViewById(R.id.cell_account);
-			TextView tVal = (TextView) tr.findViewById(R.id.cell_value);
-			TextView tTot = (TextView) tr.findViewById(R.id.cell_total);
-
-			tDate.setText(fecha);
-			tAccount.setText("-------");
-			tItem.setText("Ingreso por Ventas");
-			tVal.setText("----");
-			tTot.setText(dec.format(totalLocal));
-			tr.setBackgroundColor(Color.LTGRAY);
-			dailyTable.addView(tr);
-			TableRow tr2 = (TableRow) getLayoutInflater().inflate(
-					R.layout.daily_table_row, null);
-			TextView tDate2 = (TextView) tr2.findViewById(R.id.cell_date);
-			TextView tItem2 = (TextView) tr2.findViewById(R.id.cell_item);
-			TextView tAccount2 = (TextView) tr2.findViewById(R.id.cell_account);
-			TextView tVal2 = (TextView) tr2.findViewById(R.id.cell_value);
-			TextView tTot2 = (TextView) tr2.findViewById(R.id.cell_total);
-
-			tDate2.setText(fecha);
-			tAccount2.setText("-------");
-			tItem2.setText("Acumulado por Ventas");
-			tVal2.setText("----");
-			tTot2.setText(dec.format(total));
-			tr2.setBackgroundColor(Color.GRAY);
-			dailyTable.addView(tr2);
-
-		}
-
-	}
 
 	private void makeInventoryTable(List<Ingredient> ingredients) {
 		inventoryTable.removeAllViews();
@@ -3264,28 +3078,7 @@ public class Initialactivity extends FragmentActivity implements
 	}
 	
 	private void onZReportSelect(){
-		SharedPreferences prefs = Util.getSharedPreferences(mContext);
-		mResetProgressDialog = new ProgressDialog(mContext);
-		mResetProgressDialog
-				.setMessage("Recibiendo Información Actualizada...");
-		mResetProgressDialog.setCancelable(false);
-		mResetProgressDialog.setIndeterminate(true);
-		mResetProgressDialog.show();
-		restService = new RestService(receivedZReport,
-				mContext, Setup.PROD_BIGDATA_URL
-						+ "/databaseOps/zReport");
-		restService.addParam("company",
-				prefs.getString(Setup.COMPANY_ID, "0"));
-		restService.addParam("reportDate",
-				"04/01/2014-04/30/2014");
-		restService
-				.setCredentials("apiadmin", Setup.apiKey);
-		try {
-			restService.execute(RestService.POST);
-		} catch (Exception e) {
-			e.printStackTrace();
-			////Log.i("MISPRUEBAS", "Error empezando request");
-		}
+		//OldMethod used to call databaseOps/zReport on bigData server, was very slow but real time comm
 	}
 
 	private void shufflePhrases() {
@@ -3619,51 +3412,7 @@ public static class MHandler extends Handler {
 
 	
 
-	private void updateSaleValue() {
-		Double total = 0.0;
-		for (Sale currentSale : salesFromToday) {
-			LinkedHashMap<Combo, Double> combos = currentSale.getCombos();
-			LinkedHashMap<Product, Double> products = currentSale.getProducts();
-			LinkedHashMap<Ingredient, Double> ingredients = currentSale
-					.getIngredients();
-			Iterator<Entry<Combo, Double>> it = combos.entrySet().iterator();
-
-			while (it.hasNext()) {
-				Map.Entry<Combo, Double> pair = (Map.Entry<Combo, Double>) it
-						.next();
-				total += (pair.getValue() * pair.getKey().getPrice());
-
-				// Log.d("INGREDIENTES","INGREDIENTE: "+ingrediente.getKey().getName()+" "+ingrediente.getValue());
-			}
-
-			Iterator<Entry<Product, Double>> it2 = products.entrySet()
-					.iterator();
-
-			while (it2.hasNext()) {
-				Map.Entry<Product, Double> pair = (Map.Entry<Product, Double>) it2
-						.next();
-				total += (pair.getValue() * pair.getKey().getPrice());
-
-				// Log.d("INGREDIENTES","INGREDIENTE: "+ingrediente.getKey().getName()+" "+ingrediente.getValue());
-			}
-
-			Iterator<Entry<Ingredient, Double>> it3 = ingredients.entrySet()
-					.iterator();
-
-			while (it3.hasNext()) {
-				Map.Entry<Ingredient, Double> pair = (Map.Entry<Ingredient, Double>) it3
-						.next();
-				if(pair.getKey() != null)
-					total += (pair.getValue() * pair.getKey().getPrice());
-
-				// Log.d("INGREDIENTES","INGREDIENTE: "+ingrediente.getKey().getName()+" "+ingrediente.getValue());
-			}
-			DecimalFormat dec = new DecimalFormat("$###,###,###");
-
-			saleValue.setText("Ventas del DÃ­a: " + dec.format(total));
-
-		}
-	}
+	
 
 	/**
 	 * 
@@ -4550,68 +4299,10 @@ public static class MHandler extends Handler {
 	};
 	
 	
-	private final Handler receivedZReport = new Handler() {
-		@Override
-		public void handleMessage(Message msg) {
-			mResetProgressDialog.dismiss();
-			prefs = Util.getSharedPreferences(mContext);
-			JSONObject respuesta = null;
-			try {
-				respuesta = new JSONObject((String) msg.obj);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-			if (respuesta != null) {
-				int status = 0;
-				int responsecode = 0;
-				String message = "";
-				JSONObject payload = null;
-				try {
-					status = respuesta.getInt("status");
-					responsecode = respuesta.getInt("code");
-					message = respuesta.getString("message");
-					payload = respuesta.getJSONObject("pay");
-
-				} catch (Exception e) {
-					////Log.i("MISPRUEBAS","ERROR COGER DATOS updateMaxHandler");
-					e.printStackTrace();
-				}
-				
-				////Log.i("MISPRUEBAS","ojo: "+String.valueOf(status)+" "+message);
-
-				if (status == 200) {
-						double ventas = 0;
-						double descuentos = 0;
-						double impuestos = 0;
-						double propinas = 0;
-						double domicilios = 0;
-						double llevar = 0;
-						double tarjeta = 0;
-						double efectivo = 0;
-						int contEfectivo = 0;
-						int contTarjeta = 0;
-						int contDomicilio = 0;
-						int contLlevar = 0;
-						
-						
-						try {
-							ventas = payload.getDouble("ventas");
-							descuentos = payload.getDouble("descuentos");
-							impuestos = payload.getDouble("impuestos");
-							propinas = payload.getDouble("propinas");
-							domicilios = payload.getDouble("domicilios");
-							llevar = payload.getDouble("llevar");
-							tarjeta = payload.getDouble("tarjeta");
-							efectivo = payload.getDouble("efectivo");
-							contEfectivo = payload.getInt("contEfectivo");
-							contTarjeta = payload.getInt("contTarjeta");
-							contDomicilio = payload.getInt("contDomicilio");
-							contLlevar = payload.getInt("contLlevar");
-
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
+	private void receivedZReport(double ventas,	double descuentos,	double impuestos,
+	double propinas, double domicilios, double llevar, double tarjeta, double efectivo,
+	int contEfectivo , int contTarjeta, int contDomicilio, int contLlevar) {
+						prefs = Util.getSharedPreferences(mContext);
 						String fecha = DateFormat.getDateFormat(Initialactivity.this).format(
 								new Date());
 						StringBuilder factura = new StringBuilder();
@@ -4883,26 +4574,7 @@ public static class MHandler extends Handler {
 				                }
 				        }
 
-						
-						
-						
-					}
-					else{
-						//otro status diferente de 200
-						//Log.i("MISPRUEBAS",String.valueOf(status)+": "+message);
-						Toast.makeText(mContext, "No hay registros del día para imprimir reporte", Toast.LENGTH_LONG).show();
-					}
-					
-				} 
-				else{
-					//respuesta = null
-					//Log.i("MISPRUEBAS","Respuesta null de servidor");
-				}
-
-			}
-			
-
-		};
+		}
 
 	public void downloadFile() {
 		try {
@@ -4988,6 +4660,7 @@ public static class MHandler extends Handler {
 	
 	private int updateSyncIdInRow(String table, Long id,
 			String field, Long value) {
+		//TODO revisar si es de sale, y actualzar en nueva base de datos, no tratar de buscar tabla sale q esta generand error handled
 		ContentValues values = new ContentValues();
 		values.put(field, value);
 		return db.update(table, values, Setup.COLUMN_ID + " = " + id, null);
@@ -5038,9 +4711,6 @@ public static class MHandler extends Handler {
 			unitDataSource = new UnitDataSource(dbHelper);
 			unitDataSource.open(db);
 			units = unitDataSource.getAllUnits();
-			saleDataSource = new SaleDataSource(dbHelper);
-			saleDataSource.open();
-			saleList = saleDataSource.getAllSales();
 			mResetProgressDialog.dismiss();
 			
 	    	
@@ -5451,14 +5121,21 @@ public static class MHandler extends Handler {
 		
 	}
 	
-	private void saveSale(String method,Double value,Double discount,int delivery,int togo, int tip){
+	
+	//hacer esto en background y una funcion en ui que aklerte reciviendo mensajes en caso que pase algo malo
+	@Background
+	void saveSale(String method,Double value,Double discount,int delivery,int togo, int tip){
 		int number = checkSaleNumber(); 
 		int nextsale = addSale(); //se aumenta el valor de facturación, //si falla se resta un numero de las ventas actuales mas adelante,.
-		Sale createdSale = null;
+		//Sale createdSale = null;
+		DailySale dailySale = null;
 		long saveDate = System.currentTimeMillis();
 		LinkedHashMap<Registrable,Integer> currentSale = currentOrder;
 		if(number > 0){
-			createdSale = saleDataSource.createSale(saveDate,
+			//save dailySale
+			dailySale = new DailySale(null, 0, delivery, togo, tip, nextsale, method, value, discount, new Date());
+			dailySaleDao.insert(dailySale);
+			/*createdSale = saleDataSource.createSale(saveDate,
 					method,
 					value,
 					0,
@@ -5466,30 +5143,106 @@ public static class MHandler extends Handler {
 					togo,
 					tip,
 					discount,
-					nextsale);
-			
-			//save dailySale
-			DailySale dailySale = new DailySale(null, 0, delivery, togo, tip, nextsale, method, value, discount, new Date());
-			dailySaleDao.insert(dailySale);
-			
+					nextsale); *///pasar esto a la nueva base de datos???
 		}
 		else{
-			alertbox("!ATENCIÓN!", "Esta venta no se puede facturar. Este dispositivo no tiene más facturas autorizadas. Consulta el administrador, o si tu lo eres, ve a tu panel de control Nest5 y autoriza más facturas. Para más información: http://soporte.nest5.com");
+			informUser(NO_AUTHORIZED_INVOICES);
 		}
-		if (createdSale != null) {
+		if (dailySale != null) {
 			Iterator<Entry<Registrable, Integer>> it = currentSale
 					.entrySet().iterator();
 
 			while (it.hasNext()) {
 				Map.Entry<Registrable, Integer> pair = (Map.Entry<Registrable, Integer>) it
 						.next();
-				createdSale.saveItem(dbHelper, pair.getKey().type,
-						pair.getKey().id, pair.getValue());//será que acá guarda el id local y sincroiniza asi por eso llega luego tod en ceros al volver a sincronizar?
+				/*createdSale.saveItem(dbHelper, pair.getKey().type,
+						pair.getKey().id, pair.getValue());*///será que acá guarda el id local y sincroiniza asi por eso llega luego tod en ceros al volver a sincronizar?
 				
 				// Log.d("INGREDIENTES","INGREDIENTE: "+ingrediente.getKey().getName()+" "+ingrediente.getValue());
+				
+				//guardar aca en la nueva base de datos greendao las parejas saleingrediente, saleproducto, salecombinacion
+				
+				if(pair.getKey().type == Registrable.TYPE_INGREDIENT){
+					Impuesto impuesto = impuestoDao.queryBuilder().where(com.nest5.businessClient.ImpuestoDao.Properties.SyncId.eq(pair.getKey().getIngredient().getTax().getSyncId())).unique(); 
+					if( impuesto == null){
+						impuesto = new Impuesto(0, pair.getKey().getIngredient().getTax().getSyncId(),pair.getKey().getIngredient().getTax().getPercentage(), pair.getKey().getIngredient().getTax().getName()); 
+						impuestoDao.insert(impuesto);
+					}
+					Ingrediente ingrediente = ingredienteDao.queryBuilder().where(com.nest5.businessClient.IngredienteDao.Properties.SyncId.eq(pair.getKey().getIngredient().getSyncId())).unique();
+					if(ingrediente == null){
+						ingrediente = new Ingrediente(null);
+						ingrediente.setImpuesto(impuesto);
+						ingrediente.setDate(new Date());
+						ingrediente.setCostPerUnit(pair.getKey().getIngredient().getCostPerUnit());
+						ingrediente.setName(pair.getKey().getIngredient().getName());
+						ingrediente.setSyncId(pair.getKey().getIngredient().getSyncId());
+						ingrediente.setPricePerUnit(pair.getKey().getIngredient().getPricePerUnit());
+						ingredienteDao.insert(ingrediente);
+					}
+					//ya tengo el impuesto y el ingrediente en la base de datos, ahora creo la relacion, venta-ingrediente
+					SaleIngrediente saIn = new SaleIngrediente();
+					saIn.setDailySale(dailySale);
+					saIn.setQuantity(pair.getValue());
+					saIn.setIngrediente(ingrediente);
+					saleIngredienteDao.insert(saIn);
+					
+				}
+				if(pair.getKey().type == Registrable.TYPE_PRODUCT){
+					Impuesto impuesto = impuestoDao.queryBuilder().where(com.nest5.businessClient.ImpuestoDao.Properties.SyncId.eq(pair.getKey().getProduct().getTax().getSyncId())).unique(); 
+					if( impuesto == null){
+						impuesto = new Impuesto(0, pair.getKey().getProduct().getTax().getSyncId(),pair.getKey().getProduct().getTax().getPercentage(), pair.getKey().getProduct().getTax().getName()); 
+						impuestoDao.insert(impuesto);
+					}
+					Producto producto = productoDao.queryBuilder().where(com.nest5.businessClient.ProductoDao.Properties.SyncId.eq(pair.getKey().getProduct().getSyncId())).unique();
+					if(producto == null){
+						producto = new Producto(null);
+						producto.setImpuesto(impuesto);
+						producto.setDate(new Date());
+						producto.setCostPerUnit(pair.getKey().getProduct().getCost());
+						producto.setName(pair.getKey().getProduct().getName());
+						producto.setSyncId(pair.getKey().getProduct().getSyncId());
+						producto.setPricePerUnit(pair.getKey().getProduct().getPrice());
+						productoDao.insert(producto);
+					}
+					//ya tengo el impuesto y el producto en la base de datos, ahora creo la relacion, venta-producto
+					SaleProducto saPr = new SaleProducto();
+					saPr.setDailySale(dailySale);
+					saPr.setQuantity(pair.getValue());
+					saPr.setProducto(producto);
+					saleProductoDao.insert(saPr);
+				}
+				if(pair.getKey().type == Registrable.TYPE_COMBO){
+					Impuesto impuesto = impuestoDao.queryBuilder().where(com.nest5.businessClient.ImpuestoDao.Properties.SyncId.eq(pair.getKey().getCombo().getTax().getSyncId())).unique(); 
+					if( impuesto == null){
+						impuesto = new Impuesto(0, pair.getKey().getCombo().getTax().getSyncId(),pair.getKey().getCombo().getTax().getPercentage(), pair.getKey().getCombo().getTax().getName()); 
+						impuestoDao.insert(impuesto);
+					}
+					Combinacion combinacion = combinacionDao.queryBuilder().where(com.nest5.businessClient.CombinacionDao.Properties.SyncId.eq(pair.getKey().getCombo().getSyncId())).unique();
+					if(combinacion == null){
+						combinacion = new Combinacion(null);
+						combinacion.setImpuesto(impuesto);
+						combinacion.setDate(new Date());
+						combinacion.setCostPerUnit(pair.getKey().getCombo().getCost());
+						combinacion.setName(pair.getKey().getCombo().getName());
+						combinacion.setSyncId(pair.getKey().getCombo().getSyncId());
+						combinacion.setPricePerUnit(pair.getKey().getCombo().getPrice());
+						combinacionDao.insert(combinacion);
+					}
+					//ya tengo el impuesto y el combinacion en la base de datos, ahora creo la relacion, venta-combinacion
+					SaleCombinacion saCm = new SaleCombinacion();
+					saCm.setDailySale(dailySale);
+					saCm.setQuantity(pair.getValue());
+					saCm.setCombinacion(combinacion);
+					saleCombinacionDao.insert(saCm);
+				}
+				//TODO //una vez inserte ingredientes, productos y combos, inserta relaciones venta-cadauno, que se borran de acuerdo a lo que configure el usuario, no puede poner mas de una semana, cambiar que aca guarde sales y demas relaciones y que nunca las sincronice del servidor
+				
+				
 			}
 			
-			//cookingOrders.remove(currentSelectedPosition);
+			//cookingOrders.remove(currentSelectedPosition); //viejo!!! ojo no es de lo nuevo de greendao y todos los movimientos
+			//TODO
+			//Pasar todo esto a una funcion en UIThread, en este momento esta en background y modifica cosas del ui y sacará error.
 			try{
 				cookingOrders.remove(currentSale);
 				cookingOrdersDelivery.remove(currentSale);
@@ -5503,7 +5256,7 @@ public static class MHandler extends Handler {
 				e.printStackTrace();
 			}
 			currentTable = null;
-			statusText.setText("Cuenta Cerrada Exitosamente.");
+			//statusText.setText("Cuenta Cerrada Exitosamente.");  //quitar manipulacion ui porque esto es background
 			currentSelectedPosition = -1;
 			//sendCommandMessage(DELETE_ALL_COMMAND);
 			List<Long> items = new ArrayList<Long>();
@@ -5514,8 +5267,6 @@ public static class MHandler extends Handler {
 			}
 			cookingAdapter = new SaleAdapter(mContext, items, nameTables,inflater);
 			ordersList.setAdapter(cookingAdapter);
-			salesFromToday = saleDataSource
-					.getAllSalesWithin(init, end);
 
 			ordersList.setOnItemClickListener(orderListListener);
 			//currentOrder.clear(); //NUEVO
@@ -5523,19 +5274,11 @@ public static class MHandler extends Handler {
 			sale_name.setText("Venta Guardada con Éxito");
 			sale_details
 					.setText("Selecciona otro elemento para ver detalles.");
-			updateSaleValue();
-			
-			//pdate sale object to get saved items, since the object doesn't have them
-			createdSale = saleDataSource.getSale(createdSale.getId());
-			//Log.w("GUARDANDOVENTA","Cantidad de productos: "+String.valueOf(createdSale.getProducts().size()));
-			createSyncRow("\""+Setup.TABLE_SALE+"\"",createdSale.getId(), createdSale.getSyncId(), createdSale.serializedFields());
-			
-			
-
+			//TODO revisar que getId si este trayendo con el que quedo guardado y no coja una version cached del objeto sin id
+			 createSyncRow("\""+Setup.TABLE_SALE+"\"",dailySale.getId(), dailySale.getSyncId(), dailySale.serializedFields());
 		} else {
-			subSale();//falló uardando venta por lo tanto resetea el valor de facturación actual al anterior.
-			Toast.makeText(mContext, "Error al Guardar la venta",
-					Toast.LENGTH_LONG).show();
+			subSale();//falló guardando venta por lo tanto resetea el valor de facturación actual al anterior.
+			informUser(OTHER_ALERT_ERROR);
 			
 		}
 	}
@@ -5805,7 +5548,7 @@ public static class MHandler extends Handler {
 	    	  String togos = msg.getData().getString("togos");
 	    	  String tables = msg.getData().getString("tables");
 	    	  String times = msg.getData().getString("times");
-	    	  Log.i("MISPRUEBAS","lista: "+tables);
+	    	  //Log.i("MISPRUEBAS","lista: "+tables);
 	        // ...actualizo listas si son 
 	    	  if(!list.equalsIgnoreCase("")){
 	  			SharedPreferences prefs = Util.getSharedPreferences(activity);
@@ -5878,13 +5621,13 @@ public static class MHandler extends Handler {
     		    	i++;
     		    }
     		   
-    		    Log.i("MISPRUEBAS","Tables string: "+tables);
+    		   // Log.i("MISPRUEBAS","Tables string: "+tables);
     			if(tables != "[]"){ //if any order is assigned to a table
     			    gsonBuilder.registerTypeAdapter(new LinkedHashMap<LinkedHashMap<Registrable, Integer>, CurrentTable<Table,Integer>>().getClass(), new SerialiserLinkedHashMapCurrentTable());
     			    gson = gsonBuilder.create();
     			    LinkedHashMap<LinkedHashMap<Registrable,Integer>,CurrentTable<Table,Integer>> cookingOrdersTable_temp = gson.fromJson(tables, new LinkedHashMap<LinkedHashMap<Registrable, Integer>, CurrentTable<Table,Integer>>().getClass());
     			    //imprimo cookingOrders
-    			    int j = 0;
+    			   /* int j = 0;
     			    for(LinkedHashMap<Registrable, Integer> order : cookingOrders){
     			    	
     			    	Log.i("MISPRUEBAS2","-Orden No. "+j);
@@ -5904,7 +5647,7 @@ public static class MHandler extends Handler {
     			    	}
     			    	
     			    	j++;
-    			    }
+    			    }*/
     			    
     			    
     			    Set<Entry<LinkedHashMap<Registrable, Integer>, CurrentTable<Table, Integer>>> valoresTable = cookingOrdersTable_temp.entrySet();
@@ -5918,16 +5661,16 @@ public static class MHandler extends Handler {
     			    }
     			    
     			  //imprimocookingOrdersTable
-    			    j = 0;
+    			   /* j = 0;
     			    for(Entry<LinkedHashMap<Registrable, Integer>, CurrentTable<Table, Integer>> ordertable : cookingOrdersTable.entrySet()){
     			    	
-    			    	Log.i("MISPRUEBAS2","-Ordertable No. "+j);
-    			    	Log.i("MISPRUEBAS2","-En Mesa: "+ordertable.getValue().getTable().getName());
+    			    	//Log.i("MISPRUEBAS2","-Ordertable No. "+j);
+    			    	//Log.i("MISPRUEBAS2","-En Mesa: "+ordertable.getValue().getTable().getName());
     			    	for(Entry<Registrable,Integer> orden : ordertable.getKey().entrySet()){
     			    		Log.i("MISPRUEBAS2","--"+orden.getKey().name+" : "+orden.getValue());
     			    	} 			    	
     			    	j++;
-    			    }
+    			    }*/
     			    
     			}
     			
@@ -5975,19 +5718,43 @@ public static class MHandler extends Handler {
 	    }
 	  }
 	
-	@Background // Executed in a background thread
+	
+	
+	@Background
     void getAllDailySales(DailySaleDao dsd) {
+		//TODO
+		//viene, toma todas las ventas del dia, y toma todos los objetos saleing, salepro y sale combo de esto, calcula imp, descu, y demas
 		LocalDateTime today = new LocalDateTime()
 			.withHourOfDay(0)
 			.withMinuteOfHour(0)
 			.withSecondOfMinute(0)
 			.withMillisOfSecond(0);
-		Log.i("MISPRUEBAS","inciio del dia: "+today.toString());
 		
-		List sales = dsd.queryBuilder()
-				.where(Properties.Date.ge(today.toDate()))
+		List<DailySale> sales = dsd.queryBuilder()
+				.where(com.nest5.businessClient.DailySaleDao.Properties.Date.ge(today.toDate()))
 				.list();
-		Log.i("MISPRUEBAS","sales: "+sales.size());
+		
+		//calculate ventas, desceuntos, impuestos, propinas, domicilios, llevar, tarjetas, efectivo, cotEfectivo, contTarjeta, contDomicilio, contLlevar y llamar receivedZReport(...)
+		
+				double totalVentas = 0;
+		        double totalDescuentos = 0;
+		        double totalImpuestos = 0;
+		        double totalPropinas = 0;
+		        double sumDomicilios = 0;
+		        double sumLlevar = 0;
+		        double sumTarjeta = 0;
+		        double sumEfectivo = 0;
+		        int contDomicilio = 0;
+		        int contEfectivo = 0;
+		        int contTarjeta = 0;
+		        int contLlevar = 0;
+		
+		
+		for(DailySale element : sales){
+					double elementTotal = 0;
+	                double elementImptotal = 0;
+	                
+		}
 		
     }
 
@@ -6006,6 +5773,20 @@ public static class MHandler extends Handler {
 	}
 	protected static LinkedHashMap<LinkedHashMap<Registrable, Integer>, Integer> getCookingOrdersDelivery(){
 		return cookingOrdersDelivery;
+	}
+	
+	@UiThread
+	void informUser(int message){
+		switch (message) {
+		case NO_AUTHORIZED_INVOICES:
+			alertbox("!ATENCIÓN!", "Esta venta no se puede facturar. Este dispositivo no tiene más facturas autorizadas. Consulta el administrador, o si tu lo eres, ve a tu panel de control Nest5 y autoriza más facturas. Para más información: http://soporte.nest5.com");
+			break;
+
+		default:
+			Toast.makeText(mContext, "Error al Guardar la venta",
+					Toast.LENGTH_LONG).show();
+			break;
+		}
 	}
 
 	

@@ -10,7 +10,12 @@ import java.net.URL;
 
 import com.bugsense.trace.BugSense;
 import com.flurry.android.FlurryAgent;
+import com.parse.Parse;
+import com.parse.ParseInstallation;
+import com.parse.PushService;
+
 import org.json.JSONObject;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
@@ -31,10 +36,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
-import com.parse.Parse;
-import com.parse.ParseAnalytics;
-import com.parse.ParseInstallation;
-import com.parse.PushService;
+
 import com.bugsense.trace.BugSenseHandler;
 
 /**
@@ -100,15 +102,12 @@ public class LoginActivity extends Activity {
 						attemptLogin();
 					}
 				});
-		mContext = this;
-        try{
+			mContext = this;
             prefs = Util.getSharedPreferences(mContext);
             Parse.initialize(this, "qM91ypfRryTUwlFnTjDYV4JKacZzulk0LxAnAFML", "ZRiP4gEmwpvWrypr7cRK1G4ZWE1v9fm9EcyMrQqv");
-            PushService.setDefaultPushCallback(this, Initialactivity.class);
+            PushService.setDefaultPushCallback(mContext, Initialactivity.class);
             ParseInstallation.getCurrentInstallation().saveInBackground();
-        }catch(Exception e){
-         e.printStackTrace();
-        }
+
 
 		 
 	}
