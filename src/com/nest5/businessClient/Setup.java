@@ -59,6 +59,7 @@ public class Setup {
     public static final String HAS_CONFIGURED_TABLES = "has_configured_tables";
     public static final String SAVED_TABLES = "saved_tables";
     public static final int CLOSE_TABLE = 555225;
+    public static final String BLUETOOTH_PERMISSION="permission_for_bluetooth_connection";
     
     
     

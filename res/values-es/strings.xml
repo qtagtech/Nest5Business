@@ -97,5 +97,7 @@
     <string name="withNest5">Con Nest5, obtén:</string>
     <string name="print_invoice">Factura</string>
     <string name="print_order">Orden</string>
+    <string name="table_cancel">Cancelar Orden</string>
+    <string name="table_close">Terminar Servicio</string>
 
 </resources>

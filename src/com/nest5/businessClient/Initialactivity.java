@@ -51,20 +51,14 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
-
 import com.bugsense.trace.BugSenseHandler;
 import com.flurry.android.FlurryAgent;
-
 import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.UiThread;
 import org.joda.time.LocalDateTime;
 import org.json.JSONObject;
-
-import android.app.ActionBar;
-import android.app.ActionBar.Tab;
 import android.app.AlertDialog;
 import android.app.DownloadManager;
-import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -103,14 +97,10 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -135,6 +125,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.acs.acr31.ACR31Reader;
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
@@ -151,11 +145,6 @@ import com.nest5.businessClient.CloseTableForm.OnSelectTableActionListener;
 import com.nest5.businessClient.CreateComboView.OnCreateComboListener;
 import com.nest5.businessClient.CreateProductView.OnCreateProductListener;
 import com.nest5.businessClient.DailyObjectFragment.OnDailyObjectFragmentCreatedListener;
-import com.nest5.businessClient.DailySaleDao.*;
-import com.nest5.businessClient.ImpuestoDao.*;
-import com.nest5.businessClient.IngredienteDao.*;
-import com.nest5.businessClient.ProductoDao.*;
-import com.nest5.businessClient.CombinacionDao.*;
 import com.nest5.businessClient.DaoMaster.DevOpenHelper;
 import com.nest5.businessClient.HomeObjectFragment.OnHomeObjectFragmentCreatedListener;
 import com.nest5.businessClient.HomeObjectFragment.OnIngredientCategorySelectedListener;
@@ -169,11 +158,7 @@ import com.nest5.businessClient.SalesObjectFragment.OnSalesObjectFragmentCreated
 import com.nest5.businessClient.SelectAddItem.OnAddItemSelectedListener;
 import com.nest5.businessClient.WifiDirectDialog.DeviceActionListener;
 
-
-
-
-
-public class Initialactivity extends FragmentActivity implements
+public class Initialactivity extends SherlockFragmentActivity implements
 		OnAddItemSelectedListener, OnAddIngredientListener,
 		OnIngredientCategorySelectedListener,
 		OnHomeObjectFragmentCreatedListener, OnAddIngredientCategoryListener,
@@ -186,7 +171,8 @@ public class Initialactivity extends FragmentActivity implements
 		OnNest5ReadObjectFragmentCreatedListener,
 		ScanDevicesFragment.SelectDevice,
 		OnPrintSelectListener,
-		OnSelectTableActionListener
+		OnSelectTableActionListener,
+		com.actionbarsherlock.app.ActionBar.TabListener
 		{
 
 	public static final String TAG = "Initialactivity";
@@ -422,7 +408,7 @@ public class Initialactivity extends FragmentActivity implements
 
     
     private static final int REQUEST_CONNECT_DEVICE = 1;
-    private static final int REQUEST_ENABLE_BT = 2;
+    private static final int REQUEST_ENABLE_BT = 8965;
     
     
     // Array adapter for the conversation thread
@@ -611,49 +597,19 @@ public class Initialactivity extends FragmentActivity implements
 
 					}
 				});
-
-		final ActionBar actionBar = getActionBar();
+		getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+		//final ActionBar actionBar = getActionBar();
 		// Specify that tabs should be displayed in the action bar.
-		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-
-		// Create a tab listener that is called when the user changes tabs.
-		ActionBar.TabListener tabListener = new ActionBar.TabListener() {
-
-			@Override
-			public void onTabReselected(Tab tab, FragmentTransaction ft) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void onTabSelected(Tab tab, FragmentTransaction ft) {
-				mViewPager.setCurrentItem(tab.getPosition());
-
-			}
-
-			@Override
-			public void onTabUnselected(Tab tab, FragmentTransaction ft) {
-				// TODO Auto-generated method stub
-
-			}
-
-		};
-
-		Tab homeTab = actionBar.newTab().setText("Inicio")
-				.setTabListener(tabListener);
-		Tab ordersTab = actionBar.newTab().setText("Órdenes")
-				.setTabListener(tabListener);
-		/*Tab dailyTab = actionBar.newTab().setText("Registros")
-				.setTabListener(tabListener);
-		Tab inventoryTab = actionBar.newTab().setText("Inventarios")
-				.setTabListener(tabListener);*/
-		Tab nest5ReadTab = actionBar.newTab().setText("Nest5")
-				.setTabListener(tabListener);
-		actionBar.addTab(homeTab, true);
-		actionBar.addTab(ordersTab, false);
-		//actionBar.addTab(dailyTab, false);
-		//actionBar.addTab(inventoryTab, false);
-		actionBar.addTab(nest5ReadTab, false);
+		//actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+		ActionBar.Tab homeTab = getSupportActionBar().newTab().setText("Inicio");
+		ActionBar.Tab ordersTab = getSupportActionBar().newTab().setText("Órdenes");
+		ActionBar.Tab nest5ReadTab = getSupportActionBar().newTab().setText("Nest5");
+		homeTab.setTabListener(this);
+		ordersTab.setTabListener(this);
+		nest5ReadTab.setTabListener(this);
+		getSupportActionBar().addTab(homeTab, true);
+		getSupportActionBar().addTab(ordersTab, false);
+		getSupportActionBar().addTab(nest5ReadTab, false);
 		
 		
 		currentOrder = new LinkedHashMap<Registrable, Integer>();
@@ -786,6 +742,29 @@ public class Initialactivity extends FragmentActivity implements
 		});*/
 
 	}
+	
+	@Override
+	public void onTabSelected(com.actionbarsherlock.app.ActionBar.Tab tab,
+			android.support.v4.app.FragmentTransaction ft) {
+		mViewPager.setCurrentItem(tab.getPosition());
+		
+	}
+
+
+	@Override
+	public void onTabUnselected(com.actionbarsherlock.app.ActionBar.Tab tab,
+			android.support.v4.app.FragmentTransaction ft) {
+
+		
+	}
+
+
+	@Override
+	public void onTabReselected(com.actionbarsherlock.app.ActionBar.Tab tab,
+			android.support.v4.app.FragmentTransaction ft) {
+
+		
+	}
 
 	@Override
 	public void onSaveInstanceState(Bundle savedInstance) {
@@ -811,20 +790,32 @@ public class Initialactivity extends FragmentActivity implements
 		mHandler.postDelayed(contador,60*1000);
 		backUpOrdersHandler.postDelayed(constantBackUp, 1000 * 30);
 		updateRegistrables(); //update all elements than can be sold (ingredients, products, combos)
+		SharedPreferences prefs = Util.getSharedPreferences(mContext);
+		boolean blue = prefs.getBoolean(Setup.BLUETOOTH_PERMISSION, true);
 		try{
-			if (!mBluetoothAdapter.isEnabled()) {
-	            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-	            startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
-	        // Otherwise, setup the serial session
-	        } else {
-	            if (mChatService == null) setupChat();
-	        	//if (mSerialService == null) setupChat();
-	        }
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+			
+				BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+				if(mBluetoothAdapter != null){
+					if(blue){
+						prefs.edit().putBoolean(Setup.BLUETOOTH_PERMISSION, false);
+						if (!mBluetoothAdapter.isEnabled()) {
+				            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+				            startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
+				        // Otherwise, setup the serial session
+				        } else {
+				            if (mChatService == null) setupChat();
+				        	//if (mSerialService == null) setupChat();
+				        }
+					}
+					
+				}
+				
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+			
+			
 
-        SharedPreferences prefs = Util.getSharedPreferences(mContext);
         String deviceId = prefs.getString(Setup.DEVICE_REGISTERED_ID, "null");
         String compid = prefs.getString(Setup.COMPANY_ID, "0");
         String jString = "{device_id:"+deviceId+",company:"+compid+"}";
@@ -964,7 +955,7 @@ public class Initialactivity extends FragmentActivity implements
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		mMenu = menu;
-		MenuInflater inflater = getMenuInflater();
+		com.actionbarsherlock.view.MenuInflater inflater = getSupportMenuInflater();
 		inflater.inflate(R.menu.main_menu, menu);
 			SharedPreferences defaultprefs = PreferenceManager.getDefaultSharedPreferences(mContext);
 			boolean layouttables = defaultprefs.getBoolean("arrange_tables", false);
@@ -972,14 +963,14 @@ public class Initialactivity extends FragmentActivity implements
 				MenuItem tables = mMenu.findItem(R.id.layouttables);
 				if(!tables.isVisible()){
 					tables.setVisible(true);
-					invalidateOptionsMenu();
+						//supportInvalidateOptionsMenu();
 				}
 				MenuItem mesas = mMenu.findItem(R.id.menu_show_tables);
-				if(!mesas.isVisible()){
-					mesas.setVisible(true);
-					invalidateOptionsMenu();
-				}
 				
+					if(!mesas.isVisible()){
+						mesas.setVisible(true);
+							//supportInvalidateOptionsMenu();
+					}
 				
 			}	
 		
@@ -991,8 +982,8 @@ public class Initialactivity extends FragmentActivity implements
 		// Handle item selection
 		switch (item.getItemId()) {
 		case R.id.menu_add:
-			showAddItemDialog();
-			return true;
+			//showAddItemDialog();
+			return false;
 		case R.id.menu_sync:
 			/*
 			 * Toast.makeText(mContext, " " + salesFromToday.size(),
@@ -1251,6 +1242,10 @@ public class Initialactivity extends FragmentActivity implements
 			
 			
 		}
+		if(requestCode == REQUEST_ENABLE_BT){
+			SharedPreferences prefs = Util.getSharedPreferences(mContext);
+			prefs.edit().putBoolean(Setup.BLUETOOTH_PERMISSION, false).commit();
+		}
 		
 		
 		// else continue with any other code you need in the method
@@ -1265,7 +1260,7 @@ public class Initialactivity extends FragmentActivity implements
 			tablelayouts.setVisible(layouttables);
 			showtables.setVisible(layouttables);
 			if(change){
-				invalidateOptionsMenu();
+				supportInvalidateOptionsMenu();
 			}
 			
 			
@@ -1367,7 +1362,7 @@ public class Initialactivity extends FragmentActivity implements
 	public void OnAddIngredientSave(String name, IngredientCategory category,
 			Tax tax, Unit unit, double costPerUnit, double pricePerUnit,
 			double priceMeasure, Boolean editing, double qty) {
-		// TODO Auto-generated method stub
+		
 		// Toast.makeText(mContext, name+" "+categoryId.getName(),
 		// Toast.LENGTH_LONG).show();
 		if (!editing) {
@@ -1434,7 +1429,7 @@ public class Initialactivity extends FragmentActivity implements
 
 	@Override
 	public void OnAddProductCategorySave(String name) {
-		// TODO Auto-generated method stub
+		
 		ProductCategory categoryProduct = null;
 		try {
 			categoryProduct = productCategoryDatasource
@@ -1463,7 +1458,7 @@ public class Initialactivity extends FragmentActivity implements
 
 	@Override
 	public void OnAddIngredientCategorySave(String name) {
-		// TODO Auto-generated method stub
+		
 		IngredientCategory ingredientProduct = null;
 		try {
 			ingredientProduct = ingredientCategoryDatasource
@@ -1587,7 +1582,7 @@ public class Initialactivity extends FragmentActivity implements
 
 	@Override
 	public void OnIngredientCategorySelected(long id) {
-		// TODO Auto-generated method stub
+		
 
 		// tomar id de la categoria, buscar todos los ingredentes y populate la
 		// gridview
@@ -1596,7 +1591,7 @@ public class Initialactivity extends FragmentActivity implements
 
 	@Override
 	public void OnHomeObjectFragmentCreated(View v) {
-		// TODO Auto-generated method stub
+	
 		LinearLayout ll = (LinearLayout) v
 				.findViewById(R.id.ingredient_categories_buttons);
 		ll.removeAllViews();
@@ -1850,7 +1845,7 @@ public class Initialactivity extends FragmentActivity implements
 
 	@Override
 	public void OnNest5ReadObjectFragmentCreated(View v) {
-		// TODO Auto-generated method stub
+		
 		readCardBtn = (Button) v.findViewById(R.id.read_magnetic_card);
 		readCardBtn.setOnClickListener(readMagneticCardListener);
 
@@ -2004,7 +1999,7 @@ public class Initialactivity extends FragmentActivity implements
 
 		@Override
 		public void onClick(View v) {
-			// TODO Auto-generated method stub
+			
 			// Toast.makeText(mContext, String.valueOf(v.getId()),
 			// Toast.LENGTH_LONG).show();
 			switch (v.getId()) {
@@ -2314,7 +2309,7 @@ public class Initialactivity extends FragmentActivity implements
 	@Override
 	public void OnAddProductSave(String name, ProductCategory category,
 			double cost, double price, Tax tax) {
-		// TODO Auto-generated method stub
+
 		if ((name == null) || (category == null)) {
 			showAddProductCategoryFormDialog();
 		} else {
@@ -3125,7 +3120,7 @@ public class Initialactivity extends FragmentActivity implements
 	private class WiFiSend extends AsyncTask<String, Void, Void> {
 
 		protected Void doInBackground(String... msg) {
-			// TODO Auto-generated method stub
+
 			try {
 				socket = new Socket(connectedIp, 8100);
 				wifiOutputStream = new DataOutputStream(
@@ -3135,17 +3130,17 @@ public class Initialactivity extends FragmentActivity implements
 				wifiOutputStream.writeUTF(msg[0]);
 				// textIn.setText(dataInputStream.readUTF());
 			} catch (UnknownHostException e) {
-				// TODO Auto-generated catch block
+
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+
 				e.printStackTrace();
 			} finally {
 				if (socket != null) {
 					try {
 						socket.close();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
+
 						e.printStackTrace();
 					}
 				}
@@ -3153,7 +3148,7 @@ public class Initialactivity extends FragmentActivity implements
 					try {
 						wifiOutputStream.close();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
+
 						e.printStackTrace();
 					}
 				}
@@ -3162,7 +3157,7 @@ public class Initialactivity extends FragmentActivity implements
 					try {
 						wifiInputStream.close();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
+
 						e.printStackTrace();
 					}
 				}
@@ -3305,16 +3300,16 @@ public class Initialactivity extends FragmentActivity implements
 			try {
 				playSound(mContext);
 			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
+
 				e.printStackTrace();
 			} catch (SecurityException e) {
-				// TODO Auto-generated catch block
+
 				e.printStackTrace();
 			} catch (IllegalStateException e) {
-				// TODO Auto-generated catch block
+
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+
 				e.printStackTrace();
 			}
 		}
@@ -3391,7 +3386,7 @@ public static class MHandler extends Handler {
 	/*BLUETOOTH*/
 	@Override
 	public void onDeviceSelected(String address) {
-		// TODO Auto-generated method stub
+
 		Toast.makeText(this, "address--->"+address, Toast.LENGTH_SHORT).show();
         // Get the BLuetoothDevice object
         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
@@ -3399,7 +3394,7 @@ public static class MHandler extends Handler {
         try {
 			device.createRfcommSocketToServiceRecord(uuid);
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
+
 			e1.printStackTrace();
 		}
 
@@ -3661,7 +3656,7 @@ public static class MHandler extends Handler {
 		@Override
 		protected Boolean doInBackground(File... params) {
 
-			// TODO: attempt upload
+
 			String accessKey = "AKIAIIQ5AOSHXVIRUSBA";
 			String secretKey = "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";
 			AWSCredentials credentials = new BasicAWSCredentials(accessKey,
@@ -3685,7 +3680,7 @@ public static class MHandler extends Handler {
 
 			}
 
-			// TODO: register the new account here.
+
 
 			return true;
 		}
@@ -3782,7 +3777,7 @@ public static class MHandler extends Handler {
 						@Override
 						public void onItemClick(AdapterView<?> arg0, View arg1,
 								int position, long arg3) {
-							// TODO Auto-generated method stub
+	
 							// enviar empresa, usuario y promocion que sellara
 							mResetProgressDialog = new ProgressDialog(mContext);
 							mResetProgressDialog
@@ -3895,7 +3890,7 @@ public static class MHandler extends Handler {
 						@Override
 						public void onItemClick(AdapterView<?> arg0, View arg1,
 								int position, long arg3) {
-							// TODO Auto-generated method stub
+							
 							// enviar empresa, usuario y promocion que sellara
 							mResetProgressDialog = new ProgressDialog(mContext);
 							mResetProgressDialog
@@ -4105,7 +4100,7 @@ public static class MHandler extends Handler {
 							try{
 								table = sync.getTable();
 								id = sync.getRowId();
-								//////Log.i("MISPRUEBAS","valores table y id: "+table+" --- "+String.valueOf(id));
+								Log.i("MISPRUEBAS","valores table y id: "+table+" --- "+String.valueOf(id));
 								if(updateSyncIdInRow(table,id,Setup.COLUMN_SYNC_ID,sync_id) > 0)
 									deleteSyncRow(sync_row);
 							}
@@ -4661,6 +4656,18 @@ public static class MHandler extends Handler {
 	private int updateSyncIdInRow(String table, Long id,
 			String field, Long value) {
 		//TODO revisar si es de sale, y actualzar en nueva base de datos, no tratar de buscar tabla sale q esta generand error handled
+		Log.i("MISPRUEBAS",table);
+		if(table.equalsIgnoreCase("\"sale\"")){
+			Log.i("MISPRUEBAS","entra a table sale");
+			DailySale sale = dailySaleDao.queryBuilder().where(com.nest5.businessClient.DailySaleDao.Properties.Id.eq(id)).unique();
+			if(sale != null){
+				Log.i("MISPRUEBAS","hay una venta que es: "+sale.getNumber());
+				sale.setSyncId(value);
+				dailySaleDao.update(sale);
+				return 1;
+			}
+			return 0;
+		}
 		ContentValues values = new ContentValues();
 		values.put(field, value);
 		return db.update(table, values, Setup.COLUMN_ID + " = " + id, null);
@@ -5235,14 +5242,13 @@ public static class MHandler extends Handler {
 					saCm.setCombinacion(combinacion);
 					saleCombinacionDao.insert(saCm);
 				}
-				//TODO //una vez inserte ingredientes, productos y combos, inserta relaciones venta-cadauno, que se borran de acuerdo a lo que configure el usuario, no puede poner mas de una semana, cambiar que aca guarde sales y demas relaciones y que nunca las sincronice del servidor
+				 //una vez inserte ingredientes, productos y combos, inserta relaciones venta-cadauno, que se borran de acuerdo a lo que configure el usuario, no puede poner mas de una semana, cambiar que aca guarde sales y demas relaciones y que nunca las sincronice del servidor
 				
 				
 			}
 			
 			//cookingOrders.remove(currentSelectedPosition); //viejo!!! ojo no es de lo nuevo de greendao y todos los movimientos
-			//TODO
-			//Pasar todo esto a una funcion en UIThread, en este momento esta en background y modifica cosas del ui y sacará error.
+			
 			try{
 				cookingOrders.remove(currentSale);
 				cookingOrdersDelivery.remove(currentSale);
@@ -5252,7 +5258,7 @@ public static class MHandler extends Handler {
 				cookingOrdersTable.remove(currentSale);
 		        //quitar mesas de las abiertas y quitar 
 			}catch(Exception e){
-				////Log.i("ERRORES_REMOVE","HAY UN ERROR AL REMOVER CURRENTSALE DE COOKINGORDERS");
+				Log.i("MISPRUEBAS","HAY UN ERROR AL REMOVER CURRENTSALE DE COOKINGORDERS");
 				e.printStackTrace();
 			}
 			currentTable = null;
@@ -5274,8 +5280,7 @@ public static class MHandler extends Handler {
 			sale_name.setText("Venta Guardada con Éxito");
 			sale_details
 					.setText("Selecciona otro elemento para ver detalles.");
-			//TODO revisar que getId si este trayendo con el que quedo guardado y no coja una version cached del objeto sin id
-			 createSyncRow("\""+Setup.TABLE_SALE+"\"",dailySale.getId(), dailySale.getSyncId(), dailySale.serializedFields());
+			 createSyncRow("\""+Setup.TABLE_SALE+"\"",dailySale.getId(),0, dailySale.serializedFields());
 		} else {
 			subSale();//falló guardando venta por lo tanto resetea el valor de facturación actual al anterior.
 			informUser(OTHER_ALERT_ERROR);
@@ -5788,6 +5793,9 @@ public static class MHandler extends Handler {
 			break;
 		}
 	}
+
+
+	
 
 	
 	

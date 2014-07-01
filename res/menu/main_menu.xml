@@ -31,8 +31,8 @@
         android:showAsAction="ifRoom"
         android:visible="false"></item>
     <item android:id="@+id/appsettings" 
-        android:titleCondensed="Configuración Impresión" 
-        android:title="Configuración Impresión" 
+        android:titleCondensed="Configuración" 
+        android:title="Configuración" 
         android:icon="@drawable/settings" 
         android:showAsAction="ifRoom"></item>
     
