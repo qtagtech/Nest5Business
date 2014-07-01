@@ -51,12 +51,15 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+
 import com.bugsense.trace.BugSenseHandler;
 import com.flurry.android.FlurryAgent;
+
 import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.UiThread;
 import org.joda.time.LocalDateTime;
 import org.json.JSONObject;
+
 import android.app.AlertDialog;
 import android.app.DownloadManager;
 import android.app.ProgressDialog;
@@ -3040,7 +3043,7 @@ public class Initialactivity extends SherlockFragmentActivity implements
 					}
 				}
 				currentTable = null;
-				statusText.setText("Orden de Mesa cancelada con √©xito.");
+				statusText.setText("Orden de Mesa cancelada con Èxito.");
 			}
 			
 			List<Long> items = new ArrayList<Long>();
@@ -4051,6 +4054,7 @@ public static class MHandler extends Handler {
 			JSONObject respuesta = null;
 				////Log.i("MISPRUEBAS","LLEGUE DE subir fila");
 				totalSync--;//no importa lo que pase, cada que trata de subir una fila dice que lo hizo, solo borra la syncrow de la base de ddatos si se guarda nuevo documento o se actualiza, de resto queda ahi, para un pr√≥ximo intento
+			Log.i("MISPRUEBAS","Filas que quedan por sincronizar: "+String.valueOf(totalSync));
 			try {
 				respuesta = new JSONObject((String) msg.obj);
 			} catch (Exception e) {
@@ -4086,13 +4090,14 @@ public static class MHandler extends Handler {
 						try {
 							sync_id = respuesta.getLong("syncId");
 							sync_row = respuesta.getLong("syncRow");
+							Log.i("MISPRUEBAS","EL sync_row q se busca es con id:"+sync_row);
 							//////Log.i("MISPRUEBAS","valores sync_id y sync_row: "+String.valueOf(sync_id)+" --- "+String.valueOf(sync_row));
 
 						} catch (Exception e) {
 							////Log.i("MISPRUEBAS","ERROR cogiendo el syncId o el syncRow enviado por el servidor");
 							e.printStackTrace();
 						}
-						if((sync_id != 0L) && (sync_row != 0L)){//se debe actualizar el valor en el objeto local porque fue creado como nuevo con √©xito en el servidor
+						if((sync_id != 0L) && (sync_row != 0L)){//se debe actualizar el valor en el objeto local porque fue creado como nuevo con …xito en el servidor
 							SyncRow sync = syncRowDataSource.getSyncRow(sync_row);
 							String table = null;
 							Long id = null;
@@ -4102,7 +4107,10 @@ public static class MHandler extends Handler {
 								id = sync.getRowId();
 								Log.i("MISPRUEBAS","valores table y id: "+table+" --- "+String.valueOf(id));
 								if(updateSyncIdInRow(table,id,Setup.COLUMN_SYNC_ID,sync_id) > 0)
-									deleteSyncRow(sync_row);
+									//deleteSyncRow(sync_row);
+									syncRowDataSource.deleteSyncRow(sync);
+									
+									
 							}
 							catch(Exception e){
 								Log.e("MISPRUEBAS",e.toString());
@@ -4116,7 +4124,7 @@ public static class MHandler extends Handler {
 					
 					
 				} else {
-					if(status == 200){ //se actualiz√≥ una fila, 
+					if(status == 200){ //se actualizÛ una fila, 
 						//ok! status received, but still we have to check for code 555 that says everything done in Nest5 as expected.
 						if(responsecode == 555 ){
 							try {
@@ -4128,7 +4136,9 @@ public static class MHandler extends Handler {
 							}
 							if((sync_row != 0L)){//se debe actualizar el valor en el objeto local porque fue creado como nuevo con √©xito en el servidor
 								try{
-									deleteSyncRow(sync_row);
+									SyncRow sync = syncRowDataSource.getSyncRow(sync_row);
+									//deleteSyncRow(sync_row);
+									syncRowDataSource.deleteSyncRow(sync);
 										
 								}
 								catch(Exception e){
@@ -4677,7 +4687,6 @@ public static class MHandler extends Handler {
 	private int deleteSyncRow(Long id) {
 		return db.delete(Setup.TABLE_SYNC_ROW, Setup.COLUMN_ID
 		        + " = " + id, null);
-		
 		//actualizar las listas de acuerdo a las cosas que se hayan hecho
 	}
 	
@@ -5158,6 +5167,16 @@ public static class MHandler extends Handler {
 		if (dailySale != null) {
 			Iterator<Entry<Registrable, Integer>> it = currentSale
 					.entrySet().iterator();
+			StringBuilder cadenaIngredientes = new StringBuilder();
+			cadenaIngredientes.append("[");
+			StringBuilder cadenaProductos = new StringBuilder();
+			cadenaProductos.append("[");
+			StringBuilder cadenaCombos = new StringBuilder();
+			cadenaCombos.append("[");
+			
+			int i = 0;
+			int j = 0;
+			int k = 0;
 
 			while (it.hasNext()) {
 				Map.Entry<Registrable, Integer> pair = (Map.Entry<Registrable, Integer>) it
@@ -5192,6 +5211,11 @@ public static class MHandler extends Handler {
 					saIn.setQuantity(pair.getValue());
 					saIn.setIngrediente(ingrediente);
 					saleIngredienteDao.insert(saIn);
+					if(i!=0){
+						cadenaIngredientes.append(",");
+					}
+					cadenaIngredientes.append("{\"sync_id\": "+ingrediente.getSyncId()+",\""+Setup.COLUMN_INGREDIENT_QTY+"\": "+pair.getValue()+"}");
+					i++;
 					
 				}
 				if(pair.getKey().type == Registrable.TYPE_PRODUCT){
@@ -5217,6 +5241,11 @@ public static class MHandler extends Handler {
 					saPr.setQuantity(pair.getValue());
 					saPr.setProducto(producto);
 					saleProductoDao.insert(saPr);
+					if(j!=0){
+						cadenaProductos.append(",");
+					}
+					cadenaProductos.append("{\"sync_id\": "+producto.getSyncId()+",\""+Setup.COLUMN_INGREDIENT_QTY+"\": "+pair.getValue()+"}");
+					j++;
 				}
 				if(pair.getKey().type == Registrable.TYPE_COMBO){
 					Impuesto impuesto = impuestoDao.queryBuilder().where(com.nest5.businessClient.ImpuestoDao.Properties.SyncId.eq(pair.getKey().getCombo().getTax().getSyncId())).unique(); 
@@ -5241,11 +5270,19 @@ public static class MHandler extends Handler {
 					saCm.setQuantity(pair.getValue());
 					saCm.setCombinacion(combinacion);
 					saleCombinacionDao.insert(saCm);
+					if(k!=0){
+						cadenaCombos.append(",");
+					}
+					cadenaCombos.append("{\"sync_id\": "+combinacion.getSyncId()+",\""+Setup.COLUMN_INGREDIENT_QTY+"\": "+pair.getValue()+"}");
+					k++;
 				}
 				 //una vez inserte ingredientes, productos y combos, inserta relaciones venta-cadauno, que se borran de acuerdo a lo que configure el usuario, no puede poner mas de una semana, cambiar que aca guarde sales y demas relaciones y que nunca las sincronice del servidor
 				
 				
 			}
+			cadenaIngredientes.append("]");
+			cadenaProductos.append("]");
+			cadenaCombos.append("]");
 			
 			//cookingOrders.remove(currentSelectedPosition); //viejo!!! ojo no es de lo nuevo de greendao y todos los movimientos
 			
@@ -5256,7 +5293,14 @@ public static class MHandler extends Handler {
 				cookingOrdersTimes.remove(currentSale);
 				openTables.remove(cookingOrdersTable.get(currentSale));
 				cookingOrdersTable.remove(currentSale);
-		        //quitar mesas de las abiertas y quitar 
+				for(CurrentTable<Table, Integer> actual : openTables){
+					if(actual.getTable().getName().equalsIgnoreCase(currentTable.getTable().getName())){
+						openTables.remove(actual);
+						break;
+					}
+				}
+				currentTable = null;
+				statusText.setText("Orden de Mesa cancelada con Èxito."); 
 			}catch(Exception e){
 				Log.i("MISPRUEBAS","HAY UN ERROR AL REMOVER CURRENTSALE DE COOKINGORDERS");
 				e.printStackTrace();
@@ -5280,9 +5324,9 @@ public static class MHandler extends Handler {
 			sale_name.setText("Venta Guardada con √âxito");
 			sale_details
 					.setText("Selecciona otro elemento para ver detalles.");
-			 createSyncRow("\""+Setup.TABLE_SALE+"\"",dailySale.getId(),0, dailySale.serializedFields());
+			 createSyncRow("\""+Setup.TABLE_SALE+"\"",dailySale.getId(),0, "{\"_id\": "+dailySale.getId()+",\""+Setup.COLUMN_SALE_DATE+"\": "+dailySale.getDate().getTime()+",\""+Setup.COLUMN_SALE_ISDELIVERY+"\": "+dailySale.getIsDelivery()+",\""+Setup.COLUMN_SALE_METHOD+"\": \""+dailySale.getMethod()+"\",\""+Setup.COLUMN_SALE_ISTOGO+"\": "+dailySale.getIsTogo()+",\""+Setup.COLUMN_SALE_TIP+"\": "+dailySale.getTip()+",\""+Setup.COLUMN_SALE_DISCOUNT+"\": "+dailySale.getDiscount()+",\""+Setup.COLUMN_SALE_NUMBER+"\": "+dailySale.getNumber()+",\""+Setup.COLUMN_SALE_RECEIVED+"\":"+dailySale.getReceived()+",\"ingredients\": "+cadenaIngredientes.toString()+",\"products\": "+cadenaProductos.toString()+",\"combos\": "+cadenaCombos.toString()+"}");
 		} else {
-			subSale();//fall√≥ guardando venta por lo tanto resetea el valor de facturaci√≥n actual al anterior.
+			subSale();//fallÛ guardando venta por lo tanto resetea el valor de facturaci√≥n actual al anterior.
 			informUser(OTHER_ALERT_ERROR);
 			
 		}
