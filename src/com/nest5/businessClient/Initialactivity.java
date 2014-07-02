@@ -1880,7 +1880,6 @@ public class Initialactivity extends SherlockFragmentActivity implements
 			        currentSelectedAddTable = pos;
 			        if(pos > -1){
 			        	currentTable = openTables.get(pos);
-				        Log.i("PRUEBASMESA","Mesa seleccionada en spinner: posición-->"+currentTable.getTable().getName());
 			        }
 			        	
 			    }
@@ -4923,7 +4922,6 @@ public static class MHandler extends Handler {
 				// puente
 				String mesa = "-DOMICILIO / PARA LLEVAR- O -MESA NO REGISTRADA-";
 				if(currentTable != null){
-					Log.i("PRUEBASMESA","se presiono order y mesa no esta vacia: "+currentTable.getTable().getName().toUpperCase(Locale.getDefault()));
 					mesa = currentTable.getTable().getName().toUpperCase(Locale.getDefault());
 				}
 				int lines = 0;
@@ -4991,7 +4989,6 @@ public static class MHandler extends Handler {
 				factura.append(notas);
 				factura.append(note);
 				long startTime = System.currentTimeMillis();
-				//TODO REvisar acá con el tag PRUEBASMESA por qué no se agregan más de un mismo elemento existente.
 				if(currentSelectedAddTable > -1){//esto significa que esta agregando la orden actual a otra existente, para la mesa que este seleccionada
 					LinkedHashMap<Registrable, Integer> existingOrder = null;
 					for(Map.Entry<LinkedHashMap<Registrable,Integer>,CurrentTable<Table,Integer>> tab : cookingOrdersTable.entrySet()){
@@ -5015,7 +5012,12 @@ public static class MHandler extends Handler {
 						while (itnuevo.hasNext()) {
 							LinkedHashMap.Entry<Registrable, Integer> pairs = (LinkedHashMap.Entry<Registrable, Integer>) itnuevo
 									.next();
-							currentObjects.put(pairs.getKey(), pairs.getValue());
+							//aca siya existe el elemento, sumar la cantidad mas no reemplazar
+							if(currentObjects.containsKey(pairs.getKey())){
+								currentObjects.put(pairs.getKey() , currentObjects.get(pairs.getKey()) + pairs.getValue()); 
+							}else{
+								currentObjects.put(pairs.getKey(), pairs.getValue());
+							}
 						}
 						cookingOrders.add(currentObjects);
 						cookingOrdersDelivery.put(currentObjects, prevDelivery);
