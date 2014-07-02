@@ -1864,7 +1864,7 @@ public class Initialactivity extends SherlockFragmentActivity implements
 			title.setVisibility(View.VISIBLE);
 			addToOpenTable.setVisibility(View.VISIBLE);
 			ArrayList<String> nameTables = new ArrayList<String>();
-			nameTables.add("No, es una mesa nueva.");
+			nameTables.add("NUEVA MESA");
 			for (CurrentTable<Table, Integer> current : openTables) {
 				nameTables.add(current.getTable().getName());
 			}
@@ -1878,8 +1878,11 @@ public class Initialactivity extends SherlockFragmentActivity implements
 			    public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
 			    	int pos = position - 1;
 			        currentSelectedAddTable = pos;
-			        if(pos > -1)
+			        if(pos > -1){
 			        	currentTable = openTables.get(pos);
+				        Log.i("PRUEBASMESA","Mesa seleccionada en spinner: posiciÃ³n-->"+currentTable.getTable().getName());
+			        }
+			        	
 			    }
 
 				@Override
@@ -3043,7 +3046,7 @@ public class Initialactivity extends SherlockFragmentActivity implements
 					}
 				}
 				currentTable = null;
-				statusText.setText("Orden de Mesa cancelada con éxito.");
+				statusText.setText("Orden de Mesa cancelada con ï¿½xito.");
 			}
 			
 			List<Long> items = new ArrayList<Long>();
@@ -4097,7 +4100,7 @@ public static class MHandler extends Handler {
 							////Log.i("MISPRUEBAS","ERROR cogiendo el syncId o el syncRow enviado por el servidor");
 							e.printStackTrace();
 						}
-						if((sync_id != 0L) && (sync_row != 0L)){//se debe actualizar el valor en el objeto local porque fue creado como nuevo con Éxito en el servidor
+						if((sync_id != 0L) && (sync_row != 0L)){//se debe actualizar el valor en el objeto local porque fue creado como nuevo con ï¿½xito en el servidor
 							SyncRow sync = syncRowDataSource.getSyncRow(sync_row);
 							String table = null;
 							Long id = null;
@@ -4124,7 +4127,7 @@ public static class MHandler extends Handler {
 					
 					
 				} else {
-					if(status == 200){ //se actualizó una fila, 
+					if(status == 200){ //se actualizï¿½ una fila, 
 						//ok! status received, but still we have to check for code 555 that says everything done in Nest5 as expected.
 						if(responsecode == 555 ){
 							try {
@@ -4920,6 +4923,7 @@ public static class MHandler extends Handler {
 				// puente
 				String mesa = "-DOMICILIO / PARA LLEVAR- O -MESA NO REGISTRADA-";
 				if(currentTable != null){
+					Log.i("PRUEBASMESA","se presiono order y mesa no esta vacia: "+currentTable.getTable().getName().toUpperCase(Locale.getDefault()));
 					mesa = currentTable.getTable().getName().toUpperCase(Locale.getDefault());
 				}
 				int lines = 0;
@@ -4987,6 +4991,7 @@ public static class MHandler extends Handler {
 				factura.append(notas);
 				factura.append(note);
 				long startTime = System.currentTimeMillis();
+				//TODO REvisar acÃ¡ con el tag PRUEBASMESA por quÃ© no se agregan mÃ¡s de un mismo elemento existente.
 				if(currentSelectedAddTable > -1){//esto significa que esta agregando la orden actual a otra existente, para la mesa que este seleccionada
 					LinkedHashMap<Registrable, Integer> existingOrder = null;
 					for(Map.Entry<LinkedHashMap<Registrable,Integer>,CurrentTable<Table,Integer>> tab : cookingOrdersTable.entrySet()){
@@ -5300,7 +5305,7 @@ public static class MHandler extends Handler {
 					}
 				}
 				currentTable = null;
-				statusText.setText("Orden de Mesa cancelada con éxito."); 
+				statusText.setText("Orden de Mesa cancelada con ï¿½xito."); 
 			}catch(Exception e){
 				Log.i("MISPRUEBAS","HAY UN ERROR AL REMOVER CURRENTSALE DE COOKINGORDERS");
 				e.printStackTrace();
@@ -5326,7 +5331,7 @@ public static class MHandler extends Handler {
 					.setText("Selecciona otro elemento para ver detalles.");
 			 createSyncRow("\""+Setup.TABLE_SALE+"\"",dailySale.getId(),0, "{\"_id\": "+dailySale.getId()+",\""+Setup.COLUMN_SALE_DATE+"\": "+dailySale.getDate().getTime()+",\""+Setup.COLUMN_SALE_ISDELIVERY+"\": "+dailySale.getIsDelivery()+",\""+Setup.COLUMN_SALE_METHOD+"\": \""+dailySale.getMethod()+"\",\""+Setup.COLUMN_SALE_ISTOGO+"\": "+dailySale.getIsTogo()+",\""+Setup.COLUMN_SALE_TIP+"\": "+dailySale.getTip()+",\""+Setup.COLUMN_SALE_DISCOUNT+"\": "+dailySale.getDiscount()+",\""+Setup.COLUMN_SALE_NUMBER+"\": "+dailySale.getNumber()+",\""+Setup.COLUMN_SALE_RECEIVED+"\":"+dailySale.getReceived()+",\"ingredients\": "+cadenaIngredientes.toString()+",\"products\": "+cadenaProductos.toString()+",\"combos\": "+cadenaCombos.toString()+"}");
 		} else {
-			subSale();//falló guardando venta por lo tanto resetea el valor de facturaciÃ³n actual al anterior.
+			subSale();//fallï¿½ guardando venta por lo tanto resetea el valor de facturaciÃ³n actual al anterior.
 			informUser(OTHER_ALERT_ERROR);
 			
 		}
@@ -5608,6 +5613,7 @@ public static class MHandler extends Handler {
 		  			Initialactivity.cookingOrdersTimes.clear();
 		  			Initialactivity.cookingOrdersTogo.clear();
 		  			Initialactivity.cookingOrdersTable.clear();
+		  			Initialactivity.openTables.clear();
 	  			}
 	  			
 	  		}
