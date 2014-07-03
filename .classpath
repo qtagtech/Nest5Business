@@ -7,7 +7,6 @@
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
 	<classpathentry kind="lib" path="libs/acr31-1.0.0preview5.jar"/>
-	<classpathentry kind="lib" path="libs/androidannotations-3.0.1.jar"/>
 	<classpathentry kind="lib" path="libs/aws-android-sdk-1.7.0-core.jar"/>
 	<classpathentry kind="lib" path="libs/aws-android-sdk-1.7.0-s3.jar"/>
 	<classpathentry kind="lib" path="libs/bugsense-3.6.1.jar"/>
@@ -17,5 +16,12 @@
 	<classpathentry kind="lib" path="libs/gson-2.1.jar"/>
 	<classpathentry kind="lib" path="libs/joda-time-2.3.jar"/>
 	<classpathentry kind="lib" path="libs/Parse-1.4.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/StarIOPort3.1.jar"/>
+	<classpathentry kind="src" path=".apt_generated">
+		<attributes>
+			<attribute name="optional" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="libs/androidannotations-api-3.0.1.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

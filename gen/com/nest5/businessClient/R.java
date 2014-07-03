@@ -9,7 +9,15 @@ package com.nest5.businessClient;
 
 public final class R {
     public static final class array {
+        public static final int allow_alphabet_pin_code_settings=0x7f0d0008;
+        public static final int auto_connect_setting=0x7f0d0003;
+        public static final int auto_connect_settings=0x7f0d0006;
+        public static final int barcode1d_Font_ESCPOS=0x7f0d0002;
+        public static final int barcode1d_layout_ESCPOS=0x7f0d0001;
+        public static final int change_pin_code_description=0x7f0d0005;
+        public static final int change_pin_code_settings=0x7f0d0007;
         public static final int phrases=0x7f0d0000;
+        public static final int security_settings=0x7f0d0004;
     }
     public static final class attr {
         /**  Custom divider drawable to use for elements in the action bar. 
@@ -1136,35 +1144,36 @@ containing a value of this type.
         public static final int olla=0x7f0200ba;
         public static final int printer_add=0x7f0200bb;
         public static final int promo_title_gradient=0x7f0200bc;
-        public static final int red_button=0x7f0200bd;
-        public static final int rosewood=0x7f0200be;
-        public static final int round_button=0x7f0200bf;
-        public static final int round_red_button=0x7f0200c0;
-        public static final int save_piggy=0x7f0200c1;
-        public static final int search=0x7f0200c2;
-        public static final int sello_estrella=0x7f0200c3;
-        public static final int selloparaana=0x7f0200c4;
-        public static final int separator=0x7f0200c5;
-        public static final int settings=0x7f0200c6;
-        public static final int shelve=0x7f0200c7;
-        public static final int silver_texture=0x7f0200c8;
-        public static final int star=0x7f0200c9;
-        public static final int status_icon=0x7f0200ca;
-        public static final int stub=0x7f0200cb;
-        public static final int sync=0x7f0200cc;
-        public static final int tick=0x7f0200cd;
-        public static final int title_bar_default=0x7f0200ce;
-        public static final int tw_button=0x7f0200cf;
-        public static final int twitter_normal=0x7f0200d0;
-        public static final int twitter_pressed=0x7f0200d1;
-        public static final int user=0x7f0200d2;
-        public static final int wheat=0x7f0200d3;
-        public static final int white_gradient=0x7f0200d4;
-        public static final int win_star=0x7f0200d5;
-        public static final int wine=0x7f0200d6;
-        public static final int wood=0x7f0200d7;
-        public static final int wood_texture=0x7f0200d8;
-        public static final int zreport=0x7f0200d9;
+        public static final int qrcode=0x7f0200bd;
+        public static final int red_button=0x7f0200be;
+        public static final int rosewood=0x7f0200bf;
+        public static final int round_button=0x7f0200c0;
+        public static final int round_red_button=0x7f0200c1;
+        public static final int save_piggy=0x7f0200c2;
+        public static final int search=0x7f0200c3;
+        public static final int sello_estrella=0x7f0200c4;
+        public static final int selloparaana=0x7f0200c5;
+        public static final int separator=0x7f0200c6;
+        public static final int settings=0x7f0200c7;
+        public static final int shelve=0x7f0200c8;
+        public static final int silver_texture=0x7f0200c9;
+        public static final int star=0x7f0200ca;
+        public static final int status_icon=0x7f0200cb;
+        public static final int stub=0x7f0200cc;
+        public static final int sync=0x7f0200cd;
+        public static final int tick=0x7f0200ce;
+        public static final int title_bar_default=0x7f0200cf;
+        public static final int tw_button=0x7f0200d0;
+        public static final int twitter_normal=0x7f0200d1;
+        public static final int twitter_pressed=0x7f0200d2;
+        public static final int user=0x7f0200d3;
+        public static final int wheat=0x7f0200d4;
+        public static final int white_gradient=0x7f0200d5;
+        public static final int win_star=0x7f0200d6;
+        public static final int wine=0x7f0200d7;
+        public static final int wood=0x7f0200d8;
+        public static final int wood_texture=0x7f0200d9;
+        public static final int zreport=0x7f0200da;
     }
     public static final class id {
         public static final int BtnSlide=0x7f0600c4;
@@ -1597,6 +1606,21 @@ containing a value of this type.
         public static final int mytables_dbnueva=0x7f050003;
     }
     public static final class string {
+        public static final int AutoConnectionAlert=0x7f0b0090;
+        public static final int AutoConnectionUseSSP=0x7f0b0091;
+        public static final int Confirmation=0x7f0b008e;
+        public static final int ItemInfo_2inch_mobile=0x7f0b0063;
+        public static final int ItemInfo_3inch_escpos=0x7f0b0074;
+        public static final int ItemInfo_3inch_line=0x7f0b0052;
+        public static final int ItemInfo_3inch_mobile=0x7f0b0067;
+        public static final int ItemInfo_3inch_raster=0x7f0b005a;
+        public static final int ItemInfo_4inch_escpos=0x7f0b0078;
+        public static final int ItemInfo_4inch_line=0x7f0b0056;
+        public static final int ItemInfo_4inch_mobile=0x7f0b006b;
+        public static final int ItemInfo_4inch_raster=0x7f0b005e;
+        public static final int PortName_Label=0x7f0b003b;
+        public static final int PortSettings_Label=0x7f0b003c;
+        public static final int SecuritySettingAlert=0x7f0b008f;
         /**  Content description for the action bar "home" affordance. [CHAR LIMIT=NONE] 
          */
         public static final int abs__action_bar_home_description=0x7f0b0000;
@@ -1641,15 +1665,16 @@ containing a value of this type.
  Menu item text [CHAR LIMIT=NONE] 
          */
         public static final int accounts=0x7f0b000d;
-        public static final int action_forgot_password=0x7f0b0042;
-        public static final int action_register=0x7f0b0048;
-        public static final int action_sign_in_register=0x7f0b0040;
-        public static final int action_sign_in_short=0x7f0b0041;
+        public static final int action_forgot_password=0x7f0b0099;
+        public static final int action_register=0x7f0b009f;
+        public static final int action_sign_in_register=0x7f0b0097;
+        public static final int action_sign_in_short=0x7f0b0098;
         /**  Dialog button [CHAR LIMIT=NONE] 
  Dialog button [CHAR LIMIT=NONE] 
  Dialog button [CHAR LIMIT=NONE] 
          */
         public static final int add_account=0x7f0b000f;
+        public static final int allow_alphabet_pin_code=0x7f0b0089;
         /**   Name of the application in the launcher [CHAR LIMIT=NONE] 
   Name of the application in the launcher [CHAR LIMIT=NONE] 
   Name of the application in the launcher [CHAR LIMIT=NONE] 
@@ -1660,9 +1685,16 @@ containing a value of this type.
  Dialog title text [CHAR LIMIT=NONE] 
          */
         public static final int attention=0x7f0b0011;
+        public static final int auto_connect=0x7f0b007e;
+        public static final int bluetooth_interface_only=0x7f0b008d;
         public static final int buyPerk=0x7f0b0033;
+        public static final int cancel=0x7f0b0084;
+        public static final int cannot_communicate_message=0x7f0b0087;
+        public static final int change_pin_code=0x7f0b0080;
         public static final int close=0x7f0b0038;
         public static final int close_deals=0x7f0b002d;
+        public static final int complete=0x7f0b008b;
+        public static final int complete_description=0x7f0b008c;
         /**  Button text [CHAR LIMIT=NONE] 
  Button text [CHAR LIMIT=NONE] 
  Button text [CHAR LIMIT=NONE] 
@@ -1688,7 +1720,11 @@ containing a value of this type.
  Message text [CHAR LIMIT=NONE] 
          */
         public static final int contacting_server=0x7f0b0019;
-        public static final int device_error=0x7f0b004a;
+        public static final int date=0x7f0b004e;
+        public static final int day=0x7f0b004b;
+        public static final int device_error=0x7f0b00a1;
+        public static final int device_name=0x7f0b007c;
+        public static final int device_name_description=0x7f0b0082;
         public static final int directory=0x7f0b002e;
         /**  Button text [CHAR LIMIT=NONE] 
  Button text [CHAR LIMIT=NONE] 
@@ -1700,6 +1736,7 @@ containing a value of this type.
  Informational text for "Connected" screen with placeholder for account name [CHAR LIMIT=NONE] 
          */
         public static final int disconnect_text=0x7f0b001b;
+        public static final int do_not_update=0x7f0b0088;
         /**  Footer text for "Connect" screen [CHAR LIMIT=NONE] 
  Footer text for "Connect" screen [CHAR LIMIT=NONE] 
  Footer text for "Connect" screen [CHAR LIMIT=NONE] 
@@ -1710,15 +1747,18 @@ containing a value of this type.
  Footer text for "Disconnect" screen [CHAR LIMIT=NONE] 
          */
         public static final int do_you_want_to_disconnect=0x7f0b001d;
+        public static final int done=0x7f0b0083;
         /**  Deals 
  Deals 
  Deals 
          */
         public static final int emptyImage=0x7f0b0032;
-        public static final int error_field_required=0x7f0b0047;
-        public static final int error_incorrect_password=0x7f0b0046;
-        public static final int error_invalid_email=0x7f0b0044;
-        public static final int error_invalid_password=0x7f0b0045;
+        public static final int error=0x7f0b0070;
+        public static final int error_field_required=0x7f0b009e;
+        public static final int error_incorrect_password=0x7f0b009d;
+        public static final int error_invalid_email=0x7f0b009b;
+        public static final int error_invalid_password=0x7f0b009c;
+        public static final int escposModeHelpMessage=0x7f0b0042;
         public static final int extrainfo=0x7f0b002a;
         public static final int goToCoupons=0x7f0b0015;
         /**  Initial "hello, world" informational message [CHAR LIMIT=NONE] 
@@ -1731,15 +1771,25 @@ containing a value of this type.
  Initial "hello, world" response message [CHAR LIMIT=NONE] 
          */
         public static final int hello_world_text=0x7f0b001f;
+        public static final int help=0x7f0b0081;
+        public static final int hour=0x7f0b004c;
+        public static final int iOS_port_name=0x7f0b007d;
+        public static final int kana=0x7f0b004f;
+        public static final int kana_escpos=0x7f0b0073;
+        public static final int kana_line=0x7f0b0050;
+        public static final int kana_raster=0x7f0b0051;
+        public static final int lineModeHelpMessage=0x7f0b0040;
         public static final int login=0x7f0b0029;
-        public static final int login_error=0x7f0b0049;
-        public static final int login_progress_signing_in=0x7f0b0043;
+        public static final int login_error=0x7f0b00a0;
+        public static final int login_progress_signing_in=0x7f0b009a;
         /**  Home 
  Home 
  Home 
          */
         public static final int logo_big_description=0x7f0b002c;
         public static final int logout=0x7f0b000e;
+        public static final int min=0x7f0b004d;
+        public static final int month=0x7f0b004a;
         public static final int my_coupons=0x7f0b0031;
         public static final int my_promos=0x7f0b0030;
         /**  Dialog message text [CHAR LIMIT=NONE] 
@@ -1749,13 +1799,22 @@ containing a value of this type.
         public static final int needs_account=0x7f0b0020;
         public static final int open=0x7f0b0037;
         public static final int password=0x7f0b0028;
-        public static final int print_invoice=0x7f0b003b;
-        public static final int print_order=0x7f0b003c;
+        public static final int personalInfo=0x7f0b0062;
+        public static final int phone=0x7f0b006f;
+        public static final int pincode_character_number_error=0x7f0b008a;
+        public static final int printArea2inch=0x7f0b003d;
+        public static final int printArea3inch=0x7f0b003e;
+        public static final int printArea4inch=0x7f0b003f;
+        public static final int print_invoice=0x7f0b0092;
+        public static final int print_order=0x7f0b0093;
+        public static final int print_text_string=0x7f0b0071;
         /**  Strings related to login 
          */
-        public static final int prompt_email=0x7f0b003e;
-        public static final int prompt_password=0x7f0b003f;
+        public static final int prompt_email=0x7f0b0095;
+        public static final int prompt_password=0x7f0b0096;
         public static final int putname=0x7f0b002b;
+        public static final int rasterModeHelpMessage=0x7f0b0041;
+        public static final int rasterdata=0x7f0b0072;
         public static final int redeem=0x7f0b0014;
         /**  Notification message [CHAR LIMIT=NONE] 
  Notification message [CHAR LIMIT=NONE] 
@@ -1778,6 +1837,7 @@ containing a value of this type.
  Button text [CHAR LIMIT=NONE] 
          */
         public static final int scan=0x7f0b0013;
+        public static final int security=0x7f0b007f;
         /**  List view header text [CHAR LIMIT=NONE] 
  List view header text [CHAR LIMIT=NONE] 
  List view header text [CHAR LIMIT=NONE] 
@@ -1789,14 +1849,49 @@ containing a value of this type.
  Dialog button text [CHAR LIMIT=NONE] 
          */
         public static final int skip=0x7f0b0025;
+        public static final int sub_2inch_mobile=0x7f0b0064;
+        public static final int sub_3inch_escpos=0x7f0b0075;
+        public static final int sub_3inch_line=0x7f0b0053;
+        public static final int sub_3inch_mobile=0x7f0b0068;
+        public static final int sub_3inch_raster=0x7f0b005b;
+        public static final int sub_4inch_escpos=0x7f0b0079;
+        public static final int sub_4inch_line=0x7f0b0057;
+        public static final int sub_4inch_mobile=0x7f0b006c;
+        public static final int sub_4inch_raster=0x7f0b005f;
         public static final int table_cancel=0x7f0b0039;
         public static final int table_close=0x7f0b003a;
-        public static final int title_activity_login=0x7f0b003d;
+        public static final int tax_2inch_mobile=0x7f0b0065;
+        public static final int tax_3inch_escpos=0x7f0b0076;
+        public static final int tax_3inch_line=0x7f0b0054;
+        public static final int tax_3inch_mobile=0x7f0b0069;
+        public static final int tax_3inch_raster=0x7f0b005c;
+        public static final int tax_4inch_escpos=0x7f0b007a;
+        public static final int tax_4inch_line=0x7f0b0058;
+        public static final int tax_4inch_mobile=0x7f0b006d;
+        public static final int tax_4inch_raster=0x7f0b0060;
+        public static final int title_activity_login=0x7f0b0094;
+        public static final int title_company_name=0x7f0b0043;
+        public static final int title_company_name_raster_3inch=0x7f0b0045;
+        public static final int title_company_name_raster_4inch=0x7f0b0047;
+        public static final int title_receipt_name=0x7f0b0044;
+        public static final int title_receipt_name_raster_3inch=0x7f0b0046;
+        public static final int title_receipt_name_raster_4inch=0x7f0b0048;
+        public static final int total_2inch_mobile=0x7f0b0066;
+        public static final int total_3inch_escpos=0x7f0b0077;
+        public static final int total_3inch_line=0x7f0b0055;
+        public static final int total_3inch_mobile=0x7f0b006a;
+        public static final int total_3inch_raster=0x7f0b005d;
+        public static final int total_4inch_escpos=0x7f0b007b;
+        public static final int total_4inch_line=0x7f0b0059;
+        public static final int total_4inch_mobile=0x7f0b006e;
+        public static final int total_4inch_raster=0x7f0b0061;
         /**  Notification message [CHAR LIMIT=NONE] 
  Notification message [CHAR LIMIT=NONE] 
  Notification message [CHAR LIMIT=NONE] 
          */
         public static final int unregistration_succeeded=0x7f0b0026;
+        public static final int update=0x7f0b0086;
+        public static final int update_confirmation_message=0x7f0b0085;
         /**  Login 
  Login 
  Login 
@@ -1808,6 +1903,7 @@ containing a value of this type.
  Company 
          */
         public static final int withNest5=0x7f0b0035;
+        public static final int year=0x7f0b0049;
     }
     public static final class style {
         /**  BOTONES NEST5 Business 

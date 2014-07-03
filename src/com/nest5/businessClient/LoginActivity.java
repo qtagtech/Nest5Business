@@ -105,7 +105,7 @@ public class LoginActivity extends Activity {
 			mContext = this;
             prefs = Util.getSharedPreferences(mContext);
             Parse.initialize(this, "qM91ypfRryTUwlFnTjDYV4JKacZzulk0LxAnAFML", "ZRiP4gEmwpvWrypr7cRK1G4ZWE1v9fm9EcyMrQqv");
-            PushService.setDefaultPushCallback(mContext, Initialactivity.class);
+            PushService.setDefaultPushCallback(mContext, com.nest5.businessClient.Initialactivity_.class);
             ParseInstallation.getCurrentInstallation().saveInBackground();
 
 
@@ -117,7 +117,7 @@ public class LoginActivity extends Activity {
 		super.onResume();
 		prefs = Util.getSharedPreferences(mContext);
 		if(prefs.getBoolean(Setup.LOGGED_IN, false)){
-			Intent inten = new Intent(mContext, Initialactivity.class);
+			Intent inten = new Intent(mContext, Initialactivity_.class);
 			startActivity(inten);
 		}
 		
@@ -587,7 +587,7 @@ public class LoginActivity extends Activity {
 		  public void handleMessage(Message msg) {
 //			  Log.i("PRUEBAS", "LLego de bajar el archivo");
 			  showProgress(false);
-		    	Intent inten = new Intent(mContext, Initialactivity.class);
+		    	Intent inten = new Intent(mContext, Initialactivity_.class);
 				startActivity(inten);
 		     }
 		 };

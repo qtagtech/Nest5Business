@@ -56,6 +56,7 @@ import com.bugsense.trace.BugSenseHandler;
 import com.flurry.android.FlurryAgent;
 
 import org.androidannotations.annotations.Background;
+import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.UiThread;
 import org.joda.time.LocalDateTime;
 import org.json.JSONObject;
@@ -127,6 +128,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.StarMicronics.StarIOSDK.PrinterFunctions;
 import com.acs.acr31.ACR31Reader;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -160,7 +162,12 @@ import com.nest5.businessClient.PrintInvoiceForm.OnPrintSelectListener;
 import com.nest5.businessClient.SalesObjectFragment.OnSalesObjectFragmentCreatedListener;
 import com.nest5.businessClient.SelectAddItem.OnAddItemSelectedListener;
 import com.nest5.businessClient.WifiDirectDialog.DeviceActionListener;
+import com.starmicronics.stario.PortInfo;
+import com.starmicronics.stario.StarIOPort;
+import com.starmicronics.stario.StarIOPortException;
+import com.starmicronics.stario.StarPrinterStatus;
 
+@EActivity()
 public class Initialactivity extends SherlockFragmentActivity implements
 		OnAddItemSelectedListener, OnAddIngredientListener,
 		OnIngredientCategorySelectedListener,
@@ -878,6 +885,7 @@ public class Initialactivity extends SherlockFragmentActivity implements
 			}
 		}
 		//clean dailytable for sales older than today, leave only sales from today
+		connectStarMicronics();
 		
 	}
 
@@ -5307,7 +5315,7 @@ public static class MHandler extends Handler {
 					}
 				}
 				currentTable = null;
-				statusText.setText("Orden de Mesa cancelada con �xito."); 
+				//statusText.setText("Orden de Mesa cancelada con �xito."); 
 			}catch(Exception e){
 				Log.i("MISPRUEBAS","HAY UN ERROR AL REMOVER CURRENTSALE DE COOKINGORDERS");
 				e.printStackTrace();
@@ -5316,7 +5324,7 @@ public static class MHandler extends Handler {
 			//statusText.setText("Cuenta Cerrada Exitosamente.");  //quitar manipulacion ui porque esto es background
 			currentSelectedPosition = -1;
 			//sendCommandMessage(DELETE_ALL_COMMAND);
-			List<Long> items = new ArrayList<Long>();
+			/*List<Long> items = new ArrayList<Long>();
 			List<String> nameTables = new ArrayList<String>();
 			for (LinkedHashMap<Registrable, Integer> current : cookingOrders) {
 				items.add(cookingOrdersTimes.get(current));
@@ -5330,7 +5338,7 @@ public static class MHandler extends Handler {
 			//makeTable("NA");
 			sale_name.setText("Venta Guardada con Éxito");
 			sale_details
-					.setText("Selecciona otro elemento para ver detalles.");
+					.setText("Selecciona otro elemento para ver detalles.");*/
 			 createSyncRow("\""+Setup.TABLE_SALE+"\"",dailySale.getId(),0, "{\"_id\": "+dailySale.getId()+",\""+Setup.COLUMN_SALE_DATE+"\": "+dailySale.getDate().getTime()+",\""+Setup.COLUMN_SALE_ISDELIVERY+"\": "+dailySale.getIsDelivery()+",\""+Setup.COLUMN_SALE_METHOD+"\": \""+dailySale.getMethod()+"\",\""+Setup.COLUMN_SALE_ISTOGO+"\": "+dailySale.getIsTogo()+",\""+Setup.COLUMN_SALE_TIP+"\": "+dailySale.getTip()+",\""+Setup.COLUMN_SALE_DISCOUNT+"\": "+dailySale.getDiscount()+",\""+Setup.COLUMN_SALE_NUMBER+"\": "+dailySale.getNumber()+",\""+Setup.COLUMN_SALE_RECEIVED+"\":"+dailySale.getReceived()+",\"ingredients\": "+cadenaIngredientes.toString()+",\"products\": "+cadenaProductos.toString()+",\"combos\": "+cadenaCombos.toString()+"}");
 		} else {
 			subSale();//fall� guardando venta por lo tanto resetea el valor de facturación actual al anterior.
@@ -5844,6 +5852,46 @@ public static class MHandler extends Handler {
 					Toast.LENGTH_LONG).show();
 			break;
 		}
+	}
+	
+	
+	@Background(delay=700)
+	void connectStarMicronics(){
+		List<PortInfo> TCPPortList = null;
+		final ArrayList<PortInfo> arrayDiscovery;
+    	ArrayList<String> arrayPortName;
+		arrayDiscovery = new ArrayList<PortInfo>();
+		try {
+			TCPPortList = StarIOPort.searchPrinter("TCP:");
+			for (PortInfo portInfo : TCPPortList) {
+	    		arrayDiscovery.add(portInfo);
+	    	}
+			arrayPortName = new ArrayList<String>();
+
+			for(PortInfo discovery : arrayDiscovery)
+			{
+				String portName;
+
+				portName = discovery.getPortName();
+
+				if(discovery.getMacAddress().equals("") == false)
+				{
+					portName += "\n - " + discovery.getMacAddress();
+					if(discovery.getModelName().equals("") == false)
+					{
+						portName += "\n - " + discovery.getModelName();
+						Log.i("STARMICRONICS","IMPRESORA EN: "+portName);
+						PrinterFunctions.PrintSampleReceipt(mContext, discovery.getPortName(), "", "Raster", getResources(), "4inch (112mm)");
+					}
+				}
+
+				arrayPortName.add(portName);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			Log.i("STARMICRONICS","error: "+e.getMessage());
+		}
+    	
 	}
 
 
