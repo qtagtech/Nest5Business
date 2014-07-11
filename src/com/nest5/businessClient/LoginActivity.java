@@ -60,7 +60,7 @@ public class LoginActivity extends Activity {
 	private View mLoginFormView;
 	private View mLoginStatusView;
 	private TextView mLoginStatusMessageView;
-	private RestService restService;
+	private DefaultRestService restService;
 	private Context mContext;
 	private SharedPreferences prefs;
 	private static String deviceID;
@@ -104,9 +104,9 @@ public class LoginActivity extends Activity {
 				});
 			mContext = this;
             prefs = Util.getSharedPreferences(mContext);
-            Parse.initialize(this, "qM91ypfRryTUwlFnTjDYV4JKacZzulk0LxAnAFML", "ZRiP4gEmwpvWrypr7cRK1G4ZWE1v9fm9EcyMrQqv");
+            /*Parse.initialize(this, "qM91ypfRryTUwlFnTjDYV4JKacZzulk0LxAnAFML", "ZRiP4gEmwpvWrypr7cRK1G4ZWE1v9fm9EcyMrQqv");
             PushService.setDefaultPushCallback(mContext, com.nest5.businessClient.Initialactivity_.class);
-            ParseInstallation.getCurrentInstallation().saveInBackground();
+            ParseInstallation.getCurrentInstallation().saveInBackground();*/
 
 
 		 
@@ -202,13 +202,13 @@ public class LoginActivity extends Activity {
 			// Enviar email al servidor: params.email, params.android
 
 			Log.i("MISPRUEBAS","EMPEZANDO REQUEST");
-			 restService = new RestService(sendCredentialsHandler, mContext,
+			 restService = new DefaultRestService(sendCredentialsHandler, mContext,
 			 Setup.PROD_URL+"/api/checkLogin");
 			 restService.addParam("email", mEmail);
 			 restService.addParam("password", mPassword);
 			 restService.setCredentials("apiadmin", Setup.apiKey);
 			 try {
-			 restService.execute(RestService.POST);} catch (Exception e) {
+			 restService.execute(DefaultRestService.POST);} catch (Exception e) {
 			 e.printStackTrace();
 			 Log.i("MISPRUEBAS","Error empezando request");}
 
@@ -308,7 +308,7 @@ public class LoginActivity extends Activity {
 					//startActivity(inten);
 //					Log.i("MISPRUEBAS","EMPEZANDO REQUEST PARA DEVICE ID");
 					//http://localhost:8080/Nest5BusinessData/deviceOps/registerDevice?payload={%22device_id%22:%220A01B18B436A002555AF%22,%22company%22:1}
-					 restService = new RestService(sendDeviceHandler, mContext,
+					 restService = new DefaultRestService(sendDeviceHandler, mContext,
 					 Setup.PROD_BIGDATA_URL+"/deviceOps/registerDevice");
 //					 Log.i("DEVICEID", deviceID);
 //					 Log.i("DEVICEID", compid);
@@ -317,7 +317,7 @@ public class LoginActivity extends Activity {
 					 restService.addParam("payload", jString);
 					 restService.setCredentials("apiadmin", Setup.apiKey);
 					 try {
-					 restService.execute(RestService.POST);} catch (Exception e) {
+					 restService.execute(DefaultRestService.POST);} catch (Exception e) {
 					 e.printStackTrace();
                          BugSenseHandler.sendException(e);
 //					 Log.i("MISPRUEBAS","Error empezando request de deviceid");

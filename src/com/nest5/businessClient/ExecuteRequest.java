@@ -66,7 +66,7 @@ public class ExecuteRequest extends IntentService {
     public void execute(int method) throws Exception
     {
         switch(method) {
-            case RestService.GET:
+            case DefaultRestService.GET:
             {
                 String combinedParams = "";
                 if(!params.isEmpty()){
@@ -96,7 +96,7 @@ public class ExecuteRequest extends IntentService {
                 commit();
                 break;
             }
-            case RestService.POST:
+            case DefaultRestService.POST:
             {
                 request = new HttpPost(url);
 

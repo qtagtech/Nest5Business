@@ -65,7 +65,7 @@ public class SyncRowDataSource {
 
 	  public void deleteSyncRow(SyncRow syncRow) {
 	    long id = syncRow.getId();
-	    System.out.println("SyncRow deleted with id: " + id);
+	   // System.out.println("SyncRow deleted with id: " + id);
 	    database.delete(Setup.TABLE_SYNC_ROW, Setup.COLUMN_ID
 	        + " = " + id, null);
 	  }

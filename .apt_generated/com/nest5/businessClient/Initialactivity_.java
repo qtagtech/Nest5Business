@@ -36,6 +36,7 @@ public final class Initialactivity_
     }
 
     private void init_(Bundle savedInstanceState) {
+        myRestService = new MyRestService_();
     }
 
     @Override
@@ -77,13 +78,13 @@ public final class Initialactivity_
     }
 
     @Override
-    public void informUser(final int message) {
+    public void notifySuccess() {
         handler_.post(new Runnable() {
 
 
             @Override
             public void run() {
-                Initialactivity_.super.informUser(message);
+                Initialactivity_.super.notifySuccess();
             }
 
         }
@@ -91,17 +92,27 @@ public final class Initialactivity_
     }
 
     @Override
-    public void connectStarMicronics() {
-        BackgroundExecutor.execute(new BackgroundExecutor.Task("", 700, "") {
+    public void receivedZReport(final double ventas, final double descuentos, final double impuestos, final double propinas, final double domicilios, final double llevar, final double tarjeta, final double efectivo, final int contEfectivo, final int contTarjeta, final int contDomicilio, final int contLlevar) {
+        handler_.post(new Runnable() {
 
 
             @Override
-            public void execute() {
-                try {
-                    Initialactivity_.super.connectStarMicronics();
-                } catch (Throwable e) {
-                    Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
-                }
+            public void run() {
+                Initialactivity_.super.receivedZReport(ventas, descuentos, impuestos, propinas, domicilios, llevar, tarjeta, efectivo, contEfectivo, contTarjeta, contDomicilio, contLlevar);
+            }
+
+        }
+        );
+    }
+
+    @Override
+    public void informUser(final int message) {
+        handler_.post(new Runnable() {
+
+
+            @Override
+            public void run() {
+                Initialactivity_.super.informUser(message);
             }
 
         }
@@ -135,6 +146,42 @@ public final class Initialactivity_
             public void execute() {
                 try {
                     Initialactivity_.super.getAllDailySales(dsd);
+                } catch (Throwable e) {
+                    Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
+                }
+            }
+
+        }
+        );
+    }
+
+    @Override
+    public void fetchSales() {
+        BackgroundExecutor.execute(new BackgroundExecutor.Task("", 0, "") {
+
+
+            @Override
+            public void execute() {
+                try {
+                    Initialactivity_.super.fetchSales();
+                } catch (Throwable e) {
+                    Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
+                }
+            }
+
+        }
+        );
+    }
+
+    @Override
+    public void connectStarMicronics() {
+        BackgroundExecutor.execute(new BackgroundExecutor.Task("", 700, "") {
+
+
+            @Override
+            public void execute() {
+                try {
+                    Initialactivity_.super.connectStarMicronics();
                 } catch (Throwable e) {
                     Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
                 }

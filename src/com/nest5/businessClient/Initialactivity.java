@@ -58,7 +58,9 @@ import com.flurry.android.FlurryAgent;
 import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.UiThread;
+import org.androidannotations.annotations.rest.RestService;
 import org.joda.time.LocalDateTime;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.AlertDialog;
@@ -140,6 +142,10 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.nest5.businessClient.AddIngredientCategoryForm.OnAddIngredientCategoryListener;
@@ -184,7 +190,10 @@ public class Initialactivity extends SherlockFragmentActivity implements
 		OnSelectTableActionListener,
 		com.actionbarsherlock.app.ActionBar.TabListener
 		{
-
+	
+	@RestService
+    MyRestService myRestService; //Inject it
+	
 	public static final String TAG = "Initialactivity";
 
 	public static final int TOAST_COMMAND = 1;
@@ -256,7 +265,7 @@ public class Initialactivity extends SherlockFragmentActivity implements
 	private int lay = R.layout.home;
 	Typeface BebasFont;
 	Typeface VarelaFont;
-	RestService restService;
+	DefaultRestService restService;
 	EditText user;
 	EditText pass;
 	TextView userName;
@@ -475,7 +484,7 @@ public class Initialactivity extends SherlockFragmentActivity implements
 				// Enviar email al servidor: params.email, params.android
 
 				/*
-				 * restService = new RestService(sendEmailHandler, mContext,
+				 * restService = new DefaultRestService(sendEmailHandler, mContext,
 				 * "http://www.nest5.com/api/user/newAndroidUser");
 				 * restService.addParam("email", accountName);
 				 * restService.addParam("android", accountId);
@@ -485,7 +494,7 @@ public class Initialactivity extends SherlockFragmentActivity implements
 				 * prefs.edit().putString(Util.LOGGED_STATUS, Util.LOGGINGIN);
 				 * try {
 				 * 
-				 * restService.execute(RestService.POST); //Executes the request
+				 * restService.execute(DefaultRestService.POST); //Executes the request
 				 * with the HTTP POST verb } catch (Exception e) {
 				 * e.printStackTrace(); }
 				 */
@@ -733,7 +742,7 @@ public class Initialactivity extends SherlockFragmentActivity implements
 					SharedPreferences prefs = Util
 							.getSharedPreferences(mContext);
 
-					restService = new RestService(recievePromoandUserHandler,
+					restService = new DefaultRestService(recievePromoandUserHandler,
 							mContext, Setup.PROD_URL
 									+ "/company/initMagneticStamp");
 					restService.addParam("company",
@@ -741,7 +750,7 @@ public class Initialactivity extends SherlockFragmentActivity implements
 					restService.addParam("magnetic5", hexString);
 					restService.setCredentials("apiadmin", Setup.apiKey);
 					try {
-						restService.execute(RestService.POST);
+						restService.execute(DefaultRestService.POST);
 					} catch (Exception e) {
 						e.printStackTrace();
 						////Log.i("MISPRUEBAS", "Error empezando request");
@@ -886,6 +895,12 @@ public class Initialactivity extends SherlockFragmentActivity implements
 		}
 		//clean dailytable for sales older than today, leave only sales from today
 		connectStarMicronics();
+		if(prefs.getBoolean(Setup.FIRST_INSTALL, true)){
+			prefs.edit().putBoolean(Setup.FIRST_INSTALL, false).commit();
+			fetchSales();
+		}
+		
+		
 		
 	}
 
@@ -1557,14 +1572,14 @@ public class Initialactivity extends SherlockFragmentActivity implements
 					row.append(",\"sync_id\":");
 					row.append(syncRow.getSyncId());
 					row.append("}");
-					restService = new RestService(dataRowSent, mContext,
+					restService = new DefaultRestService(dataRowSent, mContext,
 							Setup.PROD_BIGDATA_URL + "/rowOps/rowReceived");
 					restService.addParam("row", row.toString());
 					restService.addParam("sync_row_id", String.valueOf(syncRow.getId()));//se envia para que el servidor lo regrese y se sepa que row se estaba subiendo
 					restService.setCredentials("apiadmin", Setup.apiKey);
 					try {
 						//////Log.i("MISPRUEBAS", "empezando upload dataRow");
-						restService.execute(RestService.POST);
+						restService.execute(DefaultRestService.POST);
 					} catch (Exception e) {
 						e.printStackTrace();
 						
@@ -1578,13 +1593,13 @@ public class Initialactivity extends SherlockFragmentActivity implements
 				if(deviceId.equalsIgnoreCase("null")){ //Device not properly registered in nest5 big data.
 					return ;
 				}
-				restService = new RestService(updateMaxHandler, mContext,
+				restService = new DefaultRestService(updateMaxHandler, mContext,
 						 Setup.PROD_BIGDATA_URL+"/deviceOps/fetchMaxSale");
 						 String jString = "{device_id:"+deviceID+"}";
 						 restService.addParam("payload", jString);		 
 						 restService.setCredentials("apiadmin", Setup.apiKey);
 						 try {
-						 restService.execute(RestService.POST);
+						 restService.execute(DefaultRestService.POST);
 						 } catch (Exception e) {
 							 e.printStackTrace(); 
 							 //////Log.i("MISPRUEBAS","Error empezando request de deviceid");
@@ -1809,13 +1824,28 @@ public class Initialactivity extends SherlockFragmentActivity implements
 
 		List<Long> items = new ArrayList<Long>();
 		List<String> nameTables = new ArrayList<String>();
+		int j = 0;
 		for (LinkedHashMap<Registrable, Integer> current : cookingOrders) {
 			items.add(cookingOrdersTimes.get(current));
-			nameTables.add(cookingOrdersTable.get(current).getTable().getName());
+			int i = 0;
+			for(Registrable regist : current.keySet()){
+				//Log.i("ERRORNAMETABLES",j+" -- "+i+"-->Registro: "+regist.name);
+				i++;
+			}
+			for(CurrentTable<Table, Integer> table : cookingOrdersTable.values()){
+				//Log.i("ERRORNAMETABLES","MESA:"+table.getTable().getName());
+			}
+			try{
+				nameTables.add(cookingOrdersTable.get(current).getTable().getName());
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+				
+			j++;
 		}
-		cookingAdapter = new SaleAdapter(mContext, items, nameTables,inflater);
+		/*cookingAdapter = new SaleAdapter(mContext, items, nameTables,inflater);
 		ordersList.setAdapter(cookingAdapter);
-		ordersList.setOnItemClickListener(orderListListener);
+		ordersList.setOnItemClickListener(orderListListener);*/
 	}
 
 	@Override
@@ -1938,14 +1968,14 @@ public class Initialactivity extends SherlockFragmentActivity implements
 			mResetProgressDialog.show();
 			SharedPreferences prefs = Util.getSharedPreferences(mContext);
 
-			restService = new RestService(recievePromoandUserHandler, mContext,
+			restService = new DefaultRestService(recievePromoandUserHandler, mContext,
 					Setup.PROD_URL + "/company/initManualStamp");
 			restService.addParam("company",
 					prefs.getString(Setup.COMPANY_ID, "0"));
 			restService.addParam("email", email);
 			restService.setCredentials("apiadmin", Setup.apiKey);
 			try {
-				restService.execute(RestService.POST);
+				restService.execute(DefaultRestService.POST);
 			} catch (Exception e) {
 				e.printStackTrace();
 				////Log.i("MISPRUEBAS", "Error empezando request");
@@ -1957,14 +1987,14 @@ public class Initialactivity extends SherlockFragmentActivity implements
 			mResetProgressDialog.show();
 			SharedPreferences prefs = Util.getSharedPreferences(mContext);
 
-			restService = new RestService(recieveRedeemConfirm, mContext,
+			restService = new DefaultRestService(recieveRedeemConfirm, mContext,
 					Setup.PROD_URL + "/company/initManualRedeem");
 			restService.addParam("company",
 					prefs.getString(Setup.COMPANY_ID, "0"));
 			restService.addParam("email", email);
 			restService.setCredentials("apiadmin", Setup.apiKey);
 			try {
-				restService.execute(RestService.POST);
+				restService.execute(DefaultRestService.POST);
 			} catch (Exception e) {
 				e.printStackTrace();
 				////Log.i("MISPRUEBAS", "Error empezando request");
@@ -2520,11 +2550,11 @@ public class Initialactivity extends SherlockFragmentActivity implements
 				factura.append(name);
 				productos.add(name);
 				int qtyL = String.valueOf(pairs.getValue()).length();
-				float precioiva = (float)Math.round(pairs.getKey().price + pairs.getKey().price
-						* pairs.getKey().tax );
-				 base += (float)Math.round(pairs.getKey().price * pairs.getValue());
-				 iva += (float)Math.round((pairs.getKey().price * pairs.getKey().tax) * pairs.getValue());
-				 total += precioiva * pairs.getValue();
+				float precioiva = (float)round(pairs.getKey().price + pairs.getKey().price
+						* pairs.getKey().tax ,0);
+				 base += (float)round(pairs.getKey().price * pairs.getValue(),0);
+				 iva += (float)round((pairs.getKey().price * pairs.getKey().tax) * pairs.getValue(),0);
+				 total += round(precioiva * pairs.getValue(),0);
 				 
 				int priceL = String.valueOf(precioiva).length();
 				espacios1 = espacios1 - qtyL < 1 ? espacios1 = 1 : espacios1 - qtyL;
@@ -2546,11 +2576,11 @@ public class Initialactivity extends SherlockFragmentActivity implements
 			}
 			float propvalue = 0; 
 					if(tipp == 1)
-						propvalue = (float)Math.round(total * 0.1);
+						propvalue = (float)round(total * 0.1,0);
 					
 			float descuento = 0;
 			if(discount > 0){
-				descuento = (float) Math.round( base - ( base * ( discount / 0 ) ) );
+				descuento = (float) round( base - ( base * ( discount / 0 ) ) ,0);
 			}
 			lines++;
 			lines++;
@@ -2559,7 +2589,7 @@ public class Initialactivity extends SherlockFragmentActivity implements
 			factura.append("BASE:      $"+base+"\r\n");
 			factura.append("Descuento ("+discount+"):      $"+descuento+"\r\n");
 			factura.append("Imp.:      $"+iva+"\r\n");
-			factura.append("SUBTOTAL:     $"+Math.round(total - descuento)+"\r\n");
+			factura.append("SUBTOTAL:     $"+round(total - descuento,0)+"\r\n");
 			factura.append("PROPINA:     $"+propvalue+"\r\n");
 			float precfinal = propvalue + total - descuento;
 			factura.append("TOTAL:     $"+precfinal+"\r\n");
@@ -2694,7 +2724,7 @@ public class Initialactivity extends SherlockFragmentActivity implements
 								formateado.append(HORIZONTAL_TAB);
 								formateado.append(HORIZONTAL_TAB);
 								formateado.append(HORIZONTAL_TAB);
-								formateado.append("$"+Math.round(total - descuento));
+								formateado.append("$"+round(total - descuento,0));
 								formateado.append(PRINT_FEED_ONE_LINE);
 								formateado.append("PROPINA:");
 								formateado.append(HORIZONTAL_TAB);
@@ -2737,7 +2767,7 @@ public class Initialactivity extends SherlockFragmentActivity implements
 					                	new connectTask().execute(formateado.toString());
 					                }
 					        }
-			        currentOrder.clear(); //NUEVOO
+			        //currentOrder.clear(); //NUEVOO
 			        
 			        makeTable("NA");
 			        
@@ -2857,10 +2887,10 @@ public class Initialactivity extends SherlockFragmentActivity implements
 				factura.append(name);
 				productos.add(name);
 				int qtyL = String.valueOf(pairs.getValue()).length();
-				float precioiva = (float)Math.round(pairs.getKey().price + pairs.getKey().price
-						* pairs.getKey().tax );
-				 base += (float)Math.round(pairs.getKey().price * pairs.getValue());
-				 iva += (float)Math.round((pairs.getKey().price * pairs.getKey().tax) * pairs.getValue());
+				float precioiva = (float)round(pairs.getKey().price + pairs.getKey().price
+						* pairs.getKey().tax ,0);
+				 base += (float)round(pairs.getKey().price * pairs.getValue(),0);
+				 iva += (float)round((pairs.getKey().price * pairs.getKey().tax) * pairs.getValue(),0);
 				 total += precioiva * pairs.getValue();
 				 
 				int priceL = String.valueOf(precioiva).length();
@@ -3074,6 +3104,7 @@ public class Initialactivity extends SherlockFragmentActivity implements
 				if(mesa.getValue().getTable().getName().equalsIgnoreCase(currentTable.getTable().getName())){
 					currentOrder = mesa.getKey();
 					currentSelectedPosition =  cookingOrders.indexOf(mesa.getKey());
+					//Log.i("ERRORNAMETABLES","Posisition a tomar: "+currentSelectedPosition);
 					break;
 				}
 			}
@@ -3384,6 +3415,17 @@ public static class MHandler extends Handler {
 			List<String> nameTables = new ArrayList<String>();
 			for (LinkedHashMap<Registrable, Integer> current : cookingOrders) {
 				items.add(cookingOrdersTimes.get(current));
+				//Log.i("ENHANDLE","Cooking Order"+current.toString());
+				for(Registrable ac : current.keySet()){
+					//Log.i("ENHANDLE",ac.name);
+				}
+				//Log.i("ENHANDLE","CookingOrdersTables");
+				for(LinkedHashMap<Registrable, Integer> nueva : cookingOrdersTable.keySet()){
+					//Log.i("ENHANDLE","Cooking Order en mesa"+cookingOrdersTable.get(nueva).getTable().getName()+" -- "+nueva.toString());
+					for(Registrable act : nueva.keySet()){
+						//Log.i("ENHANDLE",act.name);
+					}
+				}
 				nameTables.add(cookingOrdersTable.get(current).getTable().getName());
 			}
 			try{
@@ -3803,7 +3845,7 @@ public static class MHandler extends Handler {
 							int userid = currentUser.id;
 							SharedPreferences prefs = Util
 									.getSharedPreferences(mContext);
-							restService = new RestService(
+							restService = new DefaultRestService(
 									recieveStampsAndCouponsUser, mContext,
 									Setup.PROD_URL + "/promo/beLucky");
 
@@ -3814,7 +3856,7 @@ public static class MHandler extends Handler {
 							restService
 									.setCredentials("apiadmin", Setup.apiKey);
 							try {
-								restService.execute(RestService.POST);
+								restService.execute(DefaultRestService.POST);
 							} catch (Exception e) {
 								e.printStackTrace();
 								////Log.i("MISPRUEBAS", "Error empezando request");
@@ -3916,7 +3958,7 @@ public static class MHandler extends Handler {
 							int userid = currentUser.id;
 							SharedPreferences prefs = Util
 									.getSharedPreferences(mContext);
-							restService = new RestService(recieveRedeemedUser,
+							restService = new DefaultRestService(recieveRedeemedUser,
 									mContext, Setup.PROD_URL
 											+ "/promo/redeemCouponBusiness");
 
@@ -3927,7 +3969,7 @@ public static class MHandler extends Handler {
 							restService
 									.setCredentials("apiadmin", Setup.apiKey);
 							try {
-								restService.execute(RestService.POST);
+								restService.execute(DefaultRestService.POST);
 							} catch (Exception e) {
 								e.printStackTrace();
 								////Log.i("MISPRUEBAS", "Error empezando request");
@@ -4111,16 +4153,13 @@ public static class MHandler extends Handler {
 							SyncRow sync = syncRowDataSource.getSyncRow(sync_row);
 							String table = null;
 							Long id = null;
-							
 							try{
 								table = sync.getTable();
 								id = sync.getRowId();
 								Log.i("MISPRUEBAS","valores table y id: "+table+" --- "+String.valueOf(id));
 								if(updateSyncIdInRow(table,id,Setup.COLUMN_SYNC_ID,sync_id) > 0)
 									//deleteSyncRow(sync_row);
-									syncRowDataSource.deleteSyncRow(sync);
-									
-									
+									syncRowDataSource.deleteSyncRow(sync);	
 							}
 							catch(Exception e){
 								Log.e("MISPRUEBAS",e.toString());
@@ -4314,12 +4353,26 @@ public static class MHandler extends Handler {
 	};
 	
 	
-	private void receivedZReport(double ventas,	double descuentos,	double impuestos,
+	@UiThread
+	void receivedZReport(double ventas,	double descuentos,	double impuestos,
 	double propinas, double domicilios, double llevar, double tarjeta, double efectivo,
 	int contEfectivo , int contTarjeta, int contDomicilio, int contLlevar) {
 						prefs = Util.getSharedPreferences(mContext);
 						String fecha = DateFormat.getDateFormat(Initialactivity.this).format(
 								new Date());
+						SharedPreferences defaultprefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+						double initCash = 0;
+						double expendedCash = 0;
+						try{
+				            initCash = Double.parseDouble(defaultprefs.getString("amount_in_register", "0"));
+				        }catch (Exception e){
+				            e.printStackTrace();
+				        }
+						try{
+							expendedCash = Double.parseDouble(defaultprefs.getString("amount_expended", "0"));
+				        }catch (Exception e){
+				            e.printStackTrace();
+				        }
 						StringBuilder factura = new StringBuilder();
 						//factura.append("MR. PASTOR COMIDA\r\nRaPIDA MEXICANA" + "\r\n");
 						SharedPreferences prefs = Util.getSharedPreferences(mContext);
@@ -4349,6 +4402,8 @@ public static class MHandler extends Handler {
 						String labelDomicilio = "Domicilio";
 						String labelLlevar = "Llevar";
 						String labelEfectivo = "Efectivo";
+						String labelInit = "Base";
+						String labelExpenses="Gastos del día";
 						String labelTarjeta = "Tarjeta";
 						String labelIngresoReal = "Ingreso Real";
 						String labelContado = "Ventas de Contado";
@@ -4471,6 +4526,12 @@ public static class MHandler extends Handler {
 							formateado.append("$"+String.valueOf(ventas));
 							formateado.append(PRINT_FEED_ONE_LINE);
 							formateado.append(JUSTIFICATION_LEFT);
+							formateado.append(labelInit);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_RIGHT);
+							formateado.append("$"+String.valueOf(initCash));
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_LEFT);
 							formateado.append(labelDescuentos);
 							formateado.append(PRINT_FEED_ONE_LINE);
 							formateado.append(JUSTIFICATION_RIGHT);
@@ -4539,6 +4600,27 @@ public static class MHandler extends Handler {
 							formateado.append(labelIngresoReal+" $"+String.valueOf(ventas - descuentos + impuestos + propinas));
 							formateado.append(PRINT_FEED_ONE_LINE);
 							formateado.append(labelContado+" $"+String.valueOf(ventas - descuentos + impuestos));
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_LEFT);
+							formateado.append(labelInit);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_RIGHT);
+							formateado.append("$"+String.valueOf(initCash));
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_LEFT);
+							formateado.append(labelExpenses);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_RIGHT);
+							formateado.append("$"+String.valueOf(expendedCash));
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_LEFT);
+							formateado.append(DOUBLE_WIDE_CHARACTERS);
+							formateado.append("______________________");
+							formateado.append(SINGLE_WIDE_CHARACTERS);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_RIGHT);
+							formateado.append(labelIngresoReal+" $"+String.valueOf(ventas - descuentos + impuestos + initCash - expendedCash));
 							formateado.append(PRINT_FEED_ONE_LINE);
 							formateado.append(JUSTIFICATION_LEFT);
 							formateado.append(labelDomicilio);
@@ -4678,10 +4760,10 @@ public static class MHandler extends Handler {
 		//TODO revisar si es de sale, y actualzar en nueva base de datos, no tratar de buscar tabla sale q esta generand error handled
 		Log.i("MISPRUEBAS",table);
 		if(table.equalsIgnoreCase("\"sale\"")){
-			Log.i("MISPRUEBAS","entra a table sale");
+			//Log.i("MISPRUEBAS","entra a table sale");
 			DailySale sale = dailySaleDao.queryBuilder().where(com.nest5.businessClient.DailySaleDao.Properties.Id.eq(id)).unique();
 			if(sale != null){
-				Log.i("MISPRUEBAS","hay una venta que es: "+sale.getNumber());
+				//Log.i("MISPRUEBAS","hay una venta que es: "+sale.getNumber());
 				sale.setSyncId(value);
 				dailySaleDao.update(sale);
 				return 1;
@@ -5302,49 +5384,103 @@ public static class MHandler extends Handler {
 			//cookingOrders.remove(currentSelectedPosition); //viejo!!! ojo no es de lo nuevo de greendao y todos los movimientos
 			
 			try{
-				cookingOrders.remove(currentSale);
+				/*cookingOrders.remove(currentSale);
 				cookingOrdersDelivery.remove(currentSale);
 				cookingOrdersTogo.remove(currentSale);
 				cookingOrdersTimes.remove(currentSale);
 				openTables.remove(cookingOrdersTable.get(currentSale));
 				cookingOrdersTable.remove(currentSale);
+				int a = 0;
+				for(CurrentTable<Table, Integer> actual : cookingOrdersTable.values()){
+					if(actual.getTable().getName().equalsIgnoreCase(currentTable.getTable().getName())){
+						//Log.i("ERRORNAMETABLES", "se enconro la mesa: "+currentTable.getTable().getName());
+						cookingOrdersTable.remove(a);
+						break;
+					}
+					a++;
+				}
 				for(CurrentTable<Table, Integer> actual : openTables){
 					if(actual.getTable().getName().equalsIgnoreCase(currentTable.getTable().getName())){
 						openTables.remove(actual);
 						break;
 					}
 				}
+				for(LinkedHashMap<Registrable, Integer> registros: cookingOrdersTable.keySet()){
+					//Log.i("ERRORNAMETABLES","longitudd: "+registros.size());
+					if(registros.size() == 0)
+						cookingOrdersTable.remove(registros);	
+				}
+				int r = 0;
+				for (LinkedHashMap<Registrable, Integer> current : cookingOrders) {
+					int h = 0;
+					for(Registrable regist : current.keySet()){
+						//Log.i("ERRORNAMETABLES","ENSAVE - "+r+" -- "+h+"-->Registro: "+regist.name);
+						h++;
+					}
+					r++;
+				}
+				//Log.i("ERRORNAMETABLES","ENSAVE - cantidad de mesas con orden "+cookingOrdersTable.size());
+				for(LinkedHashMap<Registrable, Integer> registros: cookingOrdersTable.keySet()){
+					//Log.i("ERRORNAMETABLES","ENSAVE dentro del loop q no entra");
+					for(Registrable regist : registros.keySet()){
+						//Log.i("ERRORNAMETABLES","ENSAVE - mostrando sale "+regist.name);
+					}
+					//Log.i("ERRORNAMETABLES","ENSAVE - MESA:"+cookingOrdersTable.get(registros).getTable().getName());
+					
+				}*/
+				currentSale = cookingOrders
+						.get(currentSelectedPosition);
+				cookingOrders.remove(currentSelectedPosition);
+				//cookingOrdersMethods.remove(currentSale);
+				cookingOrdersDelivery.remove(currentSale);
+				cookingOrdersTogo.remove(currentSale);
+				//cookingOrdersTip.remove(currentSale);
+				//cookingOrdersDiscount.remove(currentSale);
+				//cookingOrdersReceived.remove(currentSale);
+				cookingOrdersTimes.remove(currentSale);
+				openTables.remove(cookingOrdersTable.get(currentSale));
+				cookingOrdersTable.remove(currentSale);
+				currentSelectedPosition = -1;
+
+				List<Long> items = new ArrayList<Long>();
+				List<String> nameTables = new ArrayList<String>();
+				for (LinkedHashMap<Registrable, Integer> current : cookingOrders) {
+					items.add(cookingOrdersTimes.get(current));
+					nameTables.add(cookingOrdersTable.get(current).getTable().getName());
+				}
 				currentTable = null;
-				//statusText.setText("Orden de Mesa cancelada con �xito."); 
 			}catch(Exception e){
 				Log.i("MISPRUEBAS","HAY UN ERROR AL REMOVER CURRENTSALE DE COOKINGORDERS");
 				e.printStackTrace();
 			}
-			currentTable = null;
-			//statusText.setText("Cuenta Cerrada Exitosamente.");  //quitar manipulacion ui porque esto es background
-			currentSelectedPosition = -1;
-			//sendCommandMessage(DELETE_ALL_COMMAND);
-			/*List<Long> items = new ArrayList<Long>();
-			List<String> nameTables = new ArrayList<String>();
-			for (LinkedHashMap<Registrable, Integer> current : cookingOrders) {
-				items.add(cookingOrdersTimes.get(current));
-				nameTables.add(cookingOrdersTable.get(current).getTable().getName());
-			}
-			cookingAdapter = new SaleAdapter(mContext, items, nameTables,inflater);
-			ordersList.setAdapter(cookingAdapter);
-
-			ordersList.setOnItemClickListener(orderListListener);
-			//currentOrder.clear(); //NUEVO
-			//makeTable("NA");
-			sale_name.setText("Venta Guardada con Éxito");
-			sale_details
-					.setText("Selecciona otro elemento para ver detalles.");*/
+			notifySuccess();
 			 createSyncRow("\""+Setup.TABLE_SALE+"\"",dailySale.getId(),0, "{\"_id\": "+dailySale.getId()+",\""+Setup.COLUMN_SALE_DATE+"\": "+dailySale.getDate().getTime()+",\""+Setup.COLUMN_SALE_ISDELIVERY+"\": "+dailySale.getIsDelivery()+",\""+Setup.COLUMN_SALE_METHOD+"\": \""+dailySale.getMethod()+"\",\""+Setup.COLUMN_SALE_ISTOGO+"\": "+dailySale.getIsTogo()+",\""+Setup.COLUMN_SALE_TIP+"\": "+dailySale.getTip()+",\""+Setup.COLUMN_SALE_DISCOUNT+"\": "+dailySale.getDiscount()+",\""+Setup.COLUMN_SALE_NUMBER+"\": "+dailySale.getNumber()+",\""+Setup.COLUMN_SALE_RECEIVED+"\":"+dailySale.getReceived()+",\"ingredients\": "+cadenaIngredientes.toString()+",\"products\": "+cadenaProductos.toString()+",\"combos\": "+cadenaCombos.toString()+"}");
 		} else {
 			subSale();//fall� guardando venta por lo tanto resetea el valor de facturación actual al anterior.
 			informUser(OTHER_ALERT_ERROR);
 			
 		}
+	}
+	
+	@UiThread
+	void notifySuccess(){
+		currentTable = null;
+		statusText.setText("Cuenta Cerrada Exitosamente.");  //quitar manipulacion ui porque esto es background
+		currentSelectedPosition = -1;
+		//sendCommandMessage(DELETE_ALL_COMMAND);
+		List<Long> items = new ArrayList<Long>();
+		List<String> nameTables = new ArrayList<String>();
+		for (LinkedHashMap<Registrable, Integer> current : cookingOrders) {
+			items.add(cookingOrdersTimes.get(current));
+			nameTables.add(cookingOrdersTable.get(current).getTable().getName());
+		}
+		cookingAdapter = new SaleAdapter(mContext, items, nameTables,inflater);
+		ordersList.setAdapter(cookingAdapter);
+
+		ordersList.setOnItemClickListener(orderListListener);
+		sale_name.setText("Venta Guardada con Éxito");
+		sale_details
+				.setText("Selecciona otro elemento para ver detalles.");
 	}
 	
 
@@ -5605,12 +5741,14 @@ public static class MHandler extends Handler {
 
 	    @Override
 	    public void handleMessage(Message msg) {
+	    	//Log.i("ERRORNAMETABLES","borrando todo");
 	      Initialactivity activity = mActivity.get();
 	      if (activity != null) {
 	    	  String list = msg.getData().getString("list");
 	    	  String deliveries = msg.getData().getString("deliveries");
 	    	  String togos = msg.getData().getString("togos");
 	    	  String tables = msg.getData().getString("tables");
+	    	  //Log.i("ERRORNAMETABLES",tables);
 	    	  String times = msg.getData().getString("times");
 	    	  //Log.i("MISPRUEBAS","lista: "+tables);
 	        // ...actualizo listas si son 
@@ -5771,6 +5909,24 @@ public static class MHandler extends Handler {
   			List<String> nameTables = new ArrayList<String>();
   			for (LinkedHashMap<Registrable, Integer> current : Initialactivity.cookingOrders) {
   				items.add(Initialactivity.cookingOrdersTimes.get(current));
+  				//para ua orden no hay mesa
+  				for(LinkedHashMap<Registrable, Integer> ordenes : cookingOrdersTable.keySet()){
+  					//Log.i("NUEVOERROR", "MESA "+cookingOrdersTable.get(ordenes).getTable().getName());
+  					for(Registrable reg : ordenes.keySet()){
+  						//Log.i("NUEVOERROR", "registros: "+reg.getName());
+  					}
+  				}
+  				//Log.i("ENHANDLE","Cooking Order"+current.toString());
+				for(Registrable ac : current.keySet()){
+					//Log.i("ENHANDLE",ac.name);
+				}
+				//Log.i("ENHANDLE","CookingOrdersTables");
+				for(LinkedHashMap<Registrable, Integer> nueva : cookingOrdersTable.keySet()){
+					//Log.i("ENHANDLE","Cooking Order en mesa"+cookingOrdersTable.get(nueva).getTable().getName()+" -- "+nueva.toString());
+					for(Registrable act : nueva.keySet()){
+						//Log.i("ENHANDLE",act.name);
+					}
+				}
   				nameTables.add(Initialactivity.cookingOrdersTable.get(current).getTable().getName());
   			}
 	    	  SaleAdapter cookingAdapter = new SaleAdapter(activity, items, nameTables,Initialactivity.inflater);
@@ -5787,7 +5943,21 @@ public static class MHandler extends Handler {
 	
 	@Background
     void getAllDailySales(DailySaleDao dsd) {
-		//TODO
+		//calculate ventas, desceuntos, impuestos, propinas, domicilios, llevar, tarjetas, efectivo, cotEfectivo, contTarjeta, contDomicilio, contLlevar y llamar receivedZReport(...)
+		
+		double totalVentas = 0;
+        double totalDescuentos = 0;
+        double totalImpuestos = 0;
+        double totalPropinas = 0;
+        double sumDomicilios = 0;
+        double sumLlevar = 0;
+        double sumTarjeta = 0;
+        double sumEfectivo = 0;
+        int contDomicilio = 0;
+        int contEfectivo = 0;
+        int contTarjeta = 0;
+        int contLlevar = 0;
+
 		//viene, toma todas las ventas del dia, y toma todos los objetos saleing, salepro y sale combo de esto, calcula imp, descu, y demas
 		LocalDateTime today = new LocalDateTime()
 			.withHourOfDay(0)
@@ -5799,27 +5969,82 @@ public static class MHandler extends Handler {
 				.where(com.nest5.businessClient.DailySaleDao.Properties.Date.ge(today.toDate()))
 				.list();
 		
-		//calculate ventas, desceuntos, impuestos, propinas, domicilios, llevar, tarjetas, efectivo, cotEfectivo, contTarjeta, contDomicilio, contLlevar y llamar receivedZReport(...)
+		for(DailySale sale : sales){
+			double elementTotal = 0;
+	        double elementImptotal = 0;
+				//ingredientes
+				SaleIngredienteDao sidao = daoSession.getSaleIngredienteDao();
+				List<SaleIngrediente> ingredients = sidao.queryBuilder()
+					.where(com.nest5.businessClient.SaleIngredienteDao.Properties.SaleId.eq(sale.getId()))
+					.list();
+				//productos
+				SaleProductoDao spdao = daoSession.getSaleProductoDao();
+				List<SaleProducto> products = spdao.queryBuilder()
+					.where(com.nest5.businessClient.SaleProductoDao.Properties.SaleId.eq(sale.getId()))
+					.list();
+				//combos
+				SaleCombinacionDao scdao = daoSession.getSaleCombinacionDao();
+				List<SaleCombinacion> combos = scdao.queryBuilder()
+					.where(com.nest5.businessClient.SaleCombinacionDao.Properties.SaleId.eq(sale.getId()))
+					.list();
+				for(SaleIngrediente ing : ingredients){
+					Impuesto impuesto = ing.getIngrediente().getImpuesto();
+					elementTotal += ing.getIngrediente().getPricePerUnit() * (ing.getQuantity());
+	                totalImpuestos += (ing.getIngrediente().getPricePerUnit() * (ing.getQuantity())) * impuesto.getPercentage();
+					
+				}
+						
+				for(SaleProducto prod : products){
+					Impuesto impuesto = prod.getProducto().getImpuesto();
+					elementTotal += prod.getProducto().getPricePerUnit() * (prod.getQuantity());
+	                totalImpuestos += (prod.getProducto().getPricePerUnit() * (prod.getQuantity())) * impuesto.getPercentage();
+					
+				}
+					
+				for(SaleCombinacion comb : combos){
+					Impuesto impuesto = comb.getCombinacion().getImpuesto();
+					elementTotal += comb.getCombinacion().getPricePerUnit() * (comb.getQuantity());
+	                totalImpuestos += (comb.getCombinacion().getPricePerUnit() * (comb.getQuantity())) * impuesto.getPercentage();
+				}
+				//once done, all combos, products and ngredients times quantties have been added, plus taxes, now get tip percentage and discounts
+                totalVentas += elementTotal;
+                totalDescuentos += elementTotal * (sale.getDiscount() / 100);
+                totalImpuestos += elementImptotal;
+                if(sale.getTip() == 1)
+                    totalPropinas += elementTotal * 0.1;
+                if(sale.getIsTogo() == 1){
+                    sumLlevar += elementTotal;
+                    contLlevar ++;
+                }
+                if(sale.getIsDelivery() == 1){
+                    sumDomicilios += elementTotal;
+                    contDomicilio ++;
+                }
+                if(sale.getMethod() == "card"){
+                    sumTarjeta += elementTotal;
+                    contTarjeta ++;
+                }else{
+                    sumEfectivo += elementTotal;
+                    contEfectivo ++;
+                }
+			}
 		
-				double totalVentas = 0;
-		        double totalDescuentos = 0;
-		        double totalImpuestos = 0;
-		        double totalPropinas = 0;
-		        double sumDomicilios = 0;
-		        double sumLlevar = 0;
-		        double sumTarjeta = 0;
-		        double sumEfectivo = 0;
-		        int contDomicilio = 0;
-		        int contEfectivo = 0;
-		        int contTarjeta = 0;
-		        int contLlevar = 0;
+		/*Log.i("CALCULANDOSALES","totalVentas: "+totalVentas);
+		Log.i("CALCULANDOSALES","totalDescuentos: "+totalDescuentos);
+		Log.i("CALCULANDOSALES","totalImpuestos: "+totalImpuestos);
+		Log.i("CALCULANDOSALES","totalPropinas: "+totalPropinas);
+		Log.i("CALCULANDOSALES","sumDomicilios: "+sumDomicilios);
+		Log.i("CALCULANDOSALES","sumLlevar: "+sumLlevar);
+		Log.i("CALCULANDOSALES","sumTarjeta: "+sumTarjeta);
+		Log.i("CALCULANDOSALES","sumEfectivo: "+sumEfectivo);
+		Log.i("CALCULANDOSALES","contDomicilio: "+contDomicilio);
+		Log.i("CALCULANDOSALES","contEfectivo: "+contEfectivo);
+		Log.i("CALCULANDOSALES","contTarjeta: "+contTarjeta);
+		Log.i("CALCULANDOSALES","contLlevar: "+contLlevar);*/
+		receivedZReport(totalVentas,totalDescuentos,totalImpuestos,totalPropinas,sumDomicilios,sumLlevar,sumTarjeta,sumEfectivo,contEfectivo,contTarjeta,contDomicilio,contLlevar);
 		
-		
-		for(DailySale element : sales){
-					double elementTotal = 0;
-	                double elementImptotal = 0;
-	                
-		}
+	
+
 		
     }
 
@@ -5893,7 +6118,137 @@ public static class MHandler extends Handler {
 		}
     	
 	}
+	
+	@Background()
+	void fetchSales(){
+		SaleObject[] todaySales = myRestService.getTodaySales(prefs.getString(Setup.COMPANY_ID, "0"));
+		
+		for(SaleObject actual : todaySales){
+			LinkedHashMap<Ingredient, Integer> ingredients = new LinkedHashMap<Ingredient, Integer>();
+			LinkedHashMap<Product, Integer> products = new LinkedHashMap<Product, Integer>();
+			LinkedHashMap<Combo, Integer> combos = new LinkedHashMap<Combo, Integer>();
+			for(ReceivedObject objeto : actual.getIngredients()){
+				try {
+					Ingredient ing = ingredientDatasource.getIngredientBySyncId(objeto.getSyncId());
+					//Log.i("MISVENTAS","Ingrediente: "+ing.getName());
+					if(ing != null)
+						ingredients.put(ing, objeto.getQuantity());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			for(ReceivedObject objeto : actual.getProducts()){
+				try {
+					//Log.i("MISVENTAS","Objeto Producto: "+objeto.getSyncId());
+					Product prod = productDatasource.getProductBySyncId(objeto.getSyncId());
+					//Log.i("MISVENTAS","Producto: "+prod.getName());
+					if(prod != null)
+						products.put(prod, objeto.getQuantity());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			for(ReceivedObject objeto : actual.getCombos()){
+				try {
+					Combo comb = comboDatasource.getComboBySyncId(objeto.getSyncId());
+					//Log.i("MISVENTAS","Combo: "+comb.getName());
+					if(comb != null)
+						combos.put(comb, objeto.getQuantity());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			DailySale dailySale = dailySaleDao.queryBuilder().where(com.nest5.businessClient.DailySaleDao.Properties.SyncId.eq(actual.getSyncId())).unique();
+			if(dailySale == null){
+				//Log.i("MISVENTAS","ENTRA");
+				dailySale = new DailySale(null, actual.getSyncId(), actual.getIsDelivery(), actual.getIsTogo(), actual.getTip(), actual.getNumber(), actual.getMethod(), actual.getReceived(), actual.getDiscount(),actual.getDate());
+				dailySaleDao.insert(dailySale);
+				for (Map.Entry<Ingredient, Integer> pair : ingredients.entrySet()) {
+					Impuesto impuesto = impuestoDao.queryBuilder().where(com.nest5.businessClient.ImpuestoDao.Properties.SyncId.eq(pair.getKey().getTax().getSyncId())).unique(); 
+					if( impuesto == null){
+						impuesto = new Impuesto(0, pair.getKey().getTax().getSyncId(),pair.getKey().getTax().getPercentage(), pair.getKey().getTax().getName()); 
+						impuestoDao.insert(impuesto);
+					}
+					Ingrediente ingrediente = ingredienteDao.queryBuilder().where(com.nest5.businessClient.IngredienteDao.Properties.SyncId.eq(pair.getKey().getSyncId())).unique();
+					if(ingrediente == null){
+						ingrediente = new Ingrediente(null);
+						ingrediente.setImpuesto(impuesto);
+						ingrediente.setDate(new Date());
+						ingrediente.setCostPerUnit(pair.getKey().getCostPerUnit());
+						ingrediente.setName(pair.getKey().getName());
+						ingrediente.setSyncId(pair.getKey().getSyncId());
+						ingrediente.setPricePerUnit(pair.getKey().getPricePerUnit());
+						ingredienteDao.insert(ingrediente);
+					}
+					//ya tengo el impuesto y el ingrediente en la base de datos, ahora creo la relacion, venta-ingrediente
+					SaleIngrediente saIn = new SaleIngrediente();
+					saIn.setDailySale(dailySale);
+					saIn.setQuantity(pair.getValue());
+					saIn.setIngrediente(ingrediente);
+					saleIngredienteDao.insert(saIn);
+				}
+				for(Map.Entry<Product, Integer> pair : products.entrySet()){
+					Impuesto impuesto = impuestoDao.queryBuilder().where(com.nest5.businessClient.ImpuestoDao.Properties.SyncId.eq(pair.getKey().getTax().getSyncId())).unique(); 
+					if( impuesto == null){
+						impuesto = new Impuesto(0, pair.getKey().getTax().getSyncId(),pair.getKey().getTax().getPercentage(), pair.getKey().getTax().getName()); 
+						impuestoDao.insert(impuesto);
+					}
+					Producto producto = productoDao.queryBuilder().where(com.nest5.businessClient.ProductoDao.Properties.SyncId.eq(pair.getKey().getSyncId())).unique();
+					if(producto == null){
+						producto = new Producto(null);
+						producto.setImpuesto(impuesto);
+						producto.setDate(new Date());
+						producto.setCostPerUnit(pair.getKey().getCost());
+						producto.setName(pair.getKey().getName());
+						producto.setSyncId(pair.getKey().getSyncId());
+						producto.setPricePerUnit(pair.getKey().getPrice());
+						productoDao.insert(producto);
+					}
+					//ya tengo el impuesto y el producto en la base de datos, ahora creo la relacion, venta-producto
+					SaleProducto saPr = new SaleProducto();
+					saPr.setDailySale(dailySale);
+					saPr.setQuantity(pair.getValue());
+					saPr.setProducto(producto);
+					saleProductoDao.insert(saPr);
+				}
+				for(Map.Entry<Combo, Integer> pair : combos.entrySet()){
+					Impuesto impuesto = impuestoDao.queryBuilder().where(com.nest5.businessClient.ImpuestoDao.Properties.SyncId.eq(pair.getKey().getTax().getSyncId())).unique(); 
+					if( impuesto == null){
+						impuesto = new Impuesto(0, pair.getKey().getTax().getSyncId(),pair.getKey().getTax().getPercentage(), pair.getKey().getTax().getName()); 
+						impuestoDao.insert(impuesto);
+					}
+					Combinacion combinacion = combinacionDao.queryBuilder().where(com.nest5.businessClient.CombinacionDao.Properties.SyncId.eq(pair.getKey().getSyncId())).unique();
+					if(combinacion == null){
+						combinacion = new Combinacion(null);
+						combinacion.setImpuesto(impuesto);
+						combinacion.setDate(new Date());
+						combinacion.setCostPerUnit(pair.getKey().getCost());
+						combinacion.setName(pair.getKey().getName());
+						combinacion.setSyncId(pair.getKey().getSyncId());
+						combinacion.setPricePerUnit(pair.getKey().getPrice());
+						combinacionDao.insert(combinacion);
+					}
+					//ya tengo el impuesto y el combinacion en la base de datos, ahora creo la relacion, venta-combinacion
+					SaleCombinacion saCm = new SaleCombinacion();
+					saCm.setDailySale(dailySale);
+					saCm.setQuantity(pair.getValue());
+					saCm.setCombinacion(combinacion);
+					saleCombinacionDao.insert(saCm);
+				}
+			}
+			
+		}
+		
+	}
+	
+	public static double round(double value, int places) {
+	    if (places < 0) throw new IllegalArgumentException();
 
+	    long factor = (long) Math.pow(10, places);
+	    value = value * factor;
+	    long tmp = Math.round(value);
+	    return (double) tmp / factor;
+	}
 
 	
 

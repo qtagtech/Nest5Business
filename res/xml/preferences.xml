@@ -26,6 +26,21 @@
 
     </PreferenceCategory>
     <PreferenceCategory
+            android:title="Cuadre Diario de Caja">
+        <EditTextPreference
+                android:key="amount_in_register"
+                android:title="¿Cuánto Efectivo Hay en Caja?"
+                android:summary="Indica la cantidad de efectivo con la empieza el local en el día para realizar al final el cuadre de caja."
+                android:dialogTitle="Indica un valor sin puntos ni comas del Efectivo en Caja" />
+        <EditTextPreference
+                android:key="amount_expended"
+                android:title="¿Cuánto has gastado en el día de Operación?"
+                android:summary="Para un cuadre de caja exacto debes indicar el valor de los gastos que hayas tenido en el día en efectivo."
+                android:dialogTitle="Indica el valor de Gastos de este día sin puntos ni comas." />
+        
+
+    </PreferenceCategory>
+    <PreferenceCategory
             android:title="Configuración Impresora Serial">
 
         <EditTextPreference
