@@ -78,20 +78,6 @@ public final class Initialactivity_
     }
 
     @Override
-    public void notifySuccess() {
-        handler_.post(new Runnable() {
-
-
-            @Override
-            public void run() {
-                Initialactivity_.super.notifySuccess();
-            }
-
-        }
-        );
-    }
-
-    @Override
     public void receivedZReport(final double ventas, final double descuentos, final double impuestos, final double propinas, final double domicilios, final double llevar, final double tarjeta, final double efectivo, final int contEfectivo, final int contTarjeta, final int contDomicilio, final int contLlevar) {
         handler_.post(new Runnable() {
 
@@ -106,6 +92,20 @@ public final class Initialactivity_
     }
 
     @Override
+    public void notifySuccess() {
+        handler_.post(new Runnable() {
+
+
+            @Override
+            public void run() {
+                Initialactivity_.super.notifySuccess();
+            }
+
+        }
+        );
+    }
+
+    @Override
     public void informUser(final int message) {
         handler_.post(new Runnable() {
 
@@ -113,42 +113,6 @@ public final class Initialactivity_
             @Override
             public void run() {
                 Initialactivity_.super.informUser(message);
-            }
-
-        }
-        );
-    }
-
-    @Override
-    public void saveSale(final String method, final Double value, final Double discount, final int delivery, final int togo, final int tip) {
-        BackgroundExecutor.execute(new BackgroundExecutor.Task("", 0, "") {
-
-
-            @Override
-            public void execute() {
-                try {
-                    Initialactivity_.super.saveSale(method, value, discount, delivery, togo, tip);
-                } catch (Throwable e) {
-                    Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
-                }
-            }
-
-        }
-        );
-    }
-
-    @Override
-    public void getAllDailySales(final DailySaleDao dsd) {
-        BackgroundExecutor.execute(new BackgroundExecutor.Task("", 0, "") {
-
-
-            @Override
-            public void execute() {
-                try {
-                    Initialactivity_.super.getAllDailySales(dsd);
-                } catch (Throwable e) {
-                    Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
-                }
             }
 
         }
@@ -182,6 +146,42 @@ public final class Initialactivity_
             public void execute() {
                 try {
                     Initialactivity_.super.connectStarMicronics();
+                } catch (Throwable e) {
+                    Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
+                }
+            }
+
+        }
+        );
+    }
+
+    @Override
+    public void getAllDailySales(final DailySaleDao dsd) {
+        BackgroundExecutor.execute(new BackgroundExecutor.Task("", 0, "") {
+
+
+            @Override
+            public void execute() {
+                try {
+                    Initialactivity_.super.getAllDailySales(dsd);
+                } catch (Throwable e) {
+                    Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
+                }
+            }
+
+        }
+        );
+    }
+
+    @Override
+    public void saveSale(final String method, final Double value, final Double discount, final int delivery, final int togo, final int tip) {
+        BackgroundExecutor.execute(new BackgroundExecutor.Task("", 0, "") {
+
+
+            @Override
+            public void execute() {
+                try {
+                    Initialactivity_.super.saveSale(method, value, discount, delivery, togo, tip);
                 } catch (Throwable e) {
                     Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
                 }
