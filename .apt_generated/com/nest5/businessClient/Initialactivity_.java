@@ -120,14 +120,14 @@ public final class Initialactivity_
     }
 
     @Override
-    public void fetchSales() {
-        BackgroundExecutor.execute(new BackgroundExecutor.Task("", 0, "") {
+    public void connectStarMicronics() {
+        BackgroundExecutor.execute(new BackgroundExecutor.Task("", 700, "") {
 
 
             @Override
             public void execute() {
                 try {
-                    Initialactivity_.super.fetchSales();
+                    Initialactivity_.super.connectStarMicronics();
                 } catch (Throwable e) {
                     Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
                 }
@@ -138,14 +138,14 @@ public final class Initialactivity_
     }
 
     @Override
-    public void connectStarMicronics() {
-        BackgroundExecutor.execute(new BackgroundExecutor.Task("", 700, "") {
+    public void saveSale(final String method, final Double value, final Double discount, final int delivery, final int togo, final int tip, final int nextsale) {
+        BackgroundExecutor.execute(new BackgroundExecutor.Task("", 0, "") {
 
 
             @Override
             public void execute() {
                 try {
-                    Initialactivity_.super.connectStarMicronics();
+                    Initialactivity_.super.saveSale(method, value, discount, delivery, togo, tip, nextsale);
                 } catch (Throwable e) {
                     Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
                 }
@@ -174,14 +174,14 @@ public final class Initialactivity_
     }
 
     @Override
-    public void saveSale(final String method, final Double value, final Double discount, final int delivery, final int togo, final int tip) {
+    public void fetchSales() {
         BackgroundExecutor.execute(new BackgroundExecutor.Task("", 0, "") {
 
 
             @Override
             public void execute() {
                 try {
-                    Initialactivity_.super.saveSale(method, value, discount, delivery, togo, tip);
+                    Initialactivity_.super.fetchSales();
                 } catch (Throwable e) {
                     Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
                 }

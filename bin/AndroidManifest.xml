@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.nest5.businessClient"
     android:installLocation="preferExternal"
-    android:versionCode="20"
+    android:versionCode="21"
     android:versionName="2.0" >
 
     <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="19" />
@@ -88,12 +88,7 @@
         </activity>
         <service android:name=".ExecuteRequest" android:label="ExecuteRequest"/>
         <service android:name="com.parse.PushService" />
-		<receiver android:name="com.parse.ParseBroadcastReceiver">
-		  <intent-filter>
-		    <action android:name="android.intent.action.BOOT_COMPLETED" />
-		    <action android:name="android.intent.action.USER_PRESENT" />
-		  </intent-filter>
-		</receiver>
+		
 		<receiver android:name="com.parse.GcmBroadcastReceiver"
 		    android:permission="com.google.android.c2dm.permission.SEND">
 		  <intent-filter>

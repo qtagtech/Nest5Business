@@ -2472,7 +2472,8 @@ public class Initialactivity extends SherlockFragmentActivity implements
 		
 		int number = checkSaleNumber(); //si falla se resta un numero de las ventas actuales mas adelante,.
 		if(number > 0){
-			saveSale(method,value,discount,delivery,togo,tipp);
+			int nextsale = addSale();
+			saveSale(method,value,discount,delivery,togo,tipp,nextsale);
 			Date date = new Date();
 			String fecha = new SimpleDateFormat("dd/MM/yyyy - HH:mm:ss").format(date); 
 			//String fecha = DateFormat.getDateFormat(Initialactivity.this).format(
@@ -5237,9 +5238,9 @@ public static class MHandler extends Handler {
 	
 	//hacer esto en background y una funcion en ui que aklerte reciviendo mensajes en caso que pase algo malo
 	@Background
-	void saveSale(String method,Double value,Double discount,int delivery,int togo, int tip){
+	void saveSale(String method,Double value,Double discount,int delivery,int togo, int tip, int nextsale){//al hacer save sale en background, se demora un poquito y lo que hace es q actualixza el valor de facturacion con addslae tarde cuando yua ha impreso factura, por eso sale repetido el valor!
 		int number = checkSaleNumber(); 
-		int nextsale = addSale(); //se aumenta el valor de facturación, //si falla se resta un numero de las ventas actuales mas adelante,.
+		//int nextsale = addSale(); //se aumenta el valor de facturación, //si falla se resta un numero de las ventas actuales mas adelante,.
 		//Sale createdSale = null;
 		DailySale dailySale = null;
 		long saveDate = System.currentTimeMillis();
