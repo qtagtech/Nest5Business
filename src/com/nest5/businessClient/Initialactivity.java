@@ -1595,6 +1595,7 @@ public class Initialactivity extends SherlockFragmentActivity implements
 				}
 				restService = new DefaultRestService(updateMaxHandler, mContext,
 						 Setup.PROD_BIGDATA_URL+"/deviceOps/fetchMaxSale");
+				Log.i("DATOSINFO",deviceID);
 						 String jString = "{device_id:"+deviceID+"}";
 						 restService.addParam("payload", jString);		 
 						 restService.setCredentials("apiadmin", Setup.apiKey);
@@ -4316,27 +4317,26 @@ public static class MHandler extends Handler {
 						.putString(Setup.COMPANY_URL, url)
 						.putString(Setup.RESOLUTION_MESSAGE, resolution)
 						.commit();
-						////Log.i("UPDATESALE","CurrentSale sin modificar: "+String.valueOf(prefs.getInt(Setup.CURRENT_SALE, currentSale)));
-			    		////Log.i("UPDATESALE","maxSale sin modificar: "+String.valueOf(prefs.getInt(Setup.MAX_SALE, currentSale)));
-			    		////Log.i("DATOSINFO","maxSale: "+String.valueOf(maxSale));
+						Log.i("UPDATESALE","CurrentSale sin modificar: "+String.valueOf(prefs.getInt(Setup.CURRENT_SALE, currentSale)));
+			    		Log.i("UPDATESALE","maxSale sin modificar: "+String.valueOf(prefs.getInt(Setup.MAX_SALE, currentSale)));
+			    		Log.i("DATOSINFO","maxSale: "+String.valueOf(maxSale));
 
-						////Log.i("DATOSINFO","currentSale: "+String.valueOf(currentSale));
+						Log.i("DATOSINFO","currentSale: "+String.valueOf(currentSale));
 
-						////Log.i("DATOSINFO","prefix: "+prefix);
+						Log.i("DATOSINFO","prefix: "+prefix);
+						Log.i("DATOSINFO","nit: "+nit);
 
-						////Log.i("DATOSINFO","nit: "+nit);
+						Log.i("DATOSINFO","tel: "+tel);
 
-						////Log.i("DATOSINFO","tel: "+tel);
+						Log.i("DATOSINFO","address: "+address);
 
-						////Log.i("DATOSINFO","address: "+address);
-
-						////Log.i("DATOSINFO","email: "+email);
+						Log.i("DATOSINFO","email: "+email);
 						
-						////Log.i("DATOSINFO","url: "+url);
+						Log.i("DATOSINFO","url: "+url);
 						
-						////Log.i("DATOSINFO","invoiceMessage: "+invoiceMessage);
+						Log.i("DATOSINFO","invoiceMessage: "+invoiceMessage);
 						
-						////Log.i("DATOSINFO","tipMessage: "+tipMessage);
+						Log.i("DATOSINFO","tipMessage: "+tipMessage);
 					}
 					else{
 						

@@ -78,13 +78,13 @@ public final class Initialactivity_
     }
 
     @Override
-    public void receivedZReport(final double ventas, final double descuentos, final double impuestos, final double propinas, final double domicilios, final double llevar, final double tarjeta, final double efectivo, final int contEfectivo, final int contTarjeta, final int contDomicilio, final int contLlevar) {
+    public void informUser(final int message) {
         handler_.post(new Runnable() {
 
 
             @Override
             public void run() {
-                Initialactivity_.super.receivedZReport(ventas, descuentos, impuestos, propinas, domicilios, llevar, tarjeta, efectivo, contEfectivo, contTarjeta, contDomicilio, contLlevar);
+                Initialactivity_.super.informUser(message);
             }
 
         }
@@ -106,31 +106,13 @@ public final class Initialactivity_
     }
 
     @Override
-    public void informUser(final int message) {
+    public void receivedZReport(final double ventas, final double descuentos, final double impuestos, final double propinas, final double domicilios, final double llevar, final double tarjeta, final double efectivo, final int contEfectivo, final int contTarjeta, final int contDomicilio, final int contLlevar) {
         handler_.post(new Runnable() {
 
 
             @Override
             public void run() {
-                Initialactivity_.super.informUser(message);
-            }
-
-        }
-        );
-    }
-
-    @Override
-    public void connectStarMicronics() {
-        BackgroundExecutor.execute(new BackgroundExecutor.Task("", 700, "") {
-
-
-            @Override
-            public void execute() {
-                try {
-                    Initialactivity_.super.connectStarMicronics();
-                } catch (Throwable e) {
-                    Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
-                }
+                Initialactivity_.super.receivedZReport(ventas, descuentos, impuestos, propinas, domicilios, llevar, tarjeta, efectivo, contEfectivo, contTarjeta, contDomicilio, contLlevar);
             }
 
         }
@@ -156,14 +138,14 @@ public final class Initialactivity_
     }
 
     @Override
-    public void getAllDailySales(final DailySaleDao dsd) {
-        BackgroundExecutor.execute(new BackgroundExecutor.Task("", 0, "") {
+    public void connectStarMicronics() {
+        BackgroundExecutor.execute(new BackgroundExecutor.Task("", 700, "") {
 
 
             @Override
             public void execute() {
                 try {
-                    Initialactivity_.super.getAllDailySales(dsd);
+                    Initialactivity_.super.connectStarMicronics();
                 } catch (Throwable e) {
                     Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
                 }
@@ -182,6 +164,24 @@ public final class Initialactivity_
             public void execute() {
                 try {
                     Initialactivity_.super.fetchSales();
+                } catch (Throwable e) {
+                    Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
+                }
+            }
+
+        }
+        );
+    }
+
+    @Override
+    public void getAllDailySales(final DailySaleDao dsd) {
+        BackgroundExecutor.execute(new BackgroundExecutor.Task("", 0, "") {
+
+
+            @Override
+            public void execute() {
+                try {
+                    Initialactivity_.super.getAllDailySales(dsd);
                 } catch (Throwable e) {
                     Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
                 }
