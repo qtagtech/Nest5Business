@@ -120,42 +120,6 @@ public final class Initialactivity_
     }
 
     @Override
-    public void saveSale(final String method, final Double value, final Double discount, final int delivery, final int togo, final int tip, final int nextsale) {
-        BackgroundExecutor.execute(new BackgroundExecutor.Task("", 0, "") {
-
-
-            @Override
-            public void execute() {
-                try {
-                    Initialactivity_.super.saveSale(method, value, discount, delivery, togo, tip, nextsale);
-                } catch (Throwable e) {
-                    Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
-                }
-            }
-
-        }
-        );
-    }
-
-    @Override
-    public void connectStarMicronics() {
-        BackgroundExecutor.execute(new BackgroundExecutor.Task("", 700, "") {
-
-
-            @Override
-            public void execute() {
-                try {
-                    Initialactivity_.super.connectStarMicronics();
-                } catch (Throwable e) {
-                    Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
-                }
-            }
-
-        }
-        );
-    }
-
-    @Override
     public void fetchSales() {
         BackgroundExecutor.execute(new BackgroundExecutor.Task("", 0, "") {
 
@@ -182,6 +146,42 @@ public final class Initialactivity_
             public void execute() {
                 try {
                     Initialactivity_.super.getAllDailySales(dsd);
+                } catch (Throwable e) {
+                    Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
+                }
+            }
+
+        }
+        );
+    }
+
+    @Override
+    public void saveSale(final String method, final Double value, final Double discount, final int delivery, final int togo, final int tip, final int nextsale) {
+        BackgroundExecutor.execute(new BackgroundExecutor.Task("", 0, "") {
+
+
+            @Override
+            public void execute() {
+                try {
+                    Initialactivity_.super.saveSale(method, value, discount, delivery, togo, tip, nextsale);
+                } catch (Throwable e) {
+                    Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
+                }
+            }
+
+        }
+        );
+    }
+
+    @Override
+    public void connectStarMicronics() {
+        BackgroundExecutor.execute(new BackgroundExecutor.Task("", 700, "") {
+
+
+            @Override
+            public void execute() {
+                try {
+                    Initialactivity_.super.connectStarMicronics();
                 } catch (Throwable e) {
                     Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
                 }
