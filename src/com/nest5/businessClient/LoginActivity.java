@@ -203,7 +203,7 @@ public class LoginActivity extends Activity {
 
 			Log.i("MISPRUEBAS","EMPEZANDO REQUEST");
 			 restService = new DefaultRestService(sendCredentialsHandler, mContext,
-			 Setup.PROD_URL+"/api/checkLogin");
+			 Setup.PROD_URL+"/api/checkSellerLogin");	
 			 restService.addParam("email", mEmail);
 			 restService.addParam("password", mPassword);
 			 restService.setCredentials("apiadmin", Setup.apiKey);
@@ -283,12 +283,37 @@ public class LoginActivity extends Activity {
 //				Log.i("MISPRUEBAS","CON RESPUESTA");
 				int status = 0;
 				String compid = "";
+				String nit = "";
 				String compname = "";
+                String compEmail = "";
+                String compUsername = "";
+                String compPhone = "";
+                
+                String sellerName = "";
+                int sellerId = 0;
+                String sellerPhone = "";
+                String sellerIdentification = "";
+                String sellerEmail = "";
+                boolean sellerActive = false;
+                String sellerDate = "";
 				try {
 					status = respuesta.getInt("status");
 					compid = respuesta.getString("id");
+					nit = respuesta.getString("nit");
 					compname = respuesta.getString("name");
 
+                    compEmail = respuesta.getString("email");
+                    compUsername = respuesta.getString("username");
+                    compPhone = respuesta.getString("phone");
+                    
+                    sellerName = respuesta.getString("seller");
+                    sellerId = respuesta.getInt("seller_id");
+                    sellerPhone = respuesta.getString("seller_phone");
+                    sellerIdentification = respuesta.getString("seller_identification");
+                    sellerEmail = respuesta.getString("seller_email");
+                    sellerActive = respuesta.getBoolean("seller_active");
+                    sellerDate = respuesta.getString("seller_date");
+                    
 				} catch (Exception e) {
                     BugSenseHandler.sendException(e);
 //					Log.i("MISPRUEBAS","ERROR COGER DATOS");
@@ -313,7 +338,23 @@ public class LoginActivity extends Activity {
 //					 Log.i("DEVICEID", deviceID);
 //					 Log.i("DEVICEID", compid);
 
-					 prefs.edit().putBoolean(Setup.LOGGED_IN, true).putString(Setup.COMPANY_ID, compid).putString(Setup.COMPANY_NAME, compname).putString(Setup.DEVICE_REGISTERED_ID, deviceID).commit();
+                     prefs.edit().putBoolean(Setup.LOGGED_IN, true)
+	                     .putString(Setup.COMPANY_ID, compid)
+	                     .putString(Setup.COMPANY_NIT, nit)
+	                     .putString(Setup.COMPANY_NAME, compname)
+	                     .putString(Setup.DEVICE_REGISTERED_ID, deviceID)
+	                     .putString(Setup.COMPANY_EMAIL, compEmail)
+	                     .putString(Setup.COMPANY_TEL, compPhone)
+	                     .putString(Setup.COMPANY_USERNAME, compUsername)
+	                     .putString(Setup.SELLER_NAME, sellerName)
+	                     .putInt(Setup.SELLER_ID, sellerId)
+	                     .putString(Setup.SELLER_PHONE, sellerPhone)
+	                     .putString(Setup.SELLER_IDENTIFICATION, sellerIdentification)
+	                     .putString(Setup.SELLER_EMAIL, sellerEmail)
+	                     .putBoolean(Setup.SELLER_ACTIVE, sellerActive)
+	                     .putString(Setup.SELLER_DATE, sellerDate)
+	                     .commit();
+
 					 restService.addParam("payload", jString);
 					 restService.setCredentials("apiadmin", Setup.apiKey);
 					 try {

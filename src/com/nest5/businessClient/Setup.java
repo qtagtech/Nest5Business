@@ -48,8 +48,16 @@ public class Setup {
     public static final String COMPANY_ADDRESS = "company_address";
     public static final String COMPANY_EMAIL = "company_email";
     public static final String COMPANY_URL = "company_url";
+    public static final String COMPANY_USERNAME = "company_username";
     public static final String COMPANY_MESSAGE = "company_message";
     public static final String TIP_MESSAGE = "tip_message";
+    public static final String SELLER_NAME = "seller_name";
+    public static final String SELLER_ID = "seller_id";
+    public static final String SELLER_PHONE = "seller_phone";
+    public static final String SELLER_IDENTIFICATION = "seller_identification";
+    public static final String SELLER_EMAIL = "seller_email";
+    public static final String SELLER_ACTIVE = "seller_active";
+    public static final String SELLER_DATE = "seller_date";
     public static final String RESOLUTION_MESSAGE = "resolution_message";
     public static final String COOKING_ORDERS = "saved_cooking_orders";
     public static final String COOKING_ORDERS_DELIVERIES = "saved_cooking_orders_deliveries";
@@ -140,6 +148,7 @@ public class Setup {
     public static final String COLUMN_SALE_TIP = "tip";
     public static final String COLUMN_SALE_DISCOUNT = "discount";
     public static final String COLUMN_SALE_NUMBER = "sale_number";
+    public static final String COLUMN_SALE_SELLER = "seller";
 
     
     //SaleItem  guarda las propiedades de un registrable con una cantidad en la base de datos
@@ -171,9 +180,11 @@ public class Setup {
 
     //public static final String PROD_URL = "http://192.168.1.189:8092";
     //public static final String PROD_URL = "http://api.nest5.com";
-    public static final String PROD_URL = "http://www.nest5.com";
+    //public static final String PROD_URL = "http://www.nest5.com";
     //public static final String PROD_BIGDATA_URL = "http://192.168.1.189:8090/Nest5BusinessData";
-    public static final String PROD_BIGDATA_URL = "http://bigdata.nest5.com";
+    //public static final String PROD_BIGDATA_URL = "http://bigdata.nest5.com";
+    public static final String PROD_URL = "http://192.168.1.55:8080";
+    public static final String PROD_BIGDATA_URL = "http://192.168.1.55:8090/Nest5BusinessData";    
    
 
     
