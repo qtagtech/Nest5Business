@@ -2636,9 +2636,11 @@ public class Initialactivity extends SherlockFragmentActivity implements
 			factura.append("Descuento " + dis + "$"+df.format(descuento)+"\r\n");
 			factura.append("Imp.:            $"+df.format(iva)+"\r\n");
 			factura.append("SUBTOTAL:        $"+df.format(round(total - descuento,0))+"\r\n");
+			factura.append("EFECTIVO:        $"+df.format(value)+"\r\n");
 			factura.append("PROPINA:         $"+df.format(propvalue)+"\r\n");
 			float precfinal = propvalue + total - descuento;
 			factura.append("TOTAL:           $"+df.format(precfinal)+"\r\n");
+			factura.append("DEVUELTA:        $"+df.format(value - precfinal)+"\r\n");
 			factura.append("\r\n");
 			factura.append(sep + "\r\n");
 			factura.append("\r\n");
