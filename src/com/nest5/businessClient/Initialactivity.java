@@ -463,12 +463,12 @@ public class Initialactivity extends SherlockFragmentActivity implements
     /**
      * Tiene impresora BIXOLON
      */
-    private boolean hasBixolonPrinter = false;
+    static boolean hasBixolonPrinter = false;
     
     /*
      * BIXOLONPRINTER
      * */
-    static BixolonPrinter mBixolonPrinter;
+    static List<BixolonPrinter> BixolonPrinterList;
     
 	/**
 	 * @param isWifiP2pEnabled
@@ -555,9 +555,6 @@ public class Initialactivity extends SherlockFragmentActivity implements
 		checkLogin();
 		
 		
-		mBixolonPrinter = new BixolonPrinter(this, bixolonHandler, null);
-		findNetworkPrinters();
-        
 		// add necessary intent values to be matched.
 		
 		intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
@@ -915,8 +912,6 @@ public class Initialactivity extends SherlockFragmentActivity implements
 			}
 		}
 		//clean dailytable for sales older than today, leave only sales from today
-		
-		findNetworkPrinters();
 		connectStarMicronics();
 		
 		if(prefs.getBoolean(Setup.FIRST_INSTALL, true)){
@@ -954,7 +949,9 @@ public class Initialactivity extends SherlockFragmentActivity implements
 		// Stop the Bluetooth chat service
 		try{
 			if (mChatService != null) mChatService.stop();
-			if (mBixolonPrinter != null) mBixolonPrinter.disconnect();
+			for (BixolonPrinter printer: BixolonPrinterList){
+				printer.disconnect();
+			}
 	        //if (mSerialService != null) mSerialService.stop();
 		}catch(Exception e){
 			e.printStackTrace();
@@ -6440,67 +6437,19 @@ public static class MHandler extends Handler {
 	}
 	
 	
-	private void findNetworkPrinters(){
-		// Search for the Bixolon printer
-		if (!hasBixolonPrinter)
-			mBixolonPrinter.findNetworkPrinters(3000);
-		
-	}
-	
-private final Handler bixolonHandler = new Handler(new Handler.Callback() {
-		
-		@SuppressWarnings("unchecked")
-		@Override
-		public boolean handleMessage(Message msg) {
-			Log.d(TAG, "mHandler.handleMessage(" + msg + ")");
-			
-			switch (msg.what) {
-			case BixolonPrinter.MESSAGE_STATE_CHANGE:
-				switch (msg.arg1) {
-				case BixolonPrinter.STATE_CONNECTED:
-					Log.i("BIXOLON:", "Conectado a impresora bixolon");
-					hasBixolonPrinter = true;
-					break;
-
-				case BixolonPrinter.STATE_CONNECTING:
-					break;
-
-				case BixolonPrinter.STATE_NONE:
-					break;
-				}
-				return true;
-				
-			case BixolonPrinter.MESSAGE_NETWORK_DEVICE_SET:
-				if (msg.obj == null) {
-					Toast.makeText(getApplicationContext(), "No connectable device", Toast.LENGTH_SHORT).show();
-				}
-				Set<String> ipAddressSet = (Set<String>) msg.obj;
-				
-				if (ipAddressSet != null) {
-					final String[] items = ipAddressSet.toArray(new String[ipAddressSet.size()]);
-					 
-					if (items.length > 0){
-						Log.i("BIXOLON:", "Impresora encontrada: " + items[0] + ":9100");
-						mBixolonPrinter.connect(items[0], 9100, 5000);
-					}
-				}
-				
-				return true;
-			}
-			return false;
-		}
-	});
 	
 	@Background(delay=700)
 	void PrintOnBixolon(String text){
 		if (hasBixolonPrinter){
 			String extraT = "  \r\n  \r\n";
 			
-			mBixolonPrinter.printText(text, 0, 0, 0, false);
-			mBixolonPrinter.printText(extraT, 0, 0, 0, false);
-			mBixolonPrinter.printText(extraT, 0, 0, 0, false);
-			
-			mBixolonPrinter.cutPaper(false);
+			for (BixolonPrinter printer : BixolonPrinterList){
+				printer.printText(text, 0, 0, 0, false);
+				printer.printText(extraT, 0, 0, 0, false);
+				printer.printText(extraT, 0, 0, 0, false);
+				
+				printer.cutPaper(false);
+			}
 		}
 	}
 	
