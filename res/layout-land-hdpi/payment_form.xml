@@ -23,32 +23,45 @@
 			    android:layout_width="fill_parent"
 			    android:layout_height="wrap_content"
 			    android:weightSum="1">
-			        
-			       <Button 
-				        android:id="@+id/payment_option_cash"
+
+			        <Button
+			            android:id="@+id/payment_option_cash"
+			            style="@style/ButtonText"
+			            android:layout_width="0dip"
+			            android:layout_weight="0.24"
+			            android:background="@drawable/blue_button"
+			            android:text="Efectivo"
+			            android:textSize="15dp" />
+
+				    <Button
+				        android:id="@+id/payment_option_debit"
+				        style="@style/ButtonText"
 				        android:layout_width="0dip"
-				        android:layout_weight="0.3"
 				        android:layout_gravity="center_horizontal|center_vertical"
-				        android:background="@drawable/blue_button" 
-			        	style="@style/ButtonText"				       
-				        android:text="Efectivo"/>
-				    <Button 
-				        android:id="@+id/payment_option_card"
+				        android:layout_weight="0.25"
+				        android:background="@drawable/blue_button"
+				        android:text="Débito"
+				        android:textSize="15dp" />
+
+				    <Button
+				        android:id="@+id/payment_option_credit"
+				        style="@style/ButtonText"
 				        android:layout_width="0dip"
-				        android:layout_weight="0.3"
 				        android:layout_gravity="center_horizontal|center_vertical"
-				        android:background="@drawable/blue_button" 
-			        	style="@style/ButtonText"				       
-				        android:text="Tarjeta"/>
-				    <Button 
+				        android:layout_weight="0.24"
+				        android:background="@drawable/blue_button"
+				        android:text="Crédito"
+				        android:textSize="15dp" />
+
+				    <Button
 				        android:id="@+id/tip_btn"
+				        style="@style/ButtonText"
 				        android:layout_width="0dip"
-				        android:layout_weight="0.3"
 				        android:layout_gravity="center_horizontal|center_vertical"
-				        android:background="@drawable/blue_button" 
-			        	style="@style/ButtonText"				       
-				        android:text="Propina"/>
-				    
+				        android:layout_weight="0.25"
+				        android:background="@drawable/blue_button"
+				        android:text="Propina"
+				        android:textSize="15dp" />
 				     
 			    </LinearLayout>
 			    

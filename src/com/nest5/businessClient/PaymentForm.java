@@ -45,7 +45,8 @@ public class PaymentForm extends DialogFragment {
 private Context mContext;
 private LinkedHashMap<Registrable, Integer> items;
 private Button cashBtn;
-private Button cardBtn;
+private Button debitBtn;
+private Button creditBtn;
 private EditText discountTxt;
 private Button payBtn;
 private Button tipBtn;
@@ -103,7 +104,8 @@ public void onAttach(Activity activity){
     cashBtn = (Button) view.findViewById(R.id.payment_option_cash);
     payBtn = (Button) view.findViewById(R.id.payment_form_pay_button);
     cancelBtn = (Button) view.findViewById(R.id.payment_form_cancel_button);
-    cardBtn = (Button) view.findViewById(R.id.payment_option_card);
+    debitBtn = (Button) view.findViewById(R.id.payment_option_debit);
+    creditBtn = (Button) view.findViewById(R.id.payment_option_credit);
     valueTxt = (EditText) view.findViewById(R.id.payment_form_text);
     changeTxt = (TextView) view.findViewById(R.id.payment_form_change);
     discountTxt = (EditText) view.findViewById(R.id.payment_form_discount);
@@ -156,8 +158,10 @@ public void onAttach(Activity activity){
 				valueTxt.setText(String.valueOf(price));
 				method = "cash";
 				v.setEnabled(false);
-				cardBtn.setEnabled(true);
-				cardBtn.setBackgroundDrawable(getResources().getDrawable(R.drawable.blue_button));
+				debitBtn.setEnabled(true);
+				debitBtn.setBackgroundDrawable(getResources().getDrawable(R.drawable.blue_button));
+				creditBtn.setEnabled(true);
+				creditBtn.setBackgroundDrawable(getResources().getDrawable(R.drawable.blue_button));
 			
 		}
 	});
@@ -175,7 +179,7 @@ public void onAttach(Activity activity){
     		}
     	}
     });
-    cardBtn.setOnClickListener(new OnClickListener() {
+    debitBtn.setOnClickListener(new OnClickListener() {
 		
 		@Override
 		public void onClick(View v) {
@@ -184,11 +188,33 @@ public void onAttach(Activity activity){
 				v.setBackgroundColor(Color.GRAY);
 				valueTxt.setEnabled(false);
 				valueTxt.setText(String.valueOf(price));
-				method = "card";
+				method = "debit";
 				v.setEnabled(false);
 				cashBtn.setEnabled(true);
 				cashBtn.setBackgroundDrawable(getResources().getDrawable(R.drawable.blue_button));
+				creditBtn.setEnabled(true);
+				creditBtn.setBackgroundDrawable(getResources().getDrawable(R.drawable.blue_button));
 			
+		}
+		
+		
+	});
+    
+    creditBtn.setOnClickListener(new OnClickListener() {
+		
+		@Override
+		public void onClick(View v) {
+			
+			
+				v.setBackgroundColor(Color.GRAY);
+				valueTxt.setEnabled(false);
+				valueTxt.setText(String.valueOf(price));
+				method = "credit";
+				v.setEnabled(false);
+				cashBtn.setEnabled(true);
+				cashBtn.setBackgroundDrawable(getResources().getDrawable(R.drawable.blue_button));
+				debitBtn.setEnabled(true);
+				debitBtn.setBackgroundDrawable(getResources().getDrawable(R.drawable.blue_button));
 			
 		}
 		
