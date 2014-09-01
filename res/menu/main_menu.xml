@@ -6,6 +6,11 @@
           android:showAsAction="always"
           android:visible="false"
            />
+    <item android:id="@+id/logout"
+          android:icon="@drawable/add"
+          android:title="Cerrar Sesión"
+          android:showAsAction="always"
+           />
     <item android:id="@+id/menu_add"
           android:icon="@drawable/add"
           android:title="Agregar"

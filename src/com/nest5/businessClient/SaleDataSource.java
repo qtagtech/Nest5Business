@@ -42,7 +42,7 @@ public class SaleDataSource {
 	    dbHelper.close();
 	  }
 
-	  public Sale createSale(long date,String method,double received,long syncId,int delivery, int togo,int tip, double discount, int number) { //se llama desde initialActivity a guardar
+      public Sale createSale(long date,String method,double received,long syncId,int delivery, int togo,int tip, double discount, int number, int sellerId) { //se llama desde initialActivity a guardar
 	    ContentValues values = new ContentValues();
 	    values.put(Setup.COLUMN_SALE_DATE, date);
 	    values.put(Setup.COLUMN_SALE_METHOD, method);
@@ -53,6 +53,7 @@ public class SaleDataSource {
 	    values.put(Setup.COLUMN_SALE_TIP, tip);
 	    values.put(Setup.COLUMN_SALE_DISCOUNT, discount);
 	    values.put(Setup.COLUMN_SALE_NUMBER, number);
+        values.put(Setup.COLUMN_SALE_SELLER, sellerId);
 	    
 	    
 	    long insertId = database.insert(Setup.TABLE_SALE, null,

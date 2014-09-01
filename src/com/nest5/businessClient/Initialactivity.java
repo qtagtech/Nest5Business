@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -52,6 +53,7 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.bixolon.printer.BixolonPrinter;
 import com.bugsense.trace.BugSenseHandler;
 import com.flurry.android.FlurryAgent;
 
@@ -81,6 +83,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Typeface;
+import android.hardware.usb.UsbDevice;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
@@ -104,6 +107,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v4.view.ViewPager;
+import android.text.Layout.Alignment;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -450,7 +454,22 @@ public class Initialactivity extends SherlockFragmentActivity implements
      * ****/
     
     private TCPPrint mTCPPrint;
-
+    
+    /**
+     * Tiene impresora STAR MICRONICS
+     */
+    private boolean hasStarMicronicsPrinter = false;
+    
+    /**
+     * Tiene impresora BIXOLON
+     */
+    static boolean hasBixolonPrinter = false;
+    
+    /*
+     * BIXOLONPRINTER
+     * */
+    static List<BixolonPrinter> BixolonPrinterList;
+    
 	/**
 	 * @param isWifiP2pEnabled
 	 *            the isWifiP2pEnabled to set
@@ -534,8 +553,8 @@ public class Initialactivity extends SherlockFragmentActivity implements
         BugSenseHandler.initAndStartSession(Initialactivity.this, "1a5a6af1");
 		setContentView(R.layout.swipe_view);
 		checkLogin();
-        
-        
+		
+		
 		// add necessary intent values to be matched.
 		
 		intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
@@ -574,8 +593,7 @@ public class Initialactivity extends SherlockFragmentActivity implements
 		combos = comboDatasource.getAllCombos();
 		syncRowDataSource = new SyncRowDataSource(dbHelper);
 		syncRowDataSource.open(db);
-		
-		
+			
 		Calendar today = Calendar.getInstance();
 		Calendar tomorrow = Calendar.getInstance();
 		today.set(Calendar.HOUR, 0);
@@ -759,7 +777,6 @@ public class Initialactivity extends SherlockFragmentActivity implements
 
 			}
 		});*/
-
 	}
 	
 	@Override
@@ -808,6 +825,7 @@ public class Initialactivity extends SherlockFragmentActivity implements
 		isPausing = false;
 		mHandler.postDelayed(contador,60*1000);
 		backUpOrdersHandler.postDelayed(constantBackUp, 1000 * 30);
+		connectStarMicronics();
 		updateRegistrables(); //update all elements than can be sold (ingredients, products, combos)
 		SharedPreferences prefs = Util.getSharedPreferences(mContext);
 		boolean blue = prefs.getBoolean(Setup.BLUETOOTH_PERMISSION, true);
@@ -895,12 +913,13 @@ public class Initialactivity extends SherlockFragmentActivity implements
 		}
 		//clean dailytable for sales older than today, leave only sales from today
 		connectStarMicronics();
+		
 		if(prefs.getBoolean(Setup.FIRST_INSTALL, true)){
 			prefs.edit().putBoolean(Setup.FIRST_INSTALL, false).commit();
 			fetchSales();
 		}
 		
-		
+		updateDailySales(dailySaleDao);
 		
 	}
 
@@ -930,6 +949,9 @@ public class Initialactivity extends SherlockFragmentActivity implements
 		// Stop the Bluetooth chat service
 		try{
 			if (mChatService != null) mChatService.stop();
+			for (BixolonPrinter printer: BixolonPrinterList){
+				printer.disconnect();
+			}
 	        //if (mSerialService != null) mSerialService.stop();
 		}catch(Exception e){
 			e.printStackTrace();
@@ -1010,6 +1032,9 @@ public class Initialactivity extends SherlockFragmentActivity implements
 		case R.id.menu_add:
 			//showAddItemDialog();
 			return false;
+        case R.id.logout:
+            logout();
+            return true;
 		case R.id.menu_sync:
 			/*
 			 * Toast.makeText(mContext, " " + salesFromToday.size(),
@@ -1701,6 +1726,7 @@ public class Initialactivity extends SherlockFragmentActivity implements
 		// Tomar la tabla de la izquierda del home view
 		table = (TableLayout) v.findViewById(R.id.my_table);
 		makeTable("NA");
+		updateDailySales(dailySaleDao);
 		
 		deviceText.setOnClickListener(new OnClickListener() {
 			
@@ -1714,8 +1740,6 @@ public class Initialactivity extends SherlockFragmentActivity implements
 				
 			}
 		});
-		
-
 	}
 	
 	
@@ -2499,6 +2523,7 @@ public class Initialactivity extends SherlockFragmentActivity implements
 			String mensaje  = prefs.getString(Setup.COMPANY_MESSAGE, "No hay ningún mensaje configurado aún. En el mensaje es recomendable mencionar tus redes sociales, benficios y promociones que tengas, además de información de interés paratus clientes. ");
 			String propina  = prefs.getString(Setup.TIP_MESSAGE, "No hay ningún mensaje de propina configurado aÃºn. ");
 			String resolution  = prefs.getString(Setup.RESOLUTION_MESSAGE, "Resolución de facturación No. 00000-0000 de 1970 DIAN");
+			String seller = prefs.getString(Setup.SELLER_NAME, "Nombre del Vendedor");
 			int currentSale = prefs.getInt(Setup.CURRENT_SALE, 0);
 			factura.append(empresa + "\r\n");
 			factura.append(nit + "\r\n");
@@ -2506,6 +2531,7 @@ public class Initialactivity extends SherlockFragmentActivity implements
 			factura.append(telefono + "\r\n");
 			factura.append(email + "\r\n");
 			factura.append(pagina + "\r\n");
+			factura.append("Vendedor: " + seller + "\r\n");
 			factura.append(resolution + "\r\n");
 			factura.append("Factura de Venta No. "+String.valueOf(currentSale)+"\r\n");
 			lines++;
@@ -2517,7 +2543,7 @@ public class Initialactivity extends SherlockFragmentActivity implements
 			lines++;
 			lines++;
 			factura.append("\r\n");
-			factura.append("    Item       Cantidad   Precio\r\n");
+			factura.append("    Item         Cantidad       Precio   \r\n");
 			lines++;
 			Iterator<Entry<Registrable, Integer>> it = currentOrder.entrySet()
 					.iterator();
@@ -2530,6 +2556,7 @@ public class Initialactivity extends SherlockFragmentActivity implements
 			ArrayList<String> productos = new ArrayList<String>();
 			ArrayList<String> quantities = new ArrayList<String>();
 			ArrayList<String> precios = new ArrayList<String>();
+			DecimalFormat df = new DecimalFormat("#");
 			while (it.hasNext()) {
 
 				LinkedHashMap.Entry<Registrable, Integer> pairs = (LinkedHashMap.Entry<Registrable, Integer>) it
@@ -2545,6 +2572,12 @@ public class Initialactivity extends SherlockFragmentActivity implements
 					name = name.substring(0, 14);
 				int espacios1 = 4;
 				int espacios2 = 12;
+				
+				if (hasBixolonPrinter){
+					espacios1 = 7;
+					espacios2 = 18;
+				}
+				
 				if (name.length() < 14)
 				{
 					espacios1 += 14 - name.length();
@@ -2571,7 +2604,7 @@ public class Initialactivity extends SherlockFragmentActivity implements
 				}
 				quantities.add(String.valueOf(pairs.getValue()));
 				factura.append("$");
-				factura.append(precioiva);
+				factura.append(df.format(precioiva));
 				factura.append("\r\n");
 				precios.add("$"+precioiva);
 				lines++;
@@ -2584,19 +2617,29 @@ public class Initialactivity extends SherlockFragmentActivity implements
 			if(discount > 0){
 				descuento = (float) round( base - ( base * ( discount / 0 ) ) ,0);
 			}
+			
+			String sep = "<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>";
+			if (hasBixolonPrinter) sep = "<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>";
+			
 			lines++;
 			lines++;
+			String dis = "("+df.format(discount)+"): ";
+			if (discount < 100) dis += " ";
+			if (discount < 10) dis += " ";
+			
 			factura.append("\r\n");
-			factura.append("<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>\r\n");
-			factura.append("BASE:      $"+base+"\r\n");
-			factura.append("Descuento ("+discount+"):      $"+descuento+"\r\n");
-			factura.append("Imp.:      $"+iva+"\r\n");
-			factura.append("SUBTOTAL:     $"+round(total - descuento,0)+"\r\n");
-			factura.append("PROPINA:     $"+propvalue+"\r\n");
+			factura.append(sep + "\r\n");
+			factura.append("BASE:            $"+df.format(base)+"\r\n");
+			factura.append("Descuento " + dis + "$"+df.format(descuento)+"\r\n");
+			factura.append("Imp.:            $"+df.format(iva)+"\r\n");
+			factura.append("SUBTOTAL:        $"+df.format(round(total - descuento,0))+"\r\n");
+			factura.append("EFECTIVO:        $"+df.format(value)+"\r\n");
+			factura.append("PROPINA:         $"+df.format(propvalue)+"\r\n");
 			float precfinal = propvalue + total - descuento;
-			factura.append("TOTAL:     $"+precfinal+"\r\n");
+			factura.append("TOTAL:           $"+df.format(precfinal)+"\r\n");
+			factura.append("DEVUELTA:        $"+df.format(value - precfinal)+"\r\n");
 			factura.append("\r\n");
-			factura.append("<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>\r\n");
+			factura.append(sep + "\r\n");
 			factura.append("\r\n");
 			lines++;
 			factura.append(propina + "\r\n");
@@ -2665,6 +2708,8 @@ public class Initialactivity extends SherlockFragmentActivity implements
 								formateado.append(email);
 								formateado.append(PRINT_FEED_ONE_LINE);
 								formateado.append(pagina);
+								formateado.append(PRINT_FEED_ONE_LINE);
+								formateado.append("Vendedor: " + seller);
 								formateado.append(PRINT_FEED_ONE_LINE);
 								formateado.append("Factura de Venta No."+String.valueOf(currentSale));
 								formateado.append(PRINT_FEED_ONE_LINE);
@@ -2754,7 +2799,12 @@ public class Initialactivity extends SherlockFragmentActivity implements
 								formateado.append(ITALIC_CANCEL);
 								formateado.append(FINALIZE_TICKET);
 								formateado.append(FULL_CUT);
-					        	 if (mTCPPrint != null) {
+								
+								if (hasBixolonPrinter){
+									PrintOnBixolon(factura.toString());
+								}else if (hasStarMicronicsPrinter){
+									printOnStarMicronics(factura.toString());
+								}else if (mTCPPrint != null) {
 					        		 if(mTCPPrint.getStatus() == TCPPrint.CONNECTED){
 					        			 mTCPPrint.sendMessage(formateado.toString());
 					        			 mTCPPrint.sendMessage(formateado.toString());
@@ -2764,15 +2814,15 @@ public class Initialactivity extends SherlockFragmentActivity implements
 					        			 new connectTask().execute(formateado.toString());
 					        			 alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Estamos tratando de reconectarnos e imprimir. Si no funciona, reinicia la Red o la impresora y ve a órdenes para imprimir el pedido.");
 					        		 }   
-					                }else{
-					                	alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Trataremos en este momento de nuevo de imprimir el pedido. Si no funciona, reinicia la red o la impreso y ve a órdenes para imprimir de nuevo la orden.");
-					                	new connectTask().execute(formateado.toString());
-					                }
+				                }else{
+				                	alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Trataremos en este momento de nuevo de imprimir el pedido. Si no funciona, reinicia la red o la impreso y ve a órdenes para imprimir de nuevo la orden.");
+				                	new connectTask().execute(formateado.toString());
+				                }
 					        }
 			        //currentOrder.clear(); //NUEVOO
 			        
 			        makeTable("NA");
-			        
+			        updateDailySales(dailySaleDao);
 			
 		}
 		else{
@@ -3026,7 +3076,12 @@ public class Initialactivity extends SherlockFragmentActivity implements
 								formateado.append(ITALIC_CANCEL);
 								formateado.append(FINALIZE_TICKET);
 								formateado.append(FULL_CUT);
-					        	 if (mTCPPrint != null) {
+								
+								if (hasBixolonPrinter){
+									PrintOnBixolon(factura.toString());
+								}else if (hasStarMicronicsPrinter){
+									printOnStarMicronics(factura.toString());
+								}else if (mTCPPrint != null) {
 					        		 if(mTCPPrint.getStatus() == TCPPrint.CONNECTED){
 					        			 mTCPPrint.sendMessage(formateado.toString());
 					        			 mTCPPrint.sendMessage(formateado.toString());
@@ -4356,8 +4411,8 @@ public static class MHandler extends Handler {
 	
 	@UiThread
 	void receivedZReport(double ventas,	double descuentos,	double impuestos,
-	double propinas, double domicilios, double llevar, double tarjeta, double efectivo,
-	int contEfectivo , int contTarjeta, int contDomicilio, int contLlevar) {
+	double propinas, double domicilios, double llevar, double tarjetaDebito, double tarjetaCredito, double efectivo,
+	int contEfectivo , int contTarjetaDebito, int contTarjetaCredito, int contDomicilio, int contLlevar) {
 						prefs = Util.getSharedPreferences(mContext);
 						String fecha = DateFormat.getDateFormat(Initialactivity.this).format(
 								new Date());
@@ -4374,6 +4429,17 @@ public static class MHandler extends Handler {
 				        }catch (Exception e){
 				            e.printStackTrace();
 				        }
+						int totalEspacios = 32;
+						String underLineBreak = "________________________________\r\n";
+						
+						if (hasStarMicronicsPrinter){ 
+							totalEspacios = 80;
+							underLineBreak = "_____________________________________________\r\n";
+						}else if (hasBixolonPrinter){
+							totalEspacios = 42;
+							underLineBreak = "_________________________________________\r\n";
+						}
+						
 						StringBuilder factura = new StringBuilder();
 						//factura.append("MR. PASTOR COMIDA\r\nRaPIDA MEXICANA" + "\r\n");
 						SharedPreferences prefs = Util.getSharedPreferences(mContext);
@@ -4383,12 +4449,14 @@ public static class MHandler extends Handler {
 						String pagina  = prefs.getString(Setup.COMPANY_URL, "http://www.empresa.com");
 						String direccion  = prefs.getString(Setup.COMPANY_ADDRESS, "Dirección Física Empresa");
 						String telefono  = prefs.getString(Setup.COMPANY_TEL, "555-55-55");
+						String seller = prefs.getString(Setup.SELLER_NAME, "Nombre del Vendedor");
 						factura.append(empresa + "\r\n");
 						factura.append(nit + "\r\n");
 						factura.append(direccion + "\r\n");
 						factura.append(telefono + "\r\n");
 						factura.append(email + "\r\n");
 						factura.append(pagina + "\r\n");
+						factura.append("Vendedor: " + seller + "\r\n");
 						factura.append("\r\n");
 						factura.append("\r\n");
 						String labelVentasBrutas = "Valor Ventas Brutas";
@@ -4405,55 +4473,62 @@ public static class MHandler extends Handler {
 						String labelEfectivo = "Efectivo";
 						String labelInit = "Base";
 						String labelExpenses="Gastos del día";
-						String labelTarjeta = "Tarjeta";
+						String labelTarjetaDebito = "Tarjeta D�bito";
+						String labelTarjetaCredito = "Tarjeta Cr�dito";
 						String labelIngresoReal = "Ingreso Real";
 						String labelContado = "Ventas de Contado";
 						String labelTransacciones = "Total de Transacciones";
-						int totalEspacios = 32;
+						
+						DecimalFormat decimalF = new DecimalFormat("#");
+						
 						factura.append(padRight(labelVentasBrutas, (totalEspacios - labelVentasBrutas.length())));
 						factura.append("\r\n");
-						factura.append(padLeft("$"+String.valueOf(ventas), (totalEspacios - ("$"+String.valueOf(ventas)).length())));
+						factura.append(padLeft("$"+decimalF.format(ventas), (totalEspacios - ("$"+decimalF.format(ventas)).length())));
 						factura.append("\r\n");
 						factura.append(padRight(labelDescuentos, (totalEspacios - labelDescuentos.length())));
 						factura.append("\r\n");
-						factura.append(padLeft("$"+String.valueOf(descuentos), (totalEspacios - ("$"+String.valueOf(descuentos)).length())));
+						factura.append(padLeft("$"+decimalF.format(descuentos), (totalEspacios - ("$"+decimalF.format(descuentos)).length())));
 						factura.append("\r\n");
 						factura.append(padRight(labelImpuestos, (totalEspacios - labelImpuestos.length())));
 						factura.append("\r\n");
-						factura.append(padLeft("$"+String.valueOf(impuestos), (totalEspacios - ("$"+String.valueOf(impuestos)).length())));
+						factura.append(padLeft("$"+decimalF.format(impuestos), (totalEspacios - ("$"+decimalF.format(impuestos)).length())));
 						factura.append("\r\n");
-						factura.append("________________________________\r\n");
-						factura.append(padLeft(labelSubtotal+" $"+String.valueOf(ventas - descuentos + impuestos), (totalEspacios - (labelSubtotal+" $"+String.valueOf(ventas - descuentos + impuestos)).length())));
+						factura.append(underLineBreak);
+						factura.append(padLeft(labelSubtotal+" $"+decimalF.format(ventas - descuentos + impuestos), (totalEspacios - (labelSubtotal+" $"+decimalF.format(ventas - descuentos + impuestos)).length())));
 						factura.append("\r\n");
 						factura.append(padRight(labelPropinas, (totalEspacios - labelPropinas.length())));
 						factura.append("\r\n");
-						factura.append(padLeft("$"+String.valueOf(propinas), (totalEspacios - ("$"+String.valueOf(propinas)).length())));
+						factura.append(padLeft("$"+decimalF.format(propinas), (totalEspacios - ("$"+decimalF.format(propinas)).length())));
 						factura.append("\r\n");
-						factura.append("________________________________\r\n");
-						factura.append(padLeft(labelIngresosCaja+" $"+String.valueOf(ventas - descuentos + impuestos + propinas), (totalEspacios - (labelIngresosCaja+" $"+String.valueOf(ventas - descuentos + impuestos + propinas)).length())));
+						factura.append(underLineBreak);
+						factura.append(padLeft(labelIngresosCaja+" $"+decimalF.format(ventas - descuentos + impuestos + propinas), (totalEspacios - (labelIngresosCaja+" $"+decimalF.format(ventas - descuentos + impuestos + propinas)).length())));
 						factura.append("\r\n");
 						factura.append("\r\n");
 						factura.append(padRight(labelDomicilio, (totalEspacios - labelDomicilio.length())));
 						factura.append("\r\n");
-						factura.append(padLeft("$"+String.valueOf(domicilios), (totalEspacios - ("$"+String.valueOf(domicilios)).length())));
+						factura.append(padLeft("$"+decimalF.format(domicilios), (totalEspacios - ("$"+decimalF.format(domicilios)).length())));
 						factura.append("\r\n");
 						factura.append(padRight(labelLlevar, (totalEspacios - labelLlevar.length())));
 						factura.append("\r\n");
-						factura.append(padLeft("$"+String.valueOf(llevar), (totalEspacios - ("$"+String.valueOf(llevar)).length())));
+						factura.append(padLeft("$"+decimalF.format(llevar), (totalEspacios - ("$"+decimalF.format(llevar)).length())));
 						factura.append("\r\n");
 						factura.append(padRight(labelEfectivo, (totalEspacios - labelEfectivo.length())));
 						factura.append("\r\n");
-						factura.append(padLeft("$"+String.valueOf(efectivo), (totalEspacios - ("$"+String.valueOf(efectivo)).length())));
+						factura.append(padLeft("$"+decimalF.format(efectivo), (totalEspacios - ("$"+decimalF.format(efectivo)).length())));
 						factura.append("\r\n");
-						factura.append(padRight(labelTarjeta, (totalEspacios - labelTarjeta.length())));
+						factura.append(padRight(labelTarjetaDebito, (totalEspacios - labelTarjetaDebito.length())));
 						factura.append("\r\n");
-						factura.append(padLeft("$"+String.valueOf(tarjeta), (totalEspacios - ("$"+String.valueOf(tarjeta)).length())));
+						factura.append(padLeft("$"+decimalF.format(tarjetaDebito), (totalEspacios - ("$"+decimalF.format(tarjetaDebito)).length())));
+						factura.append("\r\n");
+						factura.append(padRight(labelTarjetaCredito, (totalEspacios - labelTarjetaCredito.length())));
+						factura.append("\r\n");
+						factura.append(padLeft("$"+decimalF.format(tarjetaDebito), (totalEspacios - ("$"+decimalF.format(tarjetaDebito)).length())));
 						factura.append("\r\n");
 						factura.append("\r\n");
-						factura.append("________________________________\r\n");
-						factura.append(padLeft(labelIngresoReal+" $"+String.valueOf(ventas - descuentos + impuestos + propinas), (totalEspacios - (labelIngresosCaja+" $"+String.valueOf(ventas - descuentos + impuestos + propinas)).length())));
+						factura.append(underLineBreak);
+						factura.append(padLeft(labelIngresoReal+" $"+decimalF.format(ventas - descuentos + impuestos + propinas), (totalEspacios - (labelIngresosCaja+" $"+decimalF.format(ventas - descuentos + impuestos + propinas)).length())));
 						factura.append("\r\n");
-						factura.append(padLeft(labelContado+" $"+String.valueOf(ventas - descuentos + impuestos), (totalEspacios - (labelContado+" $"+String.valueOf(ventas - descuentos + impuestos)).length())));
+						factura.append(padLeft(labelContado+" $"+decimalF.format(ventas - descuentos + impuestos), (totalEspacios - (labelContado+" $"+decimalF.format(ventas - descuentos + impuestos)).length())));
 						factura.append("\r\n");
 						factura.append(padRight(labelDomicilio, (totalEspacios - labelDomicilio.length())));
 						factura.append("\r\n");
@@ -4467,12 +4542,18 @@ public static class MHandler extends Handler {
 						factura.append("\r\n");
 						factura.append(padLeft(String.valueOf(contEfectivo), (totalEspacios - (String.valueOf(contEfectivo)).length())));
 						factura.append("\r\n");
-						factura.append(padRight(labelTarjeta, (totalEspacios - labelTarjeta.length())));
+						factura.append(padRight(labelTarjetaDebito, (totalEspacios - labelTarjetaDebito.length())));
 						factura.append("\r\n");
-						factura.append(padLeft(String.valueOf(contTarjeta), (totalEspacios - (String.valueOf(contTarjeta)).length())));
+						factura.append(padLeft(String.valueOf(contTarjetaDebito), (totalEspacios - (String.valueOf(contTarjetaDebito)).length())));
 						factura.append("\r\n");
-						factura.append("________________________________\r\n");
-						factura.append(padLeft(labelTransacciones+" "+String.valueOf(contEfectivo + contTarjeta), (totalEspacios - (labelTransacciones+" "+String.valueOf(contEfectivo + contTarjeta)).length())));
+						factura.append(padRight(labelTarjetaCredito, (totalEspacios - labelTarjetaCredito.length())));
+						factura.append("\r\n");
+						factura.append(padLeft(String.valueOf(contTarjetaCredito), (totalEspacios - (String.valueOf(contTarjetaCredito)).length())));
+						factura.append("\r\n");
+						factura.append(underLineBreak);
+						factura.append(padLeft(labelTransacciones+" "+String.valueOf(contEfectivo + contTarjetaDebito + contTarjetaCredito), (totalEspacios - (labelTransacciones+" "+String.valueOf(contEfectivo + contTarjetaDebito + contTarjetaCredito)).length())));
+						factura.append("\r\n");
+						factura.append("\r\n");
 						Boolean printed = true;
 				        try{
 				        	if(mChatService.getState() == BluetoothChatService.STATE_CONNECTED)
@@ -4510,6 +4591,8 @@ public static class MHandler extends Handler {
 							formateado.append(email);
 							formateado.append(PRINT_FEED_ONE_LINE);
 							formateado.append(pagina);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(seller);
 							formateado.append(PRINT_FEED_N_LINES);
 							formateado.append((char) 0x03);
 							formateado.append(DOUBLE_WIDE_CHARACTERS);
@@ -4586,10 +4669,16 @@ public static class MHandler extends Handler {
 							formateado.append("$"+String.valueOf(efectivo));
 							formateado.append(PRINT_FEED_ONE_LINE);
 							formateado.append(JUSTIFICATION_LEFT);
-							formateado.append(labelTarjeta);
+							formateado.append(labelTarjetaDebito);
 							formateado.append(PRINT_FEED_ONE_LINE);
 							formateado.append(JUSTIFICATION_RIGHT);
-							formateado.append("$"+String.valueOf(tarjeta));
+							formateado.append("$"+String.valueOf(tarjetaDebito));
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_LEFT);
+							formateado.append(labelTarjetaCredito);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_RIGHT);
+							formateado.append("$"+String.valueOf(tarjetaCredito));
 							formateado.append(PRINT_FEED_ONE_LINE);
 							formateado.append(PRINT_FEED_ONE_LINE);
 							formateado.append(JUSTIFICATION_LEFT);
@@ -4642,10 +4731,16 @@ public static class MHandler extends Handler {
 							formateado.append(String.valueOf(contEfectivo));
 							formateado.append(PRINT_FEED_ONE_LINE);
 							formateado.append(JUSTIFICATION_LEFT);
-							formateado.append(labelTarjeta);
+							formateado.append(labelTarjetaDebito);
 							formateado.append(PRINT_FEED_ONE_LINE);
 							formateado.append(JUSTIFICATION_RIGHT);
-							formateado.append(String.valueOf(contTarjeta));
+							formateado.append(String.valueOf(contTarjetaDebito));
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_LEFT);
+							formateado.append(labelTarjetaCredito);
+							formateado.append(PRINT_FEED_ONE_LINE);
+							formateado.append(JUSTIFICATION_RIGHT);
+							formateado.append(String.valueOf(contTarjetaCredito));
 							formateado.append(PRINT_FEED_ONE_LINE);
 							formateado.append(JUSTIFICATION_LEFT);
 							formateado.append(DOUBLE_WIDE_CHARACTERS);
@@ -4653,10 +4748,15 @@ public static class MHandler extends Handler {
 							formateado.append(SINGLE_WIDE_CHARACTERS);
 							formateado.append(PRINT_FEED_ONE_LINE);
 							formateado.append(JUSTIFICATION_RIGHT);
-							formateado.append(labelTransacciones+" "+String.valueOf(contEfectivo + contTarjeta));
+							formateado.append(labelTransacciones+" "+String.valueOf(contEfectivo + contTarjetaDebito + contTarjetaCredito));
 							formateado.append(FINALIZE_TICKET);
 							formateado.append(FULL_CUT);
-				        	 if (mTCPPrint != null) {
+							
+							if (hasBixolonPrinter){
+								PrintOnBixolon(factura.toString());
+							}else if (hasStarMicronicsPrinter){
+								printOnStarMicronics(factura.toString());
+							}else if (mTCPPrint != null) {
 				        		 if(mTCPPrint.getStatus() == TCPPrint.CONNECTED){
 				        			 mTCPPrint.sendMessage(formateado.toString());
 				        			 mTCPPrint.sendMessage(formateado.toString());
@@ -4670,7 +4770,7 @@ public static class MHandler extends Handler {
 				                	alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Trataremos en este momento de nuevo de imprimir el pedido. Si no funciona, reinicia la red o la impreso y ve a órdenes para imprimir de nuevo la orden.");
 				                	new connectTask().execute(formateado.toString());
 				                }
-				        }
+				        	}
 
 		}
 
@@ -5214,7 +5314,12 @@ public static class MHandler extends Handler {
 							formateado.append(ITALIC_CANCEL);
 							formateado.append(FINALIZE_TICKET);
 							formateado.append(PARTIAL_CUT);
-				        	 if (mTCPPrint != null) {
+							
+							if (hasBixolonPrinter){
+								PrintOnBixolon(factura.toString());
+							}else if (hasStarMicronicsPrinter){
+								printOnStarMicronics(factura.toString());
+							}else if (mTCPPrint != null) {
 				        		 if(mTCPPrint.getStatus() == TCPPrint.CONNECTED){
 				        			 mTCPPrint.sendMessage(formateado.toString());
 				        			 mTCPPrint.sendMessage(formateado.toString());
@@ -5224,11 +5329,13 @@ public static class MHandler extends Handler {
 				        			 new connectTask().execute(formateado.toString());
 				        			 alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Estamos tratando de reconectarnos e imprimir. Si no funciona, reinicia la Red o la impresora y ve a órdenes para imprimir el pedido.");
 				        		 }   
-				                }else{
-				                	alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Trataremos en este momento de nuevo de imprimir el pedido. Si no funciona, reinicia la red o la impreso y ve a órdenes para imprimir de nuevo la orden.");
-				                	new connectTask().execute(formateado.toString());
-				                }
-				        }
+			                }else{
+			                	alertbox("¡Oops!", "Al Parecer no hay impresora disponible. Trataremos en este momento de nuevo de imprimir el pedido. Si no funciona, reinicia la red o la impreso y ve a órdenes para imprimir de nuevo la orden.");
+			                	new connectTask().execute(formateado.toString());
+			                }
+							
+							updateDailySales(dailySaleDao);
+			        }
 				        
 				        
 				        
@@ -5244,6 +5351,8 @@ public static class MHandler extends Handler {
 		//Sale createdSale = null;
 		DailySale dailySale = null;
 		long saveDate = System.currentTimeMillis();
+        prefs = Util.getSharedPreferences(mContext);
+        int sellerId = prefs.getInt(Setup.SELLER_ID, -1);
 		LinkedHashMap<Registrable,Integer> currentSale = currentOrder;
 		if(number > 0){
 			//save dailySale
@@ -5455,7 +5564,7 @@ public static class MHandler extends Handler {
 				e.printStackTrace();
 			}
 			notifySuccess();
-			 createSyncRow("\""+Setup.TABLE_SALE+"\"",dailySale.getId(),0, "{\"_id\": "+dailySale.getId()+",\""+Setup.COLUMN_SALE_DATE+"\": "+dailySale.getDate().getTime()+",\""+Setup.COLUMN_SALE_ISDELIVERY+"\": "+dailySale.getIsDelivery()+",\""+Setup.COLUMN_SALE_METHOD+"\": \""+dailySale.getMethod()+"\",\""+Setup.COLUMN_SALE_ISTOGO+"\": "+dailySale.getIsTogo()+",\""+Setup.COLUMN_SALE_TIP+"\": "+dailySale.getTip()+",\""+Setup.COLUMN_SALE_DISCOUNT+"\": "+dailySale.getDiscount()+",\""+Setup.COLUMN_SALE_NUMBER+"\": "+dailySale.getNumber()+",\""+Setup.COLUMN_SALE_RECEIVED+"\":"+dailySale.getReceived()+",\"ingredients\": "+cadenaIngredientes.toString()+",\"products\": "+cadenaProductos.toString()+",\"combos\": "+cadenaCombos.toString()+"}");
+			createSyncRow("\""+Setup.TABLE_SALE+"\"",dailySale.getId(),0, "{\"_id\": "+dailySale.getId()+",\"" + Setup.SELLER_ID + "\": " + sellerId + ",\""+Setup.COLUMN_SALE_DATE+"\": "+dailySale.getDate().getTime()+",\""+Setup.COLUMN_SALE_ISDELIVERY+"\": "+dailySale.getIsDelivery()+",\""+Setup.COLUMN_SALE_METHOD+"\": \""+dailySale.getMethod()+"\",\""+Setup.COLUMN_SALE_ISTOGO+"\": "+dailySale.getIsTogo()+",\""+Setup.COLUMN_SALE_TIP+"\": "+dailySale.getTip()+",\""+Setup.COLUMN_SALE_DISCOUNT+"\": "+dailySale.getDiscount()+",\""+Setup.COLUMN_SALE_NUMBER+"\": "+dailySale.getNumber()+",\""+Setup.COLUMN_SALE_RECEIVED+"\":"+dailySale.getReceived()+",\"ingredients\": "+cadenaIngredientes.toString()+",\"products\": "+cadenaProductos.toString()+",\"combos\": "+cadenaCombos.toString()+"}");
 		} else {
 			subSale();//fall� guardando venta por lo tanto resetea el valor de facturación actual al anterior.
 			informUser(OTHER_ALERT_ERROR);
@@ -5492,6 +5601,7 @@ public static class MHandler extends Handler {
 	public static String padLeft(String s, int n) {
 	    return String.format("%1$" + n + "s", s);  
 	}
+	
 	private void updateRegistrables(){
 		try{
 			productList = new ArrayList<Registrable>();
@@ -5945,18 +6055,20 @@ public static class MHandler extends Handler {
 	@Background
     void getAllDailySales(DailySaleDao dsd) {
 		//calculate ventas, desceuntos, impuestos, propinas, domicilios, llevar, tarjetas, efectivo, cotEfectivo, contTarjeta, contDomicilio, contLlevar y llamar receivedZReport(...)
-		
+
 		double totalVentas = 0;
         double totalDescuentos = 0;
         double totalImpuestos = 0;
         double totalPropinas = 0;
         double sumDomicilios = 0;
         double sumLlevar = 0;
-        double sumTarjeta = 0;
+        double sumTarjetaD = 0;
+        double sumTarjetaC = 0;
         double sumEfectivo = 0;
         int contDomicilio = 0;
         int contEfectivo = 0;
-        int contTarjeta = 0;
+        int contTarjetaD = 0;
+        int contTarjetaC = 0;
         int contLlevar = 0;
 
 		//viene, toma todas las ventas del dia, y toma todos los objetos saleing, salepro y sale combo de esto, calcula imp, descu, y demas
@@ -6021,9 +6133,12 @@ public static class MHandler extends Handler {
                     sumDomicilios += elementTotal;
                     contDomicilio ++;
                 }
-                if(sale.getMethod() == "card"){
-                    sumTarjeta += elementTotal;
-                    contTarjeta ++;
+                if(sale.getMethod().equals("debit")){
+                    sumTarjetaD += elementTotal;
+                    contTarjetaD ++;
+                }else if(sale.getMethod().equals("credit")){
+                    sumTarjetaC += elementTotal;
+                    contTarjetaC ++;
                 }else{
                     sumEfectivo += elementTotal;
                     contEfectivo ++;
@@ -6041,8 +6156,10 @@ public static class MHandler extends Handler {
 		Log.i("CALCULANDOSALES","contDomicilio: "+contDomicilio);
 		Log.i("CALCULANDOSALES","contEfectivo: "+contEfectivo);
 		Log.i("CALCULANDOSALES","contTarjeta: "+contTarjeta);
-		Log.i("CALCULANDOSALES","contLlevar: "+contLlevar);*/
-		receivedZReport(totalVentas,totalDescuentos,totalImpuestos,totalPropinas,sumDomicilios,sumLlevar,sumTarjeta,sumEfectivo,contEfectivo,contTarjeta,contDomicilio,contLlevar);
+		Log.i("CALCULANDOSALES","contLlevar: "+contLlevar);
+		Log.i("CALCULANDOSALES","vendedor: "+seller);*/
+
+		receivedZReport(totalVentas,totalDescuentos,totalImpuestos,totalPropinas,sumDomicilios,sumLlevar,sumTarjetaD,sumTarjetaC,sumEfectivo,contEfectivo,contTarjetaD,contTarjetaC,contDomicilio,contLlevar);
 		
 	
 
@@ -6107,7 +6224,9 @@ public static class MHandler extends Handler {
 					{
 						portName += "\n - " + discovery.getModelName();
 						Log.i("STARMICRONICS","IMPRESORA EN: "+portName);
-						PrinterFunctions.PrintSampleReceipt(mContext, discovery.getPortName(), "", "Raster", getResources(), "4inch (112mm)");
+						hasStarMicronicsPrinter = true;
+						deviceText.setText("STAR Micronics");
+						//PrinterFunctions.PrintSampleReceipt(mContext, discovery.getPortName(), "", "Raster", getResources(), "4inch (112mm)");
 					}
 				}
 
@@ -6118,6 +6237,11 @@ public static class MHandler extends Handler {
 			Log.i("STARMICRONICS","error: "+e.getMessage());
 		}
     	
+	}
+	
+	@Background(delay=700)
+	void connectBixolonPrinter(){
+		
 	}
 	
 	@Background()
@@ -6251,12 +6375,136 @@ public static class MHandler extends Handler {
 	    return (double) tmp / factor;
 	}
 
-	
+    private void logout(){
+        prefs = Util.getSharedPreferences(mContext);
+        prefs.edit().putBoolean(Setup.LOGGED_IN, false)
+            .putString(Setup.COMPANY_ID, "0")
+            .putString(Setup.COMPANY_NAME, "N/A")
+            .putString(Setup.DEVICE_REGISTERED_ID, "0")
+            .putString(Setup.COMPANY_EMAIL, "N/A")
+            .putString(Setup.COMPANY_TEL, "0")
+            .putString(Setup.COMPANY_USERNAME, "N/A")
+            .putString(Setup.SELLER_NAME, "N/A")
+            .putInt(Setup.SELLER_ID, 0)
+            .putString(Setup.SELLER_PHONE, "N/A")
+            .putString(Setup.SELLER_IDENTIFICATION, "N/A")
+            .putString(Setup.SELLER_EMAIL, "N/A")
+            .putBoolean(Setup.SELLER_ACTIVE, false)
+            .putString(Setup.SELLER_DATE, "N/A")
+            .commit();
+        
+        Intent inten = new Intent(mContext, LoginActivity.class);
+        startActivity(inten);
+    }
 
-	
-	
-	
-	
-	
+    @Background(delay=700)
+	void printOnStarMicronics(String text){
+		List<PortInfo> TCPPortList = null;
+		final ArrayList<PortInfo> arrayDiscovery;
+    	ArrayList<String> arrayPortName;
+		arrayDiscovery = new ArrayList<PortInfo>();
+		try {
+			TCPPortList = StarIOPort.searchPrinter("TCP:");
+			for (PortInfo portInfo : TCPPortList) {
+	    		arrayDiscovery.add(portInfo);
+	    	}
+			arrayPortName = new ArrayList<String>();
 
+			for(PortInfo discovery : arrayDiscovery)
+			{
+				String portName;
+
+				portName = discovery.getPortName();
+
+				if(discovery.getMacAddress().equals("") == false)
+				{
+					portName += "\n - " + discovery.getMacAddress();
+					if(discovery.getModelName().equals("") == false)
+					{
+						portName += "\n - " + discovery.getModelName();
+						Log.i("STARMICRONICS","IMPRESORA EN: "+portName);
+						PrinterFunctions.PrintReceipt(mContext, discovery.getPortName(), "", "Raster", getResources(), "4inch (112mm)", text);
+					}
+				}
+
+				arrayPortName.add(portName);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			Log.i("STARMICRONICS","error: "+e.getMessage());
+		}
+    	
+	}
+	
+	
+	
+	@Background(delay=700)
+	void PrintOnBixolon(String text){
+		if (hasBixolonPrinter){
+			String extraT = "  \r\n  \r\n";
+			
+			for (BixolonPrinter printer : BixolonPrinterList){
+				printer.printText(text, 0, 0, 0, false);
+				printer.printText(extraT, 0, 0, 0, false);
+				printer.printText(extraT, 0, 0, 0, false);
+				
+				printer.cutPaper(false);
+			}
+		}
+	}
+	
+    void updateDailySales(DailySaleDao dsd) {
+		if (dsd == null || saleValue == null) return;
+		
+		double totalVentas = 0;
+
+		LocalDateTime today = new LocalDateTime()
+			.withHourOfDay(0)
+			.withMinuteOfHour(0)
+			.withSecondOfMinute(0)
+			.withMillisOfSecond(0);
+		
+		List<DailySale> sales = dsd.queryBuilder()
+				.where(com.nest5.businessClient.DailySaleDao.Properties.Date.ge(today.toDate()))
+				.list();
+		
+		for(DailySale sale : sales){
+			double elementTotal = 0;
+				//ingredientes
+				SaleIngredienteDao sidao = daoSession.getSaleIngredienteDao();
+				List<SaleIngrediente> ingredients = sidao.queryBuilder()
+					.where(com.nest5.businessClient.SaleIngredienteDao.Properties.SaleId.eq(sale.getId()))
+					.list();
+				//productos
+				SaleProductoDao spdao = daoSession.getSaleProductoDao();
+				List<SaleProducto> products = spdao.queryBuilder()
+					.where(com.nest5.businessClient.SaleProductoDao.Properties.SaleId.eq(sale.getId()))
+					.list();
+				//combos
+				SaleCombinacionDao scdao = daoSession.getSaleCombinacionDao();
+				List<SaleCombinacion> combos = scdao.queryBuilder()
+					.where(com.nest5.businessClient.SaleCombinacionDao.Properties.SaleId.eq(sale.getId()))
+					.list();
+				for(SaleIngrediente ing : ingredients){
+					elementTotal += ing.getIngrediente().getPricePerUnit() * (ing.getQuantity());
+					
+				}
+						
+				for(SaleProducto prod : products){
+					elementTotal += prod.getProducto().getPricePerUnit() * (prod.getQuantity());
+					
+				}
+					
+				for(SaleCombinacion comb : combos){
+					elementTotal += comb.getCombinacion().getPricePerUnit() * (comb.getQuantity());
+				}
+				//once done, all combos, products and ngredients times quantties have been added, plus taxes, now get tip percentage and discounts
+                totalVentas += elementTotal;
+			}
+		
+			
+		DecimalFormat formatter = new DecimalFormat("#");
+		Log.i("VENTAS DEL DIA: ", "Ventas del d�a: $" + formatter.format(totalVentas));
+		saleValue.setText("Ventas del d�a: $" + formatter.format(totalVentas));
+    }
 }

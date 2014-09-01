@@ -1200,28 +1200,28 @@ public class PrinterFunctions
 				
 				byte[] outputByteBuffer = null;
 				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x40}));                         // Initialization
-//				list.addAll(Arrays.asList(new Byte[]{0x1d, 0x57, (byte) 0x80, 0x01}));      // 印字領域設定（58mm用紙）
-				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x24, 0x31}));                   // 漢字モード設定
-	            list.addAll(Arrays.asList(new Byte[]{0x1b, 0x44, 0x10, 0x00}));             // 水平タブ位置設定
-				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x1d, 0x61, 0x31}));             // 中央揃え設定
+//				list.addAll(Arrays.asList(new Byte[]{0x1d, 0x57, (byte) 0x80, 0x01}));      // å�°å­—é ˜åŸŸè¨­å®šï¼ˆ58mmç”¨ç´™ï¼‰
+				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x24, 0x31}));                   // æ¼¢å­—ãƒ¢ãƒ¼ãƒ‰è¨­å®š
+	            list.addAll(Arrays.asList(new Byte[]{0x1b, 0x44, 0x10, 0x00}));             // æ°´å¹³ã‚¿ãƒ–ä½�ç½®è¨­å®š
+				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x1d, 0x61, 0x31}));             // ä¸­å¤®æ�ƒã�ˆè¨­å®š
 				
-				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x69, 0x02, 0x00}));             // 文字縦拡大設定
-				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x45}));                         // 強調印字設定
+				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x69, 0x02, 0x00}));             // æ–‡å­—ç¸¦æ‹¡å¤§è¨­å®š
+				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x45}));                         // å¼·èª¿å�°å­—è¨­å®š
 				
 				outputByteBuffer = createShiftJIS(context.getResources().getString(R.string.title_company_name) + "\n");
 				tempList = new Byte[outputByteBuffer.length];
 				CopyArray(outputByteBuffer, tempList);
 				list.addAll(Arrays.asList(tempList));
 				
-				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x69, 0x01, 0x00}));             // 文字縦拡大設定
+				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x69, 0x01, 0x00}));             // æ–‡å­—ç¸¦æ‹¡å¤§è¨­å®š
 				
 				outputByteBuffer = createShiftJIS(context.getResources().getString(R.string.title_receipt_name) + "\n");
 				tempList = new Byte[outputByteBuffer.length];
 				CopyArray(outputByteBuffer, tempList);
 				list.addAll(Arrays.asList(tempList));
 				
-				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x69, 0x00, 0x00}));             // 文字縦拡大解除
-				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x46}));                         // 強調印字解除
+				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x69, 0x00, 0x00}));             // æ–‡å­—ç¸¦æ‹¡å¤§è§£é™¤
+				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x46}));                         // å¼·èª¿å�°å­—è§£é™¤
 				
 				outputByteBuffer = createShiftJIS("------------------------------------------------\n");
 				tempList = new Byte[outputByteBuffer.length];
@@ -1241,7 +1241,7 @@ public class PrinterFunctions
 				String TIME=(hour24 + context.getResources().getString(R.string.hour) +
 						     minute + context.getResources().getString(R.string.min)).toString();
 				
-				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x1d, 0x61, 0x30}));            //左揃え設定
+				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x1d, 0x61, 0x30}));            //å·¦æ�ƒã�ˆè¨­å®š
 				
 				outputByteBuffer = createShiftJIS(context.getResources().getString(R.string.date) + YMD + "  " + TIME + "\n");
 				tempList = new Byte[outputByteBuffer.length];
@@ -1268,8 +1268,8 @@ public class PrinterFunctions
 				CopyArray(outputByteBuffer, tempList);
 				list.addAll(Arrays.asList(tempList));
                 
-				int sub=0;    //小計
-				int tax=0;    //税額
+				int sub=0;    //å°�è¨ˆ
+				int tax=0;    //ç¨Žé¡�
 				sub = 10000 + 3800 + 2000 + 15000 + 5000;
 				NumberFormat exsub=NumberFormat.getNumberInstance();
 				
@@ -1296,28 +1296,28 @@ public class PrinterFunctions
 				
 				byte[] outputByteBuffer=null;
 				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x40}));                         // Initialization
-//				list.addAll(Arrays.asList(new Byte[]{0x1d, 0x57, (byte) 0x80, 0x01}));      // 印字領域設定（58mm用紙）
-				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x24, 0x31}));                   // 漢字モード設定
-	            list.addAll(Arrays.asList(new Byte[]{0x1b, 0x44, 0x10, 0x00}));             // 水平タブ位置設定
-				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x1d, 0x61, 0x31}));             // 中央揃え設定
+//				list.addAll(Arrays.asList(new Byte[]{0x1d, 0x57, (byte) 0x80, 0x01}));      // å�°å­—é ˜åŸŸè¨­å®šï¼ˆ58mmç”¨ç´™ï¼‰
+				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x24, 0x31}));                   // æ¼¢å­—ãƒ¢ãƒ¼ãƒ‰è¨­å®š
+	            list.addAll(Arrays.asList(new Byte[]{0x1b, 0x44, 0x10, 0x00}));             // æ°´å¹³ã‚¿ãƒ–ä½�ç½®è¨­å®š
+				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x1d, 0x61, 0x31}));             // ä¸­å¤®æ�ƒã�ˆè¨­å®š
 				
-				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x69, 0x02, 0x00}));             // 文字縦拡大設定
-				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x45}));                         // 強調印字設定
+				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x69, 0x02, 0x00}));             // æ–‡å­—ç¸¦æ‹¡å¤§è¨­å®š
+				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x45}));                         // å¼·èª¿å�°å­—è¨­å®š
 				
 				outputByteBuffer = createShiftJIS(context.getResources().getString(R.string.title_company_name) + "\n");
 				tempList = new Byte[outputByteBuffer.length];
 				CopyArray(outputByteBuffer, tempList);
 				list.addAll(Arrays.asList(tempList));
 				
-				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x69, 0x01, 0x00}));             // 文字縦拡大設定
+				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x69, 0x01, 0x00}));             // æ–‡å­—ç¸¦æ‹¡å¤§è¨­å®š
 				
 				outputByteBuffer = createShiftJIS(context.getResources().getString(R.string.title_receipt_name) + "\n");
 				tempList = new Byte[outputByteBuffer.length];
 				CopyArray(outputByteBuffer, tempList);
 				list.addAll(Arrays.asList(tempList));
 				
-				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x69, 0x00, 0x00}));             // 文字縦拡大解除
-				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x46}));                         // 強調印字解除
+				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x69, 0x00, 0x00}));             // æ–‡å­—ç¸¦æ‹¡å¤§è§£é™¤
+				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x46}));                         // å¼·èª¿å�°å­—è§£é™¤
 				
 				outputByteBuffer = createShiftJIS("--------------------------------------------------------------------\n");
 				tempList = new Byte[outputByteBuffer.length];
@@ -1337,7 +1337,7 @@ public class PrinterFunctions
 				String TIME=(hour24 + context.getResources().getString(R.string.hour) +
 						     minute + context.getResources().getString(R.string.min)).toString();
 				
-				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x1d, 0x61, 0x30}));            //左揃え設定
+				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x1d, 0x61, 0x30}));            //å·¦æ�ƒã�ˆè¨­å®š
 				
 				outputByteBuffer = createShiftJIS(context.getResources().getString(R.string.date) + YMD + "  " + TIME + "\n");
 				tempList = new Byte[outputByteBuffer.length];
@@ -1363,15 +1363,15 @@ public class PrinterFunctions
 				CopyArray(outputByteBuffer, tempList);
 				list.addAll(Arrays.asList(tempList));
                 
-				int sub=0;    //小計
-				int tax=0;    //税額
+				int sub=0;    //å°�è¨ˆ
+				int tax=0;    //ç¨Žé¡�
 				sub = 10000 + 3800 + 2000 + 15000 + 5000;
 				NumberFormat exsub=NumberFormat.getNumberInstance();
 				
 				tax=sub*5/100;
 				NumberFormat extax=NumberFormat.getNumberInstance();
 
-				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x52, 0x08}));    // 国際文字 日本語
+				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x52, 0x08}));    // å›½éš›æ–‡å­— æ—¥æœ¬èªž
 				
 				outputByteBuffer = createShiftJIS(context.getResources().getString(R.string.sub_4inch_line) + exsub.format(sub)+"\n\n" +
                                                   context.getResources().getString(R.string.tax_4inch_line) + extax.format(tax)+"\n\n" +
@@ -1381,7 +1381,7 @@ public class PrinterFunctions
 				CopyArray(outputByteBuffer, tempList);
 				list.addAll(Arrays.asList(tempList));
                 
-				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x64, 0x33}));    // カット
+				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x64, 0x33}));    // ã‚«ãƒƒãƒˆ
 				list.addAll(Arrays.asList(new Byte[]{0x07}));                // Kick cash drawer
 				
 				sendCommand(context, portName, portSettings, list);
@@ -1446,8 +1446,8 @@ public class PrinterFunctions
 				CopyArray(command, tempList);
 				list.addAll(Arrays.asList(tempList));
                 
-				int sub=0;    //小計
-				int tax=0;    //税額
+				int sub=0;    //å°�è¨ˆ
+				int tax=0;    //ç¨Žé¡�
 				sub = 10000 + 3800 + 2000 + 15000 + 5000;
 				NumberFormat exsub=NumberFormat.getNumberInstance();
 				
@@ -1530,15 +1530,15 @@ public class PrinterFunctions
 				CopyArray(command, tempList);
 				list.addAll(Arrays.asList(tempList));
                 
-				int sub=0;    //小計
-				int tax=0;    //税額
+				int sub=0;    //å°�è¨ˆ
+				int tax=0;    //ç¨Žé¡�
 				sub = 10000 + 3800 + 2000 + 15000 + 5000;
 				NumberFormat exsub=NumberFormat.getNumberInstance();
 				
 				tax=sub*5/100;
 				NumberFormat extax=NumberFormat.getNumberInstance();
                 
-				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x52, 0x08}));    // 国際文字 日本語
+				list.addAll(Arrays.asList(new Byte[]{0x1b, 0x52, 0x08}));    // å›½éš›æ–‡å­— æ—¥æœ¬èªž
 				
                 textToPrint = (context.getResources().getString(R.string.sub_4inch_raster) + exsub.format(sub) + "\n" +
                                context.getResources().getString(R.string.tax_4inch_raster) + extax.format(tax) + "\n" +
@@ -1703,5 +1703,32 @@ public class PrinterFunctions
 				catch (StarIOPortException e) { }
 			}
 		}
+	}
+	
+	public static void PrintReceipt(Context context, String portName, String portSettings, String commandType, Resources res, String strPrintArea, String text)
+	{	
+        ArrayList<Byte> list = new ArrayList<Byte>();
+        Byte[] tempList;
+		
+		printableArea = 832;    // Printable area in paper is 832(dot)
+		
+		RasterDocument rasterDoc = new RasterDocument(RasSpeed.Medium, RasPageEndMode.FeedAndFullCut, RasPageEndMode.FeedAndFullCut, RasTopMargin.Standard, 0, 0, 0);				
+		byte[] command = rasterDoc.BeginDocumentCommandData();
+		tempList = new Byte[command.length];
+		CopyArray(command, tempList);
+		list.addAll(Arrays.asList(tempList));
+		
+        command = createRasterCommand(text, 13, 0);
+		tempList = new Byte[command.length];
+		CopyArray(command, tempList);
+		list.addAll(Arrays.asList(tempList));
+        
+		command = rasterDoc.EndDocumentCommandData();
+		tempList = new Byte[command.length];
+		CopyArray(command, tempList);
+		list.addAll(Arrays.asList(tempList));
+		list.addAll(Arrays.asList(new Byte[]{0x07}));                // Kick cash drawer
+		
+		sendCommand(context, portName, portSettings, list);
 	}
 }
